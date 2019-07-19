@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   forum_report
+ * @package   forumreport_summary
  * @copyright 2019 Michael Hawkins <michaelh@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -48,13 +48,19 @@ class summary_table extends table_sql {
     /** @var int[] Options for max number of rows per page. */
     //protected $perpageoptions = [25, 50, 100];
 
+    /** @var int The course ID being reported on */
+    protected $courseid = 0;
+
+    /** @var int The forum ID being reported on - 0 = all forums in the course. */
+    protected $forumid = 0;
+
     /**
      * Forum report table constructor.
      *
-     * @param int (opt) $forumid the ID of the forum being summarised. 0 will fetch for all forums in the course.
+     * @param int (opt) $forumid The ID of the forum being summarised. 0 will fetch for all forums in the course.
      */
     public function __construct($forumid = 0) {
-        parent::__construct("report_{$forumid}"); //TODO: Is the string part needed in the param
+        parent::__construct("summaryreport_{$forumid}");
 
         //TODO: Have values passed in for filters that can be assigned to properties.
 
@@ -68,6 +74,7 @@ class summary_table extends table_sql {
             'username' => get_string('username'),
             'fullname' => get_string('fullname', 'forumreport_summary'),
             'postcount' => get_string('postcount', 'forumreport_summary'),
+            'replycount' => get_string('replycount', 'forumreport_summary'),
         ];
 
         $this->define_columns(array_keys($columnheaders));
@@ -75,12 +82,6 @@ class summary_table extends table_sql {
 
         // Define configs.
         $this->define_table_configs();
-
-        $fields = '*';
-        $from = '{user}';
-        $where = '1 = 1';
-        $params =[];
-        $this->set_sql($fields, $from, $where, $params); //TODO: move out into whatever builds this
     }
 
     /**
@@ -101,7 +102,7 @@ class summary_table extends table_sql {
     public function col_select($data) {
         //TODO: rowids[] name might work if it could be user or group ID, otherwise userid
         //TODO: see if checkboxes ever need to be checked by default (3rd param)
-        return \html_writer::checkbox('rowids[]', $data->id, false, '', ['class' => 'selectrows']);
+        return \html_writer::checkbox('rowids[]', $data->userid, false, '', ['class' => 'selectrows']);
     }
 
     /**
@@ -118,7 +119,9 @@ class summary_table extends table_sql {
      *
      * @param stdClass $data The row data.
      */
-    public function col_fullnamez($data) {
+    public function col_fullname($data) {
+        //TODO: Need to check permission to view this
+
         return $data->firstname . ' ' . $data->lastname;
     }
 
@@ -128,7 +131,20 @@ class summary_table extends table_sql {
      * @param stdClass $data The row data.
      */
     public function col_postcount($data) {
-        return 42069; //TODO
+
+
+        return $data->num_discussions;
+    }
+
+    /**
+     * Generate the replycount column.
+     *
+     * @param stdClass $data The row data.
+     */
+    public function col_replycount($data) {
+
+
+        return $data->num_replies;
     }
 
     /**
@@ -140,8 +156,88 @@ class summary_table extends table_sql {
         echo $OUTPUT->heading(get_string('nothingtodisplay'), 4); //TODO - test this
     }
 
+    /** TODO::: This is to override, so it can pull in the more complicated queries
+     *  TODO: At the moment it is a copy paste
+     * Query the db. Store results in the table object for use by build_table.
+     *
+     * @param int $pagesize size of page for paginated displayed table.
+     * @param bool $useinitialsbar do you want to use the initials bar. Bar
+     * will only be used if there is a fullname column defined for the table.
+     */
+    public function xxxxxxxxquery_db($pagesize, $useinitialsbar=false) {
+        global $DB;
 
+        $totalsql = '   SELECT ue.userid
+                        FROM {enrol} e
+                        JOIN {user_enrolments} ue ON ue.enrolid = e.id
+                        JOIN {user} u ON u.id = ue.userid
+                        JOIN {forum} f ON f.course = e.courseid
+                        WHERE e.courseid = :courseid AND f.id = :forumid GROUP BY ue.userid';
+        $totalparams = [
+            'courseid' => 2, //3
+            'forumid' => 2, //4
+        ];
+        
+        $totalrows = $DB->count_records_sql($totalsql, $totalparams);
+exit("Total = $totalrows");
 
+        $this->pagesize($pagesize, $totalrows);
+
+        $this->rawdata = [];
+
+        $rawdata = '';
+        foreach ($rawdata as $datarow) {
+            //
+        }
+
+        $this->build_query();
+
+        //WHAT WAS ORIGINALLY HERE and working with errors:
+        //$this->build_query();
+        //parent::query_db($pagesize, $useinitialsbar);
+    }
+
+    public function query_db($pagesize, $useinitialsbar=false) {
+        $this->build_query();
+        parent::query_db($pagesize, $useinitialsbar);
+    }
+
+    private function build_query() {
+        /*$fields = '*';
+        $from = '{user}';
+        $where = '1 = 1';
+        $params =[];*/
+
+        /** Draft working query for basic info:
+            SELECT ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS num_discussions, COUNT(pr.id) AS num_replies, u.username, u.firstname, u.lastname
+            FROM mdl_enrol e
+                JOIN mdl_user_enrolments ue ON ue.enrolid = e.id #users enrolled - so we get zeros for users with no posts
+                JOIN mdl_user u ON u.id = ue.userid #Username etc
+                JOIN mdl_forum f ON f.course = e.courseid #Only forums in this course
+                JOIN mdl_forum_discussions d ON d.forum = f.id #Generic all discussions to get post count
+                LEFT JOIN mdl_forum_posts pd ON pd.discussion =  d.id AND pd.userid = ue.userid AND pd.parent = 0 #<<< parent 0 is a discussion
+                LEFT JOIN mdl_forum_posts pr ON pr.discussion =  d.id AND pr.userid = ue.userid AND pr.parent != 0 #<<< parent 0 is a discussion, need to sum that separate
+            WHERE e.courseid = 3 AND f.id = 4
+            GROUP BY ue.userid
+            ORDER BY ue.userid ASC
+         */
+
+        $fields = 'ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS num_discussions, COUNT(pr.id) AS num_replies, u.username, u.firstname, u.lastname';
+        $from = '   {enrol} e
+                    JOIN {user_enrolments} ue ON ue.enrolid = e.id
+                    JOIN {user} u ON u.id = ue.userid
+                    JOIN {forum} f ON f.course = e.courseid
+                    JOIN {forum_discussions} d ON d.forum = f.id
+                    LEFT JOIN {forum_posts} pd ON pd.discussion =  d.id AND pd.userid = ue.userid AND pd.parent = 0
+                    LEFT JOIN {forum_posts} pr ON pr.discussion =  d.id AND pr.userid = ue.userid AND pr.parent != 0';
+        $where = 'e.courseid = :courseid AND f.id = :forumid GROUP BY ue.userid';
+        $params = [
+            'courseid' => 2, //3
+            'forumid' => 2, //4
+        ];
+
+        $this->set_sql($fields, $from, $where, $params); //TODO: move out into whatever builds this
+    }
 
 
 

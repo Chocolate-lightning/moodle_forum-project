@@ -9,11 +9,17 @@ require_once("../../../../config.php");
 //require_login(null, false);
 
 $perpage = optional_param('perpage', 10, PARAM_INT); //TODO: Change to 25
+$forumname = optional_param('forumname', 'all', PARAM_ALPHANUMEXT); //TODO: Should match what sanitizing is done to forum names
 
-$url = new moodle_url('/mod/forum/report/test.php');
+if ($forumname === 'all' || empty($forumname)) {
+    $forumname = 'all forums';
+}
 
-$title = 'Some title TODO WIP'; //get_string('datarequests', 'tool_dataprivacy');
+$url = new moodle_url('/mod/forum/report/summary');
 
+$title = get_string('summarytitle', 'forumreport_summary', $forumname);
+
+//TODO: Update this to not be using something from tool\dataprivacy
 \tool_dataprivacy\page_helper::setup($url, $title, '', 'tool/dataprivacy:managedatarequests');
 
 echo $OUTPUT->header();
@@ -21,7 +27,7 @@ echo $OUTPUT->heading($title);
 
 //TODO - Check permissions somewhere here so we know what to restrict
 
-$table = new \forumreport_summary\summary_table(1);
+$table = new \forumreport_summary\summary_table(1); //TODO - replace the forum with passed in values
 $table->baseurl = $url;
 
 //$perpage = 10;//25;
@@ -44,3 +50,5 @@ if (!empty($perpage)) {
 $table->out($perpage, false);
 //$tablehtml = ob_get_contents();
 //ob_end_clean();
+
+echo $OUTPUT->footer();

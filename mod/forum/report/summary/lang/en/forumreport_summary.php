@@ -18,11 +18,13 @@
 /**
  * Strings for the Forum report subplugin
  *
- * @package   forum_report
+ * @package   forumreport_summary
  * @copyright 2019 Michael Hawkins <michaelh@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['fullname'] = 'Full name';
+$string['fullname'] = 'Full name'; // Fallback if tableSQL doesn't provide the table heading.
 $string['pluginname'] = 'Forum report';
-$string['postcount'] = 'Number of discussion posted';
+$string['postcount'] = 'Number of discussions posted';
+$string['replycount'] = 'Number of replies posted';
+$string['summarytitle'] = 'Forum summary report - {$a}';

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy Subsystem implementation for forum_report subplugin.
+ * Privacy Subsystem implementation for forumreport_summary subplugin.
  *
- * @package    forum_report
+ * @package    forumreport_summary
  * @copyright  2019 Michael Hawkins <michaelh@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,7 +27,7 @@ namespace forumreport_summary\privacy;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Privacy Subsystem implementation for forum_report subplugin, implementing null_provider.
+ * Privacy Subsystem implementation for forumreport_summary subplugin, implementing null_provider.
  *
  * @copyright  2019 Michael Hawkins <michaelh@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

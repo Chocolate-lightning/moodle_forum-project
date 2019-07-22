@@ -17,13 +17,16 @@ if ($forumname === 'all' || empty($forumname)) {
 
 $url = new moodle_url('/mod/forum/report/summary');
 
-$title = get_string('summarytitle', 'forumreport_summary', $forumname);
+$coursename = 'TODO course name';
+$forumtitle = get_string('summarytitle', 'forumreport_summary', $forumname);
 
 //TODO: Update this to not be using something from tool\dataprivacy
-\tool_dataprivacy\page_helper::setup($url, $title, '', 'tool/dataprivacy:managedatarequests');
+\forumreport_summary\page_helper::setup($url, $coursename, $forumtitle, '', 'tool/dataprivacy:managedatarequests');
+
+//TODO: This should show the course name, not the site name at the top of the page I think
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading($title);
+echo $OUTPUT->heading($forumtitle);
 
 //TODO - Check permissions somewhere here so we know what to restrict
 

@@ -133,7 +133,7 @@ class summary_table extends table_sql {
     public function col_postcount($data) {
 
 
-        return $data->num_discussions;
+        return $data->postcount;
     }
 
     /**
@@ -144,7 +144,7 @@ class summary_table extends table_sql {
     public function col_replycount($data) {
 
 
-        return $data->num_replies;
+        return $data->replycount;
     }
 
     /**
@@ -157,47 +157,60 @@ class summary_table extends table_sql {
     }
 
     /** TODO::: This is to override, so it can pull in the more complicated queries
-     *  TODO: At the moment it is a copy paste
      * Query the db. Store results in the table object for use by build_table.
      *
-     * @param int $pagesize size of page for paginated displayed table.
-     * @param bool $useinitialsbar do you want to use the initials bar. Bar
-     * will only be used if there is a fullname column defined for the table.
+     * @param int $pagesize Size of page for paginated displayed table.
+     * @param bool $useinitialsbar Overridden but unused.
      */
-    public function xxxxxxxxquery_db($pagesize, $useinitialsbar=false) {
+    public function query_db($pagesize, $useinitialsbar=false) {
         global $DB;
 
-        $totalsql = '   SELECT ue.userid
+        //TODO - handle if this is a download, so won't use pagination
+        //See is_downloading() usage in tablelib
+
+        $totalsql = ' SELECT COUNT(DISTINCT(ue.userid))
                         FROM {enrol} e
                         JOIN {user_enrolments} ue ON ue.enrolid = e.id
                         JOIN {user} u ON u.id = ue.userid
                         JOIN {forum} f ON f.course = e.courseid
-                        WHERE e.courseid = :courseid AND f.id = :forumid GROUP BY ue.userid';
+                       WHERE e.courseid = :courseid AND f.id = :forumid';
         $totalparams = [
-            'courseid' => 2, //3
+            'courseid' => 2, //3 TODO, fetch these from properties
             'forumid' => 2, //4
         ];
-        
-        $totalrows = $DB->count_records_sql($totalsql, $totalparams);
-exit("Total = $totalrows");
 
+        // Set up pagination.
+        $totalrows = $DB->count_records_sql($totalsql, $totalparams);
         $this->pagesize($pagesize, $totalrows);
 
-        $this->rawdata = [];
+        $this->build_query();
 
-        $rawdata = '';
+        // Fetch the data.
+        $sort = $this->get_sql_sort();
+        if ($sort) {
+            $sort = "ORDER BY {$sort}";
+        }
+        $sql = "SELECT
+                {$this->sql->fields}
+                FROM {$this->sql->from}
+                WHERE {$this->sql->where}
+                {$sort}";
+
+        $this->rawdata = $DB->get_records_sql($sql, $this->sql->params, $this->get_page_start(), $this->get_page_size());
+
+        /*$rawdata = [];
         foreach ($rawdata as $datarow) {
             //
-        }
+        }*/
 
-        $this->build_query();
 
         //WHAT WAS ORIGINALLY HERE and working with errors:
         //$this->build_query();
         //parent::query_db($pagesize, $useinitialsbar);
     }
 
-    public function query_db($pagesize, $useinitialsbar=false) {
+    /** This was the working one with errors on the count **/
+    public function xxxxxxquery_db($pagesize, $useinitialsbar=false) {
         $this->build_query();
         parent::query_db($pagesize, $useinitialsbar);
     }
@@ -222,7 +235,7 @@ exit("Total = $totalrows");
             ORDER BY ue.userid ASC
          */
 
-        $fields = 'ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS num_discussions, COUNT(pr.id) AS num_replies, u.username, u.firstname, u.lastname';
+        $fields = 'ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS postcount, COUNT(pr.id) AS replycount, u.username, u.firstname, u.lastname';
         $from = '   {enrol} e
                     JOIN {user_enrolments} ue ON ue.enrolid = e.id
                     JOIN {user} u ON u.id = ue.userid

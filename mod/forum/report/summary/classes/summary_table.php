@@ -57,10 +57,14 @@ class summary_table extends table_sql {
     /**
      * Forum report table constructor.
      *
+     * @param int $courseid The ID of the course the forum(s) exist within.
      * @param int (opt) $forumid The ID of the forum being summarised. 0 will fetch for all forums in the course.
      */
-    public function __construct($forumid = 0) {
+    public function __construct($courseid, $forumid = 0) {
         parent::__construct("summaryreport_{$forumid}");
+
+        $this->courseid = $courseid;
+        $this->forumid = $forumid;
 
         //TODO: Have values passed in for filters that can be assigned to properties.
 
@@ -69,6 +73,7 @@ class summary_table extends table_sql {
             'data-action' => 'selectall'
         ];
 
+        //TODO - this may be dynamic and need to be built, depending on which filters are applied (eg only include country where it's a filter)
         $columnheaders = [
             'select' => html_writer::checkbox('selectall', 1, false, null, $checkboxattrs),
             'username' => get_string('username'),
@@ -131,8 +136,6 @@ class summary_table extends table_sql {
      * @param stdClass $data The row data.
      */
     public function col_postcount($data) {
-
-
         return $data->postcount;
     }
 
@@ -142,8 +145,6 @@ class summary_table extends table_sql {
      * @param stdClass $data The row data.
      */
     public function col_replycount($data) {
-
-
         return $data->replycount;
     }
 
@@ -165,23 +166,27 @@ class summary_table extends table_sql {
     public function query_db($pagesize, $useinitialsbar=false) {
         global $DB;
 
-        //TODO - handle if this is a download, so won't use pagination
-        //See is_downloading() usage in tablelib
+        // Set up pagination if not downloading the whole report.
+        if (!$this->is_downloading()) {
+            $totalsql = ' SELECT COUNT(DISTINCT(ue.userid))
+                            FROM {enrol} e
+                            JOIN {user_enrolments} ue ON ue.enrolid = e.id
+                            JOIN {user} u ON u.id = ue.userid
+                            JOIN {forum} f ON f.course = e.courseid
+                           WHERE e.courseid = :courseid';
+            $totalparams = [
+                'courseid' => $this->courseid,
+            ];
 
-        $totalsql = ' SELECT COUNT(DISTINCT(ue.userid))
-                        FROM {enrol} e
-                        JOIN {user_enrolments} ue ON ue.enrolid = e.id
-                        JOIN {user} u ON u.id = ue.userid
-                        JOIN {forum} f ON f.course = e.courseid
-                       WHERE e.courseid = :courseid AND f.id = :forumid';
-        $totalparams = [
-            'courseid' => 2, //3 TODO, fetch these from properties
-            'forumid' => 2, //4
-        ];
+            if($this->forumid > 0) {
+                $totalsql .= ' AND f.id = :forumid';
+                $totalparams['forumid'] = $this->forumid;
+            }
 
-        // Set up pagination.
-        $totalrows = $DB->count_records_sql($totalsql, $totalparams);
-        $this->pagesize($pagesize, $totalrows);
+            // Set up pagination.
+            $totalrows = $DB->count_records_sql($totalsql, $totalparams);
+            $this->pagesize($pagesize, $totalrows);
+        }
 
         $this->build_query();
 
@@ -190,39 +195,32 @@ class summary_table extends table_sql {
         if ($sort) {
             $sort = "ORDER BY {$sort}";
         }
+
+
+        //TODO: PERHAPS THIS COULD BE $this->sql->fromdefault and fromcustom <<< so rather than building a single from, have a default that can be used, and then custom stuff that is added in
         $sql = "SELECT
                 {$this->sql->fields}
                 FROM {$this->sql->from}
                 WHERE {$this->sql->where}
                 {$sort}";
 
-        $this->rawdata = $DB->get_records_sql($sql, $this->sql->params, $this->get_page_start(), $this->get_page_size());
+        // Only paginate when not downloading.
+        if (!$this->is_downloading()) {
+            $this->rawdata = $DB->get_records_sql($sql, $this->sql->params, $this->get_page_start(), $this->get_page_size());
+        } else {
+            $this->rawdata = $DB->get_records_sql($sql, $this->sql->params);
+        }
 
-        /*$rawdata = [];
+        /* Could possibly process the data to find subtotals before setting $this->rawdata
+         * $rawdata = [];
         foreach ($rawdata as $datarow) {
             //
         }*/
-
-
-        //WHAT WAS ORIGINALLY HERE and working with errors:
-        //$this->build_query();
-        //parent::query_db($pagesize, $useinitialsbar);
-    }
-
-    /** This was the working one with errors on the count **/
-    public function xxxxxxquery_db($pagesize, $useinitialsbar=false) {
-        $this->build_query();
-        parent::query_db($pagesize, $useinitialsbar);
     }
 
     private function build_query() {
-        /*$fields = '*';
-        $from = '{user}';
-        $where = '1 = 1';
-        $params =[];*/
-
-        /** Draft working query for basic info:
-            SELECT ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS num_discussions, COUNT(pr.id) AS num_replies, u.username, u.firstname, u.lastname
+        /** Draft working query for basic info (NOTE: THE forum_posts HAS BEEN MOVED TO A SINGLE JOIN IN THE PHP):
+            SELECT ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS postcount, COUNT(pr.id) AS replycount, u.username, u.firstname, u.lastname
             FROM mdl_enrol e
                 JOIN mdl_user_enrolments ue ON ue.enrolid = e.id #users enrolled - so we get zeros for users with no posts
                 JOIN mdl_user u ON u.id = ue.userid #Username etc
@@ -235,23 +233,44 @@ class summary_table extends table_sql {
             ORDER BY ue.userid ASC
          */
 
-        $fields = 'ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS postcount, COUNT(pr.id) AS replycount, u.username, u.firstname, u.lastname';
-        $from = '   {enrol} e
-                    JOIN {user_enrolments} ue ON ue.enrolid = e.id
-                    JOIN {user} u ON u.id = ue.userid
-                    JOIN {forum} f ON f.course = e.courseid
-                    JOIN {forum_discussions} d ON d.forum = f.id
-                    LEFT JOIN {forum_posts} pd ON pd.discussion =  d.id AND pd.userid = ue.userid AND pd.parent = 0
-                    LEFT JOIN {forum_posts} pr ON pr.discussion =  d.id AND pr.userid = ue.userid AND pr.parent != 0';
-        $where = 'e.courseid = :courseid AND f.id = :forumid GROUP BY ue.userid';
+        // Default fields that will always be included.
+        $basefields = 'ue.userid AS userid, e.courseid AS courseid, f.id as forumid, SUM(IF(p.parent = 0, 1, 0)) AS postcount, SUM(IF(p.parent != 0, 1, 0)) AS replycount, u.username, u.firstname, u.lastname';
+
+        $basefrom = '     {enrol} e
+                     JOIN {user_enrolments} ue ON ue.enrolid = e.id
+                     JOIN {user} u ON u.id = ue.userid
+                     JOIN {forum} f ON f.course = e.courseid
+                     JOIN {forum_discussions} d ON d.forum = f.id
+                LEFT JOIN {forum_posts} p ON p.discussion =  d.id
+                      AND p.userid = ue.userid';
+
+        $basewhere = 'e.courseid = :courseid';
+        
+        $groupby = ' GROUP BY ue.userid';
+        
         $params = [
-            'courseid' => 2, //3
-            'forumid' => 2, //4
+            'courseid' => $this->courseid,
         ];
+
+        //TODO: Add in other fields here by filters, in addition to the base fields
+        $fields = $basefields;
+
+        //TODO: Add in any other joins required, based on filters
+        $from = $basefrom;
+        
+        //TODO: Add in any other wheres required, based on filters - eg specific forum ID
+        $where = $basewhere;
+
+        if ($this->forumid > 0) {
+            $where .= ' AND f.id = :forumid';
+
+            $params['forumid'] = $this->forumid;
+        }
+
+        $where .= $groupby;
 
         $this->set_sql($fields, $from, $where, $params); //TODO: move out into whatever builds this
     }
-
 
 
 

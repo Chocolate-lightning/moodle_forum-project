@@ -23,8 +23,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['allforums'] = 'all forums';
 $string['fullname'] = 'Full name'; // Fallback if tableSQL doesn't provide the table heading.
-$string['pluginname'] = 'Forum report';
+$string['pluginname'] = 'Forum summary report';
 $string['postcount'] = 'Number of discussions posted';
+$string['privacy:metadata'] = 'The Forum summary report plugin does not store any personal data.';
 $string['replycount'] = 'Number of replies posted';
 $string['summarytitle'] = 'Forum summary report - {$a}';

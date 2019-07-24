@@ -8,29 +8,39 @@ require_once("../../../../config.php");
 
 //require_login(null, false);
 
-$perpage = optional_param('perpage', 10, PARAM_INT); //TODO: Change to 25
-$forumname = optional_param('forumname', 'all', PARAM_ALPHANUMEXT); //TODO: Should match what sanitizing is done to forum names
 
-if ($forumname === 'all' || empty($forumname)) {
-    $forumname = 'all forums';
+//TEST
+/*$cmid = 2;
+$vaultfactory = mod_forum\local\container::get_vault_factory();
+$forumvault = $vaultfactory->get_forum_vault();
+$forum = $forumvault->get_from_course_module_id($cmid);*/
+
+//print_object($forum);exit;
+//END TEST
+
+$courseid = 2; //TODO: Fetch the course ID and name - either automatically, or through a param. Is required, not optional.
+$perpage = optional_param('perpage', 10, PARAM_INT); //TODO: Change to 25
+$forumid = optional_param('id', 0, PARAM_INT);
+$url = new moodle_url('/mod/forum/report/summary');
+$coursename = 'TODO course name';
+
+if ($forumid > 0) {
+    //TODO: Fetch the forum name using the ID.
+} else {
+    $forumname = get_string('allforums', 'forumreport_summary');
 }
 
-$url = new moodle_url('/mod/forum/report/summary');
-
-$coursename = 'TODO course name';
 $forumtitle = get_string('summarytitle', 'forumreport_summary', $forumname);
 
 //TODO: Update this to not be using something from tool\dataprivacy
 \forumreport_summary\page_helper::setup($url, $coursename, $forumtitle, '', 'tool/dataprivacy:managedatarequests');
-
-//TODO: This should show the course name, not the site name at the top of the page I think
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($forumtitle);
 
 //TODO - Check permissions somewhere here so we know what to restrict
 
-$table = new \forumreport_summary\summary_table(1); //TODO - replace the forum with passed in values
+$table = new \forumreport_summary\summary_table($courseid, $forumid);
 $table->baseurl = $url;
 
 //$perpage = 10;//25;

@@ -40,7 +40,9 @@ echo $OUTPUT->heading($forumtitle);
 
 //TODO - Check permissions somewhere here so we know what to restrict
 
-$table = new \forumreport_summary\summary_table($courseid, $forumid);
+$table = new \forumreport_summary\summary_table($courseid, 0); //new \forumreport_summary\summary_table($courseid, $forumid);
+$table->add_filter($table::FILTER_DATEFROM, ['1564033886']);
+
 $table->baseurl = $url;
 
 //$perpage = 10;//25;

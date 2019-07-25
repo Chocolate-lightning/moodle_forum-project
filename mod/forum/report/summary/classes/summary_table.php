@@ -25,8 +25,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/tablelib.php');
 
-use table_sql;
+use coding_exception;
 use html_writer;
+use table_sql;
 
 /**
  * The class for displaying the forum report table.
@@ -41,6 +42,14 @@ class summary_table extends table_sql {
     protected $fromtimestamp;
     protected $totimestamp;
     etc etc*/
+
+    /** Constants to define filter types available **/
+    const FILTER_FORUM = 1;
+    const FILTER_DATEFROM = 2;
+    const FILTER_DATETO = 3;
+
+    /** @var stdClass The various SQL segments that will be combined to form queries to fetch various information. */
+    public $sql;
 
     /** @var int The number of rows to be displayed per page. */
     protected $perpage = 25;
@@ -87,22 +96,32 @@ class summary_table extends table_sql {
 
         // Define configs.
         $this->define_table_configs();
-    }
 
+        // Define the basic SQL data and object format.
+        $this->define_base_sql();
+    }
+    
     /**
-     * Define various table config options.
+     * Provides the string name of each filter type.
+     *
+     * @param type $filtertype Type of filter
+     * @return string Name of the filter
      */
-    protected function define_table_configs() {
-        $this->collapsible(false);
-        $this->sortable(true, 'firstname', SORT_ASC);
-        $this->pageable(true);
-        $this->no_sorting('select');
+    public function get_filter_name($filtertype) {
+        $filternames = [
+            self::FILTER_FORUM => 'Forum',
+            self::FILTER_DATEFROM => 'Date created from',
+            self::FILTER_DATETO => 'Date created to',
+        ];
+
+        return $filternames[$filtertype];
     }
 
     /**
      * Generate the select column.
      *
      * @param stdClass $data The row data.
+     * @return string HTML for checkbox.
      */
     public function col_select($data) {
         //TODO: rowids[] name might work if it could be user or group ID, otherwise userid
@@ -114,6 +133,7 @@ class summary_table extends table_sql {
      * Generate the username column.
      *
      * @param stdClass $data The row data.
+     * @return string username.
      */
     public function col_username($data) {
         return $data->username;
@@ -123,6 +143,7 @@ class summary_table extends table_sql {
      * Generate the fullname column.
      *
      * @param stdClass $data The row data.
+     * @return string User's full name.
      */
     public function col_fullname($data) {
         //TODO: Need to check permission to view this
@@ -134,6 +155,7 @@ class summary_table extends table_sql {
      * Generate the postcount column.
      *
      * @param stdClass $data The row data.
+     * @return int number of discussion posts made by user.
      */
     public function col_postcount($data) {
         return $data->postcount;
@@ -143,6 +165,7 @@ class summary_table extends table_sql {
      * Generate the replycount column.
      *
      * @param stdClass $data The row data.
+     * @return int number of replies made by user.
      */
     public function col_replycount($data) {
         return $data->replycount;
@@ -150,11 +173,13 @@ class summary_table extends table_sql {
 
     /**
      * Override the default implementation to set a decent heading level.
+     *
+     * @return string Output indicating no rows were found.
      */
     public function print_nothing_to_display() {
         global $OUTPUT;
 
-        echo $OUTPUT->heading(get_string('nothingtodisplay'), 4); //TODO - test this
+        echo $OUTPUT->heading(get_string('nothingtodisplay'), 4);
     }
 
     /** TODO::: This is to override, so it can pull in the more complicated queries
@@ -162,6 +187,7 @@ class summary_table extends table_sql {
      *
      * @param int $pagesize Size of page for paginated displayed table.
      * @param bool $useinitialsbar Overridden but unused.
+     * @return void
      */
     public function query_db($pagesize, $useinitialsbar=false) {
         global $DB;
@@ -198,6 +224,7 @@ class summary_table extends table_sql {
 
 
         //TODO: PERHAPS THIS COULD BE $this->sql->fromdefault and fromcustom <<< so rather than building a single from, have a default that can be used, and then custom stuff that is added in
+        //See the comment on the $this->set_sql line re replacing this stuff
         $sql = "SELECT
                 {$this->sql->fields}
                 FROM {$this->sql->from}
@@ -218,7 +245,74 @@ class summary_table extends table_sql {
         }*/
     }
 
-    private function build_query() {
+       /**
+     * Adds the relevant SQL to apply a filter to the report.
+     *
+     * @param int $filtertype Filter type as defined by class constants.
+     * @param array $values Optional array of values passed into the filter type.
+     * @return void
+     * @throws coding_exception
+     */
+    public function add_filter($filtertype, $values = []) {
+        $error = false;
+
+        switch($filtertype) {
+            case self::FILTER_FORUM:
+                if (count($values) != 1) {
+                    $error = true;
+                }
+
+                // No select fields required - displayed in title.
+                // No extra joins required, forum is already joined.
+                $this->sql->filterwhere .= ' AND f.id = :forumid';
+                $this->sql->params['forumid'] = $values[0];
+                break;
+
+            case self::FILTER_DATEFROM:
+                if (count($values) != 1) {
+                    $error = true;
+                }
+
+                // No select fields required - forms part of a range.
+                // No extra joins required.
+                $this->sql->filterwhere .= ' AND p.created >= :datefrom';
+                $this->sql->params['datefrom'] = $values[0];
+                break;
+
+            case self::FILTER_DATETO:
+                if (count($values) != 1) {
+                    $error = true;
+                }
+
+                // No select fields required - forms part of a range.
+                // No extra joins required.
+                $this->sql->filterwhere .= ' AND p.created <= :dateto';
+                $this->sql->params['dateto'] = $values[0];
+
+                break;
+            default:
+                throw new coding_exception("Report filter type '{$filtertype}' not found.");
+                break;
+        }
+
+        if ($error) {
+            $filtername = $this->get_filter_name($filtertype);
+            throw new coding_exception("An invalid number of values have been passed for the '{$filtername}' filter.");
+        }
+    }
+
+    /**
+     * Define various table config options.
+     */
+    protected function define_table_configs() {
+        $this->collapsible(false);
+        $this->sortable(true, 'firstname', SORT_ASC);
+        $this->pageable(true);
+        $this->no_sorting('select');
+    }
+
+    //TODO: docblock
+    protected function build_query() {
         /** Draft working query for basic info (NOTE: THE forum_posts HAS BEEN MOVED TO A SINGLE JOIN IN THE PHP):
             SELECT ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS postcount, COUNT(pr.id) AS replycount, u.username, u.firstname, u.lastname
             FROM mdl_enrol e
@@ -234,20 +328,14 @@ class summary_table extends table_sql {
          */
 
         // Default fields that will always be included.
-        $basefields = 'ue.userid AS userid, e.courseid AS courseid, f.id as forumid, SUM(IF(p.parent = 0, 1, 0)) AS postcount, SUM(IF(p.parent != 0, 1, 0)) AS replycount, u.username, u.firstname, u.lastname';
+        $basefields = $this->sql->basefields;
 
-        $basefrom = '     {enrol} e
-                     JOIN {user_enrolments} ue ON ue.enrolid = e.id
-                     JOIN {user} u ON u.id = ue.userid
-                     JOIN {forum} f ON f.course = e.courseid
-                     JOIN {forum_discussions} d ON d.forum = f.id
-                LEFT JOIN {forum_posts} p ON p.discussion =  d.id
-                      AND p.userid = ue.userid';
+        $basefrom = $this->sql->basefromjoins;
 
-        $basewhere = 'e.courseid = :courseid';
-        
-        $groupby = ' GROUP BY ue.userid';
-        
+        $basewhere = $this->sql->basewhere;
+
+        $groupby = $this->sql->groupby;
+
         $params = [
             'courseid' => $this->courseid,
         ];
@@ -257,7 +345,7 @@ class summary_table extends table_sql {
 
         //TODO: Add in any other joins required, based on filters
         $from = $basefrom;
-        
+
         //TODO: Add in any other wheres required, based on filters - eg specific forum ID
         $where = $basewhere;
 
@@ -269,8 +357,41 @@ class summary_table extends table_sql {
 
         $where .= $groupby;
 
-        $this->set_sql($fields, $from, $where, $params); //TODO: move out into whatever builds this
+        $this->set_sql($fields, $from, $where, $params); //TODO: move out into whatever builds this - if this gets replaced, need to override the out() method as well, which also uses $this->sql it.
     }
+
+    //TODO: Write up docblock for this method
+    protected function define_base_sql() {
+        $this->sql = new \stdClass();
+
+        // Define base SQL query format.
+        $this->sql->basefields = ' ue.userid AS userid,
+                                    e.courseid AS courseid,
+                                    f.id as forumid,
+                                    SUM(IF(p.parent = 0, 1, 0)) AS postcount,
+                                    SUM(IF(p.parent != 0, 1, 0)) AS replycount,
+                                    u.username,
+                                    u.firstname,
+                                    u.lastname';
+
+        $this->sql->basefromjoins = '    {enrol} e
+                                    JOIN {user_enrolments} ue ON ue.enrolid = e.id
+                                    JOIN {user} u ON u.id = ue.userid
+                                    JOIN {forum} f ON f.course = e.courseid
+                                    JOIN {forum_discussions} d ON d.forum = f.id
+                               LEFT JOIN {forum_posts} p ON p.discussion =  d.id
+                                     AND p.userid = ue.userid';
+
+        $this->sql->basewhere = 'e.courseid = :courseid';
+
+        $this->sql->groupby = ' GROUP BY ue.userid';
+
+        // Filter values will be populated separately where required.
+        $this->sql->filterfields = '';
+        $this->sql->filterfromjoins = '';
+        $this->sql->filterwhere = '';
+    }
+
 
 
 

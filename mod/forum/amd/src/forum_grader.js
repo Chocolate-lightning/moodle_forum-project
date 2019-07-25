@@ -26,6 +26,27 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_forum/repository', 'cor
         /**
          * UnifiedGrading class.
          *
+         * @function returnPostsForum
+         * @param {int} forumid The id of the forum we will be using
+         * @return {mixed} Partially executed function we will use later
+         */
+        function returnPostsForum(forumid) {
+            return function(userid) {
+                Repository.getDiscussionByUserID(userid, forumid)
+                    .then(function(context) {
+                        return Templates.render('mod_forum/forum_discussion_posts', context);
+                    })
+                    .then(function(html, js) {
+                        // When this whole chain is moved to plugin then we will call the unified grader here passing html & js
+                        UnifiedGrader.UnifiedGrading();
+                        return UnifiedGrader.UnifiedGradingRenderModuleContent(html, js);
+                    })
+                    .catch(Notification.exception);
+            };
+        }
+        /**
+         * UnifiedGrading class.
+         *
          * @class ForumGrader
          */
         var ForumGrader = function() {
@@ -34,17 +55,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'mod_forum/repository', 'cor
 
             var cmid = $('[data-region="unified-grader"]').data('cmid');
 
-            Repository.getDiscussionByUserID(userid, cmid)
-                .then(function(context) {
-                    return Templates.render('mod_forum/forum_discussion_posts', context);
-                })
-                .then(function(html, js) {
-                    // When this whole chain is moved to plugin then we will call the unified grader here passing html & js
-                    UnifiedGrader.UnifiedGrading();
-                    return UnifiedGrader.UnifiedGradingRenderModuleContent(html, js);
-                })
-                .catch(Notification.exception);
+            return returnPostsForum(cmid)(userid);
         };
 
         return ForumGrader;
-    });
+    }
+);

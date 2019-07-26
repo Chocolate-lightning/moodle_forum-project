@@ -9,7 +9,7 @@ require_once("../../../../config.php");
 //require_login(null, false);
 
 
-//TEST
+//TODO TEST
 /*$cmid = 2;
 $vaultfactory = mod_forum\local\container::get_vault_factory();
 $forumvault = $vaultfactory->get_forum_vault();
@@ -25,28 +25,30 @@ $url = new moodle_url('/mod/forum/report/summary');
 $coursename = 'TODO course name';
 
 if ($forumid > 0) {
-    //TODO: Fetch the forum name using the ID.
+    //TODO: Fetch the forum name using the ID
+    $forumname = 'TODO - some specific forum name';
 } else {
     $forumname = get_string('allforums', 'forumreport_summary');
 }
 
 $forumtitle = get_string('summarytitle', 'forumreport_summary', $forumname);
 
-//TODO: Update this to not be using something from tool\dataprivacy
+//TODO: Update this to be using the correct capability, not a tool/dataprivacy one
 \forumreport_summary\page_helper::setup($url, $coursename, $forumtitle, '', 'tool/dataprivacy:managedatarequests');
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($forumtitle);
 
-//TODO - Check permissions somewhere here so we know what to restrict
+//TODO - Check permissions somewhere here so we know what to restrict -- needs to be done in the class
 
-$table = new \forumreport_summary\summary_table($courseid, 0); //new \forumreport_summary\summary_table($courseid, $forumid);
-$table->add_filter($table::FILTER_DATEFROM, ['1564033886']);
+$table = new \forumreport_summary\summary_table($courseid, $forumid);
+//$table->add_filter($table::FILTER_DATEFROM, ['1564033886']);
 
 $table->baseurl = $url;
 
 //$perpage = 10;//25;
 if (!empty($perpage)) {
+    //Not going to set user preference for the time being, because it means we can just use a null privacy provider
     //set_user_preference(\tool_dataprivacy\local\helper::PREF_REQUEST_PERPAGE, $perpage);
 } else {
     //$perpage = $table->get_requests_per_page_options()[0];

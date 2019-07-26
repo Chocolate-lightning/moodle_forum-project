@@ -37,13 +37,11 @@ use table_sql;
  */
 class summary_table extends table_sql {
 
-    //TODO: Add filter values
-    /*protected $forumids;
-    protected $fromtimestamp;
-    protected $totimestamp;
-    etc etc*/
-
-    /** Constants to define filter types available **/
+    /**
+     * Constants to define filter types available
+     * Forum can be set via constructor since it affects the context of records being accessed,
+     * but is included here so it is injected into queries and can be fetched consistently with other filters.
+     */
     const FILTER_FORUM = 1;
     const FILTER_DATEFROM = 2;
     const FILTER_DATETO = 3;
@@ -55,7 +53,7 @@ class summary_table extends table_sql {
     protected $perpage = 25;
 
     /** @var int[] Options for max number of rows per page. */
-    //protected $perpageoptions = [25, 50, 100];
+    protected $perpageoptions = [25, 50, 75, 100];
 
     /** @var int The course ID being reported on */
     protected $courseid = 0;
@@ -70,12 +68,12 @@ class summary_table extends table_sql {
      * @param int (opt) $forumid The ID of the forum being summarised. 0 will fetch for all forums in the course.
      */
     public function __construct($courseid, $forumid = 0) {
-        parent::__construct("summaryreport_{$forumid}");
 
-        $this->courseid = $courseid;
-        $this->forumid = $forumid;
+        //TODO: Check permission to view this combination of course/forum, so it's only checked once
 
-        //TODO: Have values passed in for filters that can be assigned to properties.
+        parent::__construct("summaryreport_{$courseid}_{$forumid}");
+
+        $this->courseid = intval($courseid);
 
         $checkboxattrs = [
             'title' => get_string('selectall'),
@@ -99,8 +97,13 @@ class summary_table extends table_sql {
 
         // Define the basic SQL data and object format.
         $this->define_base_sql();
+
+        // Set the forum ID if one has been provided.
+        if ($forumid > 0) {
+            $this->add_filter(self::FILTER_FORUM, [$forumid]);
+        }
     }
-    
+
     /**
      * Provides the string name of each filter type.
      *
@@ -194,42 +197,15 @@ class summary_table extends table_sql {
 
         // Set up pagination if not downloading the whole report.
         if (!$this->is_downloading()) {
-            $totalsql = ' SELECT COUNT(DISTINCT(ue.userid))
-                            FROM {enrol} e
-                            JOIN {user_enrolments} ue ON ue.enrolid = e.id
-                            JOIN {user} u ON u.id = ue.userid
-                            JOIN {forum} f ON f.course = e.courseid
-                           WHERE e.courseid = :courseid';
-            $totalparams = [
-                'courseid' => $this->courseid,
-            ];
-
-            if($this->forumid > 0) {
-                $totalsql .= ' AND f.id = :forumid';
-                $totalparams['forumid'] = $this->forumid;
-            }
+            $totalsql = $this->get_full_sql(false);
 
             // Set up pagination.
-            $totalrows = $DB->count_records_sql($totalsql, $totalparams);
+            $totalrows = $DB->count_records_sql($totalsql, $this->sql->params);
             $this->pagesize($pagesize, $totalrows);
         }
 
-        $this->build_query();
-
         // Fetch the data.
-        $sort = $this->get_sql_sort();
-        if ($sort) {
-            $sort = "ORDER BY {$sort}";
-        }
-
-
-        //TODO: PERHAPS THIS COULD BE $this->sql->fromdefault and fromcustom <<< so rather than building a single from, have a default that can be used, and then custom stuff that is added in
-        //See the comment on the $this->set_sql line re replacing this stuff
-        $sql = "SELECT
-                {$this->sql->fields}
-                FROM {$this->sql->from}
-                WHERE {$this->sql->where}
-                {$sort}";
+        $sql = $this->get_full_sql();
 
         // Only paginate when not downloading.
         if (!$this->is_downloading()) {
@@ -254,12 +230,12 @@ class summary_table extends table_sql {
      * @throws coding_exception
      */
     public function add_filter($filtertype, $values = []) {
-        $error = false;
+        $paramcounterror = false;
 
         switch($filtertype) {
             case self::FILTER_FORUM:
                 if (count($values) != 1) {
-                    $error = true;
+                    $paramcounterror = true;
                 }
 
                 // No select fields required - displayed in title.
@@ -270,7 +246,7 @@ class summary_table extends table_sql {
 
             case self::FILTER_DATEFROM:
                 if (count($values) != 1) {
-                    $error = true;
+                    $paramcounterror = true;
                 }
 
                 // No select fields required - forms part of a range.
@@ -281,7 +257,7 @@ class summary_table extends table_sql {
 
             case self::FILTER_DATETO:
                 if (count($values) != 1) {
-                    $error = true;
+                    $paramcounterror = true;
                 }
 
                 // No select fields required - forms part of a range.
@@ -295,7 +271,7 @@ class summary_table extends table_sql {
                 break;
         }
 
-        if ($error) {
+        if ($paramcounterror) {
             $filtername = $this->get_filter_name($filtertype);
             throw new coding_exception("An invalid number of values have been passed for the '{$filtername}' filter.");
         }
@@ -311,56 +287,12 @@ class summary_table extends table_sql {
         $this->no_sorting('select');
     }
 
-    //TODO: docblock
-    protected function build_query() {
-        /** Draft working query for basic info (NOTE: THE forum_posts HAS BEEN MOVED TO A SINGLE JOIN IN THE PHP):
-            SELECT ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS postcount, COUNT(pr.id) AS replycount, u.username, u.firstname, u.lastname
-            FROM mdl_enrol e
-                JOIN mdl_user_enrolments ue ON ue.enrolid = e.id #users enrolled - so we get zeros for users with no posts
-                JOIN mdl_user u ON u.id = ue.userid #Username etc
-                JOIN mdl_forum f ON f.course = e.courseid #Only forums in this course
-                JOIN mdl_forum_discussions d ON d.forum = f.id #Generic all discussions to get post count
-                LEFT JOIN mdl_forum_posts pd ON pd.discussion =  d.id AND pd.userid = ue.userid AND pd.parent = 0 #<<< parent 0 is a discussion
-                LEFT JOIN mdl_forum_posts pr ON pr.discussion =  d.id AND pr.userid = ue.userid AND pr.parent != 0 #<<< parent 0 is a discussion, need to sum that separate
-            WHERE e.courseid = 3 AND f.id = 4
-            GROUP BY ue.userid
-            ORDER BY ue.userid ASC
-         */
-
-        // Default fields that will always be included.
-        $basefields = $this->sql->basefields;
-
-        $basefrom = $this->sql->basefromjoins;
-
-        $basewhere = $this->sql->basewhere;
-
-        $groupby = $this->sql->groupby;
-
-        $params = [
-            'courseid' => $this->courseid,
-        ];
-
-        //TODO: Add in other fields here by filters, in addition to the base fields
-        $fields = $basefields;
-
-        //TODO: Add in any other joins required, based on filters
-        $from = $basefrom;
-
-        //TODO: Add in any other wheres required, based on filters - eg specific forum ID
-        $where = $basewhere;
-
-        if ($this->forumid > 0) {
-            $where .= ' AND f.id = :forumid';
-
-            $params['forumid'] = $this->forumid;
-        }
-
-        $where .= $groupby;
-
-        $this->set_sql($fields, $from, $where, $params); //TODO: move out into whatever builds this - if this gets replaced, need to override the out() method as well, which also uses $this->sql it.
-    }
-
-    //TODO: Write up docblock for this method
+    /**
+     * Define the object to store all for the table SQL and initialises the base SQL required.
+     *
+     * @param void.
+     * @return void.
+     */
     protected function define_base_sql() {
         $this->sql = new \stdClass();
 
@@ -386,19 +318,135 @@ class summary_table extends table_sql {
 
         $this->sql->groupby = ' GROUP BY ue.userid';
 
+        $this->sql->params = ['courseid' => $this->courseid];
+
         // Filter values will be populated separately where required.
         $this->sql->filterfields = '';
         $this->sql->filterfromjoins = '';
         $this->sql->filterwhere = '';
     }
 
+    /**
+     * Overriding the parent method because it should not be used here.
+     * Filters are applied, so the stucture of $this->sql is now different to the way this is set up in the parent.
+     *
+     * @throws coding_exception
+     */
+    public function set_sql($fields, $from, $where, array $params = array()) {
+        throw new coding_exception('The set_sql method should not be used by the summary_table class.');
+    }
 
+    /**
+     * Convenience method to call a number of methods for you to display the table.
+     * Overrides the parent so SQL for filters is handled.
+     *
+     * @param $pagesize int Number of rows to fetch.
+     * @param $useinitialsbar bool Whether to include the initials bar with the table.
+     * @param $downloadhelpbutton string Unused.
+     */
+    public function out($pagesize, $useinitialsbar, $downloadhelpbutton='') {
+        global $DB;
 
+        if (!$this->columns) {
+            $sql = $this->get_full_sql();
 
+            $onerow = $DB->get_record_sql($sql, $this->sql->params, IGNORE_MULTIPLE);
+            //if columns is not set then define columns as the keys of the rows returned
+            //from the db.
+            $this->define_columns(array_keys((array)$onerow));
+            $this->define_headers(array_keys((array)$onerow));
+        }
 
+        $this->setup();
+        $this->query_db($pagesize, $useinitialsbar);
+        $this->build_table();
+        $this->close_recordset();
+        $this->finish_output();
+    }
+
+    /**
+     * Prepares a complete SQL statement from the base query and any filters defined.
+     *
+     * @param bool $fullselect Whether to select all relevant columns.
+     *              False selects a count only (used to calculate pagination).
+     * @return string The complete SQL statement.
+     */
+    private function get_full_sql($fullselect = true) {
+        $sql = 'SELECT';
+
+        if ($fullselect) {
+            $sql .= " {$this->sql->basefields}
+                      {$this->sql->filterfields}";
+        } else {
+            $sql .= ' COUNT(DISTINCT(ue.userid))';
+        }
+
+        $sql .= " FROM {$this->sql->basefromjoins}
+                       {$this->sql->filterfromjoins}
+                 WHERE {$this->sql->basewhere}
+                       {$this->sql->filterwhere}";
+
+        if ($fullselect) {
+            $sql .= $this->sql->groupby;
+
+            if(($sort = $this->get_sql_sort())) {
+                $sql .= " ORDER BY {$sort}";
+            }
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Override the wrap_html_finish method so per page option and bulk select actions can be handled.
+     */
+    public function wrap_html_finish() {
+        global $OUTPUT;
+
+        //TODO per page output, and whatever is required for the checkboxes
+        /*
+        $data = new stdClass();
+        $data->options = [
+            [
+                'value' => 0,
+                'name' => ''
+            ],
+            [
+                'value' => \tool_dataprivacy\api::DATAREQUEST_ACTION_APPROVE,
+                'name' => get_string('approve', 'tool_dataprivacy')
+            ],
+            [
+                'value' => \tool_dataprivacy\api::DATAREQUEST_ACTION_REJECT,
+                'name' => get_string('deny', 'tool_dataprivacy')
+            ]
+        ];
+
+        $perpageoptions = array_combine($this->perpageoptions, $this->perpageoptions);
+        $perpageselect = new \single_select(new moodle_url(''), 'perpage',
+                $perpageoptions, get_user_preferences('tool_dataprivacy_request-perpage'), null, 'selectgroup');
+        $perpageselect->label = get_string('perpage', 'moodle');
+        $data->perpage = $OUTPUT->render($perpageselect);
+
+        echo $OUTPUT->render_from_template('tool_dataprivacy/data_requests_bulk_actions', $data);*/
+    }
 
     //TODO using /admin/tool/dataprivacy/classes/output/data_requests_table.php
     //AND https://github.com/Chocolate-lightning/moodle-tool_matt/blob/master/classes/output/tool_matt_table.php
     //TO FIGURE THIS OUT
+
+
+            /** Draft working query for basic info (NOTE: THE forum_posts HAS BEEN MOVED TO A SINGLE JOIN IN THE PHP):
+            SELECT ue.userid AS userid, e.courseid AS courseid, f.id as forumid, COUNT(pd.id) AS postcount, COUNT(pr.id) AS replycount, u.username, u.firstname, u.lastname
+            FROM mdl_enrol e
+                JOIN mdl_user_enrolments ue ON ue.enrolid = e.id #users enrolled - so we get zeros for users with no posts
+                JOIN mdl_user u ON u.id = ue.userid #Username etc
+                JOIN mdl_forum f ON f.course = e.courseid #Only forums in this course
+                JOIN mdl_forum_discussions d ON d.forum = f.id #Generic all discussions to get post count
+                LEFT JOIN mdl_forum_posts pd ON pd.discussion =  d.id AND pd.userid = ue.userid AND pd.parent = 0 #<<< parent 0 is a discussion
+                LEFT JOIN mdl_forum_posts pr ON pr.discussion =  d.id AND pr.userid = ue.userid AND pr.parent != 0 #<<< parent 0 is a discussion, need to sum that separate
+            WHERE e.courseid = 3 AND f.id = 4
+            GROUP BY ue.userid
+            ORDER BY ue.userid ASC
+         */
 }
 

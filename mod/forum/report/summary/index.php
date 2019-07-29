@@ -22,7 +22,7 @@ $courseid = 2; //TODO: Fetch the course ID and name - either automatically, or t
 $perpage = optional_param('perpage', 10, PARAM_INT); //TODO: Change to 25
 $forumid = optional_param('id', 0, PARAM_INT);
 $url = new moodle_url('/mod/forum/report/summary');
-$coursename = 'TODO course name';
+$coursename = 'Course name'; //TODO
 
 if ($forumid > 0) {
     //TODO: Fetch the forum name using the ID

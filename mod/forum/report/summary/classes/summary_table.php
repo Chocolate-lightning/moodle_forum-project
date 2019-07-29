@@ -81,6 +81,7 @@ class summary_table extends table_sql {
         ];
 
         //TODO - this may be dynamic and need to be built, depending on which filters are applied (eg only include country where it's a filter)
+        // Default column headers. Others may be added later, when filters are added.
         $columnheaders = [
             'select' => html_writer::checkbox('selectall', 1, false, null, $checkboxattrs),
             'username' => get_string('username'),
@@ -98,10 +99,8 @@ class summary_table extends table_sql {
         // Define the basic SQL data and object format.
         $this->define_base_sql();
 
-        // Set the forum ID if one has been provided.
-        if ($forumid > 0) {
-            $this->add_filter(self::FILTER_FORUM, [$forumid]);
-        }
+        // Set the forum ID.
+        $this->add_filter(self::FILTER_FORUM, [$forumid]);
     }
 
     /**
@@ -236,12 +235,16 @@ class summary_table extends table_sql {
             case self::FILTER_FORUM:
                 if (count($values) != 1) {
                     $paramcounterror = true;
+                } else if (intval($values[0]) > 0) {
+                    // No select fields required - displayed in title.
+                    $this->sql->filterfields .= ', f.name AS forumname'; //TODO: Remove this and the next line (since forum name is in the title). Just showing the syntax for displaying this as a filter
+                    $this->add_table_column('forumname', get_string('filter:forumname', 'forumreport_summary')); //TODO: confirm naming convention for the lang string (filter:blah)
+                    // No extra joins required, forum is already joined.
+                    $this->sql->filterwhere .= ' AND f.id = :forumid';
+                    $this->sql->params['forumid'] = $values[0];
+
                 }
 
-                // No select fields required - displayed in title.
-                // No extra joins required, forum is already joined.
-                $this->sql->filterwhere .= ' AND f.id = :forumid';
-                $this->sql->params['forumid'] = $values[0];
                 break;
 
             case self::FILTER_DATEFROM:
@@ -274,6 +277,24 @@ class summary_table extends table_sql {
         if ($paramcounterror) {
             $filtername = $this->get_filter_name($filtertype);
             throw new coding_exception("An invalid number of values have been passed for the '{$filtername}' filter.");
+        }
+    }
+
+    /**
+     * Append a column to the end of the table, if the column name does not already exist.
+     *
+     * @param string $columnname The name of the column.
+     * @param string $columnheader The title displayed in the column header.
+     * @return void
+     */
+    protected function add_table_column($columnname, $columnheader) {
+        if (!isset($this->columns[$columnname])) {
+            $this->columns[$columnname]         = count($this->columns);
+            $this->column_style[$columnname]    = [];
+            $this->column_class[$columnname]    = '';
+            $this->column_suppress[$columnname] = false;
+
+            $this->headers[] = $columnheader;
         }
     }
 
@@ -351,8 +372,8 @@ class summary_table extends table_sql {
             $sql = $this->get_full_sql();
 
             $onerow = $DB->get_record_sql($sql, $this->sql->params, IGNORE_MULTIPLE);
-            //if columns is not set then define columns as the keys of the rows returned
-            //from the db.
+
+            // If columns is not set, define columns as the keys of the rows returned from the db.
             $this->define_columns(array_keys((array)$onerow));
             $this->define_headers(array_keys((array)$onerow));
         }

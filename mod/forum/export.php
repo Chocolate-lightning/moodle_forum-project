@@ -61,10 +61,12 @@ if ($form->is_cancelled()) {
     redirect(new moodle_url('/mod/forum/export.php'));
 } else if ($data = $form->get_data()) {
     require_sesskey();
-
+    global $DB;
     $userid = $USER->id;
     $forumid = $data->id;
-    $discussion = $data->discussion;
+
+//    $discussion = $data->discussion;
+
     $dataformat = $data->formats;
 
     $vaultfactory = mod_forum\local\container::get_vault_factory();
@@ -72,8 +74,11 @@ if ($form->is_cancelled()) {
     $builderfactory = mod_forum\local\container::get_builder_factory();
 
     $discussionvault = $vaultfactory->get_discussion_vault();
+    
     $forumvault = $vaultfactory->get_forum_vault();
     $forum = $forumvault->get_from_id($forumid);
+    $lastdiscussion = $discussionvault->get_last_discussion_in_forum($forum);
+    $discussion = $lastdiscussion->get_id();
     $postvault = $vaultfactory->get_post_vault();
 
     $capabilitymanager = $managerfactory->get_capability_manager($forum);
@@ -83,13 +88,13 @@ if ($form->is_cancelled()) {
 
     $forum = $forumvault->get_from_id($discussion->get_forum_id());
     $posts = $postvault->get_from_discussion_id(
-        $user,
+        $USER,
         $discussion->get_id(),
         $capabilitymanager->can_view_any_private_reply($USER)
     );
 
     $exportedposts = $exportedpostsbuilder->build(
-        $user,
+        $USER,
         [$forum],
         [$discussion],
         $posts

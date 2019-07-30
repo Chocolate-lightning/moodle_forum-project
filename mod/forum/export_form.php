@@ -60,7 +60,8 @@ class export extends moodleform {
 
         $mform->addElement('hidden', 'forum');
         $mform->setType('forum', PARAM_INT);
-        $options = array(
+        /*
+         $options = array(
             'ajax' => 'enrol_manual/form-potential-user-selector',
             'multiple' => true,
             'courseid' => 2,
@@ -76,7 +77,7 @@ class export extends moodleform {
         }
         $mform->addElement('select', 'discussion', 'Discussion', $options);
         $mform->setType('discussion', PARAM_RAW);
-
+        */
         // Export formats.
         $formats = core_plugin_manager::instance()->get_plugins_of_type('dataformat');
         $options = [];

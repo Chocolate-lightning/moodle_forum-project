@@ -80,8 +80,6 @@ class summary_table extends table_sql {
             'data-action' => 'selectall'
         ];
 
-        //TODO - this may be dynamic and need to be built, depending on which filters are applied (eg only include country where it's a filter)
-        // Default column headers. Others may be added later, when filters are added.
         $columnheaders = [
             'select' => html_writer::checkbox('selectall', 1, false, null, $checkboxattrs),
             'username' => get_string('username'),
@@ -148,9 +146,10 @@ class summary_table extends table_sql {
      * @return string User's full name.
      */
     public function col_fullname($data) {
-        //TODO: Need to check permission to view this
+        //TODO: Need to check permission to view this eg has_capability('moodle/site:viewfullnames', $this->context)
+        $fullname = $data->firstname . ' ' . $data->lastname;
 
-        return $data->firstname . ' ' . $data->lastname;
+        return $fullname;
     }
 
     /**
@@ -184,7 +183,7 @@ class summary_table extends table_sql {
         echo $OUTPUT->heading(get_string('nothingtodisplay'), 4);
     }
 
-    /** TODO::: This is to override, so it can pull in the more complicated queries
+    /**
      * Query the db. Store results in the table object for use by build_table.
      *
      * @param int $pagesize Size of page for paginated displayed table.
@@ -220,7 +219,7 @@ class summary_table extends table_sql {
         }*/
     }
 
-       /**
+    /**
      * Adds the relevant SQL to apply a filter to the report.
      *
      * @param int $filtertype Filter type as defined by class constants.

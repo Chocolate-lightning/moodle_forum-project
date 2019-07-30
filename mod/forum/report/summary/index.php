@@ -1,40 +1,43 @@
 <?php
 
-//Testing table
 //Looking at /var/www/html/moodle_forum-project/admin/tool/dataprivacy/datarequests.php
-
 
 require_once("../../../../config.php");
 
-//require_login(null, false);
-
-
-//TODO TEST
-/*$cmid = 2;
-$vaultfactory = mod_forum\local\container::get_vault_factory();
-$forumvault = $vaultfactory->get_forum_vault();
-$forum = $forumvault->get_from_course_module_id($cmid);*/
-
-//print_object($forum);exit;
-//END TEST
-
-$courseid = 2; //TODO: Fetch the course ID and name - either automatically, or through a param. Is required, not optional.
+$forumid = optional_param('forumid', 0, PARAM_INT);
+// This course ID will be ignored if a forum ID is provided.
+$courseid = optional_param('courseid', 0, PARAM_INT);
 $perpage = optional_param('perpage', 10, PARAM_INT); //TODO: Change to 25
-$forumid = optional_param('id', 0, PARAM_INT);
-$url = new moodle_url('/mod/forum/report/summary');
-$coursename = 'Course name'; //TODO
+$url = new moodle_url("/mod/forum/report/summary/");
 
 if ($forumid > 0) {
-    //TODO: Fetch the forum name using the ID
-    $forumname = 'TODO - some specific forum name';
-} else {
+    $forumobject = $DB->get_record("forum", array("id" => $forumid));
+
+    if (empty($forumobject)) {
+        throw new \moodle_exception("Unable to find forum with ID {$forumid}.");
+    }
+
+    $forumname = $forumobject->name;
+    $courseid = $forumobject->course;
+    $url->param('forumid', $forumid);
+
+} else if ($courseid > 0) {
     $forumname = get_string('allforums', 'forumreport_summary');
+    $url->param('courseid', $courseid);
+} else {
+    throw new \moodle_exception("Forum ID or course ID must be provided to generate a forum summary report.");
 }
 
+require_login($courseid, false);
+//$hascourseaccess = ($PAGE->course->id == SITEID) || can_access_course($PAGE->course, $userid);
+
+$course = get_course($courseid);
+$coursename = $course->fullname;
 $forumtitle = get_string('summarytitle', 'forumreport_summary', $forumname);
 
-//TODO: Update this to be using the correct capability, not a tool/dataprivacy one
-\forumreport_summary\page_helper::setup($url, $coursename, $forumtitle, '', 'tool/dataprivacy:managedatarequests');
+//TODO: Update this to be using the correct capability, will need a new one so can be controlled
+//Risk: if students can view others' totals, can determine if there are private replies by comparing the totals with visible posts
+\forumreport_summary\page_helper::setup($url, $coursename, $forumtitle, '', 'mod/forum:viewdiscussion');
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($forumtitle);
@@ -42,30 +45,14 @@ echo $OUTPUT->heading($forumtitle);
 //TODO - Check permissions somewhere here so we know what to restrict -- needs to be done in the class
 
 $table = new \forumreport_summary\summary_table($courseid, $forumid);
-//$table->add_filter($table::FILTER_DATEFROM, ['1564033886']);
-
 $table->baseurl = $url;
 
-//$perpage = 10;//25;
-if (!empty($perpage)) {
-    //Not going to set user preference for the time being, because it means we can just use a null privacy provider
-    //set_user_preference(\tool_dataprivacy\local\helper::PREF_REQUEST_PERPAGE, $perpage);
-} else {
-    //$perpage = $table->get_requests_per_page_options()[0];
-}
-//$table->set_requests_per_page($perpage);
-
-
-
+//$table->add_filter($table::FILTER_DATEFROM, ['1564033886']);
 
 //$requestlist = new tool_dataprivacy\output\data_requests_page($table, $filtersapplied);
 //$requestlistoutput = $PAGE->get_renderer('tool_dataprivacy');
 
 //echo $requestlistoutput->render($requestlist);
 
-//ob_start();
 $table->out($perpage, false);
-//$tablehtml = ob_get_contents();
-//ob_end_clean();
-
 echo $OUTPUT->footer();

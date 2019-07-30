@@ -5257,7 +5257,13 @@ function forum_extend_settings_navigation(settings_navigation $settingsnav, navi
         $discussionid = $params['d'];
     }
 
-    // for some actions you need to be enrolled, beiing admin is not enough sometimes here
+    //Link to the summary report for logged in users.
+    if (isloggedin() && !isguestuser()) { //TODO: need to check the report subplugin exists before displaying
+        $reportlink = "{$CFG->wwwroot}/mod/forum/report/summary/?forumid={$forumobject->id}";
+        $forumnode->add(get_string('pluginname', 'forumreport_summary'), $reportlink, navigation_node::TYPE_CONTAINER);
+    }
+
+    // For some actions you need to be enrolled, being admin is not enough sometimes here.
     $enrolled = is_enrolled($PAGE->cm->context, $USER, '', false);
     $activeenrolled = is_enrolled($PAGE->cm->context, $USER, '', true);
 

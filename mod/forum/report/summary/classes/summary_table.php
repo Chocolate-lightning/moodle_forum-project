@@ -62,16 +62,27 @@ class summary_table extends table_sql {
     protected $forumid = 0;
 
     /**
+     * @var int The user ID if only one user's summary will be generated.
+     * This will apply to users without permission to view others' summaries.
+     */
+    protected $userid = 0;
+
+    /**
      * Forum report table constructor.
      *
      * @param int $courseid The ID of the course the forum(s) exist within.
      * @param int (opt) $forumid The ID of the forum being summarised. 0 will fetch for all forums in the course.
      */
     public function __construct($courseid, $forumid = 0) {
+        parent::__construct("summaryreport_{$courseid}_{$forumid}");
 
         //TODO: Check permission to view this combination of course/forum, so it's only checked once
+        $context = 'FETCH THE CONTEXT HERE';
 
-        parent::__construct("summaryreport_{$courseid}_{$forumid}");
+        // Only show their own summary unless they have permission to view all.
+        /*if (!has_capability ('forumreport/summary:accessallsummaries', $context)) {
+            $this->userid = 'The user ID';
+        }*/
 
         $this->courseid = intval($courseid);
 
@@ -320,8 +331,8 @@ class summary_table extends table_sql {
         $this->sql->basefields = ' ue.userid AS userid,
                                     e.courseid AS courseid,
                                     f.id as forumid,
-                                    SUM(IF(p.parent = 0, 1, 0)) AS postcount,
-                                    SUM(IF(p.parent != 0, 1, 0)) AS replycount,
+                                    SUM(CASE WHEN p.parent = 0 THEN 1 ELSE 0 END) AS postcount,
+                                    SUM(CASE WHEN p.parent != 0 THEN 1 ELSE 0 END) AS replycount,
                                     u.username,
                                     u.firstname,
                                     u.lastname';

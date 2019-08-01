@@ -25,6 +25,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2019071500;
-$plugin->requires = 2019070400;  // Requires this Moodle version.
+$plugin->version  = 2019080101;
+$plugin->requires = 2019070400;
 $plugin->component = 'forumreport_summary';

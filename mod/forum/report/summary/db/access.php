@@ -37,6 +37,7 @@ $capabilities = [
         ],
     ],
 
+    // Currently unused.
     'forumreport/summary:accesstotalsummary' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,

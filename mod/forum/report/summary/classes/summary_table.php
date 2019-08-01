@@ -74,15 +74,21 @@ class summary_table extends table_sql {
      * @param int (opt) $forumid The ID of the forum being summarised. 0 will fetch for all forums in the course.
      */
     public function __construct($courseid, $forumid = 0) {
+        global $USER;
+
         parent::__construct("summaryreport_{$courseid}_{$forumid}");
 
-        //TODO: Check permission to view this combination of course/forum, so it's only checked once
-        $context = 'FETCH THE CONTEXT HERE';
+        if ($forumid > 0) {
+            $cm = get_coursemodule_from_instance('forum', $forumid, $courseid);
+            $context = \context_module::instance($cm->id);
+        } else {
+            $context = \context_course::instance($courseid);
+        }
 
         // Only show their own summary unless they have permission to view all.
-        /*if (!has_capability ('forumreport/summary:accessallsummaries', $context)) {
-            $this->userid = 'The user ID';
-        }*/
+        if (!has_capability('forumreport/summary:accessallsummaries', $context)) {
+            $this->userid = $USER->id;
+        }
 
         $this->courseid = intval($courseid);
 
@@ -251,6 +257,7 @@ class summary_table extends table_sql {
                     $this->add_table_column('forumname', get_string('filter:forumname', 'forumreport_summary')); //TODO: confirm naming convention for the lang string (filter:blah)
                     // No extra joins required, forum is already joined.
                     $this->sql->filterwhere .= ' AND f.id = :forumid';
+                    $this->sql->filtergroupby .= ', forumname';
                     $this->sql->params['forumid'] = $values[0];
 
                 }
@@ -347,14 +354,21 @@ class summary_table extends table_sql {
 
         $this->sql->basewhere = 'e.courseid = :courseid';
 
-        $this->sql->groupby = ' GROUP BY ue.userid';
+        $this->sql->basegroupby = 'userid, courseid, forumid, username, firstname, lastname';
 
         $this->sql->params = ['courseid' => $this->courseid];
+
+        // Handle if a user is limited to viewing their own summary.
+        if ($this->userid > 0) {
+            $this->sql->basewhere .= ' AND ue.userid = :userid';
+            $this->sql->params['userid'] = $this->userid;
+        }
 
         // Filter values will be populated separately where required.
         $this->sql->filterfields = '';
         $this->sql->filterfromjoins = '';
         $this->sql->filterwhere = '';
+        $this->sql->filtergroupby = '';
     }
 
     /**
@@ -418,7 +432,7 @@ class summary_table extends table_sql {
                        {$this->sql->filterwhere}";
 
         if ($fullselect) {
-            $sql .= $this->sql->groupby;
+            $sql .= ' GROUP BY ' . $this->sql->basegroupby . $this->sql->filtergroupby;
 
             if(($sort = $this->get_sql_sort())) {
                 $sql .= " ORDER BY {$sort}";

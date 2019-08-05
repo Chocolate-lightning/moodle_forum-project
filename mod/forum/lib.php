@@ -5257,9 +5257,12 @@ function forum_extend_settings_navigation(settings_navigation $settingsnav, navi
         $discussionid = $params['d'];
     }
 
+    //TODO reference get_plugin_list to find the reports in forum, then make this generic
+    //Add the new cap check for a generic one for this report type
+    //print_object(core_component::get_plugin_list('report'));
     //Link to the summary report for logged in users.
     if (isloggedin() && !isguestuser()) { //TODO: need to check the report subplugin exists before displaying
-        $reportlink = "{$CFG->wwwroot}/mod/forum/report/summary/?forumid={$forumobject->id}";
+        $reportlink = "{$CFG->wwwroot}/mod/forum/report/summary/?courseid={$forumobject->course}&forumid={$forumobject->id}";
         $forumnode->add(get_string('pluginname', 'forumreport_summary'), $reportlink, navigation_node::TYPE_CONTAINER);
     }
 

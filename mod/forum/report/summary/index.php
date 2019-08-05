@@ -1,30 +1,64 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * This script displays the forum summary report for the given parameters, within a user's capabilities.
+ *
+ * @package   forumreport_summary
+ * @copyright 2019 Michael Hawkins <michaelh@moodle.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 require_once("../../../../config.php");
 
+if (isguestuser()) {
+    print_error('noguest');
+}
+
+$courseid = required_param('courseid', PARAM_INT);
 $forumid = optional_param('forumid', 0, PARAM_INT);
-// This course ID will be ignored if a forum ID is provided.
-$courseid = optional_param('courseid', 0, PARAM_INT);
 $perpage = optional_param('perpage', 10, PARAM_INT); // TODO: Change to 25.
 $url = new moodle_url("/mod/forum/report/summary/");
+$url->param('courseid', $courseid);
+$cm = null;
+
+$modinfo = get_fast_modinfo($courseid);
 
 if ($forumid > 0) {
-    $forumobject = $DB->get_record("forum", array("id" => $forumid));
-
-    if (empty($forumobject)) {
+    if (!isset($modinfo->instances['forum'][$forumid])) {
         throw new \moodle_exception("Unable to find forum with ID {$forumid}.");
     }
 
-    $forumname = $forumobject->name;
-    $courseid = $forumobject->course;
+    $foruminfo = $modinfo->instances['forum'][$forumid];
+    $forumname = $foruminfo->name;
     $url->param('forumid', $forumid);
-} else if ($courseid > 0) {
+    $cm = $foruminfo->get_course_module_record();
+} else {
     $forumname = get_string('allforums', 'forumreport_summary');
     $url->param('courseid', $courseid);
-} else {
-    throw new \moodle_exception("Forum ID or course ID must be provided to generate a forum summary report.");
 }
 
-\forumreport_summary\page_helper::setup($url, $courseid, $forumid, $forumname);
+require_login($courseid, false, $cm);
+
+$course = $modinfo->get_course();
+
+$PAGE->set_url($url);
+$PAGE->set_pagelayout('standard');
+$PAGE->set_title($forumname);
+$PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('summarytitle', 'forumreport_summary', $forumname));

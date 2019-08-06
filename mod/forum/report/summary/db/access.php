@@ -25,6 +25,18 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
+    'forumreport/summary:accessreport' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ],
+    ],
+
     'forumreport/summary:accessallsummaries' => [
         'riskbitmask' => RISK_PERSONAL,
 
@@ -37,7 +49,6 @@ $capabilities = [
         ],
     ],
 
-    // Currently unused.
     'forumreport/summary:accesstotalsummary' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,

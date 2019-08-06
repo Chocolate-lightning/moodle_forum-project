@@ -46,7 +46,7 @@ class summary_table extends table_sql {
     const FILTER_DATEFROM = 2;
     const FILTER_DATETO = 3;
 
-    /** @var stdClass The various SQL segments that will be combined to form queries to fetch various information. */
+    /** @var \stdClass The various SQL segments that will be combined to form queries to fetch various information. */
     public $sql;
 
     /** @var int The number of rows to be displayed per page. */
@@ -73,7 +73,7 @@ class summary_table extends table_sql {
      * @param int $courseid The ID of the course the forum(s) exist within.
      * @param int (opt) $forumid The ID of the forum being summarised. 0 will fetch for all forums in the course.
      */
-    public function __construct($courseid, $forumid = 0) {
+    public function __construct(int $courseid, int $forumid = 0) {
         global $USER;
 
         parent::__construct("summaryreport_{$courseid}_{$forumid}");
@@ -121,10 +121,10 @@ class summary_table extends table_sql {
     /**
      * Provides the string name of each filter type.
      *
-     * @param type $filtertype Type of filter
+     * @param int $filtertype Type of filter
      * @return string Name of the filter
      */
-    public function get_filter_name($filtertype) {
+    public function get_filter_name(int $filtertype): string {
         $filternames = [
             self::FILTER_FORUM => 'Forum',
             self::FILTER_DATEFROM => 'Date created from',
@@ -137,10 +137,10 @@ class summary_table extends table_sql {
     /**
      * Generate the select column.
      *
-     * @param stdClass $data The row data.
+     * @param \stdClass $data The row data.
      * @return string HTML for checkbox.
      */
-    public function col_select($data) {
+    public function col_select(\stdClass $data): string {
         //TODO: rowids[] name might work if it could be user or group ID, otherwise userid
         //TODO: see if checkboxes ever need to be checked by default (3rd param)
         return \html_writer::checkbox('rowids[]', $data->userid, false, '', ['class' => 'selectrows']);
@@ -149,21 +149,21 @@ class summary_table extends table_sql {
     /**
      * Generate the username column.
      *
-     * @param stdClass $data The row data.
+     * @param \stdClass $data The row data.
      * @return string username.
      */
-    public function col_username($data) {
+    public function col_username(\stdClass $data): string {
         return $data->username;
     }
 
     /**
      * Generate the fullname column.
      *
-     * @param stdClass $data The row data.
+     * @param \stdClass $data The row data.
      * @return string User's full name.
      */
-    public function col_fullname($data) {
-        //TODO: Need to check permission to view this eg has_capability('moodle/site:viewfullnames', $this->context)
+    public function col_fullname($data): string {
+        // TODO: Confirm access with moodle/site:viewfullnames.
         $fullname = $data->firstname . ' ' . $data->lastname;
 
         return $fullname;
@@ -172,29 +172,30 @@ class summary_table extends table_sql {
     /**
      * Generate the postcount column.
      *
-     * @param stdClass $data The row data.
+     * @param \stdClass $data The row data.
      * @return int number of discussion posts made by user.
      */
-    public function col_postcount($data) {
+    public function col_postcount(\stdClass $data): int {
         return $data->postcount;
     }
 
     /**
      * Generate the replycount column.
      *
-     * @param stdClass $data The row data.
+     * @param \stdClass $data The row data.
      * @return int number of replies made by user.
      */
-    public function col_replycount($data) {
+    public function col_replycount(\stdClass $data): int {
         return $data->replycount;
     }
 
     /**
      * Override the default implementation to set a decent heading level.
      *
+     * @param void.
      * @return string Output indicating no rows were found.
      */
-    public function print_nothing_to_display() {
+    public function print_nothing_to_display(): string {
         global $OUTPUT;
 
         echo $OUTPUT->heading(get_string('nothingtodisplay'), 4);
@@ -207,7 +208,7 @@ class summary_table extends table_sql {
      * @param bool $useinitialsbar Overridden but unused.
      * @return void
      */
-    public function query_db($pagesize, $useinitialsbar=false) {
+    public function query_db($pagesize, $useinitialsbar = false): void {
         global $DB;
 
         // Set up pagination if not downloading the whole report.
@@ -244,7 +245,7 @@ class summary_table extends table_sql {
      * @return void
      * @throws coding_exception
      */
-    public function add_filter($filtertype, $values = []) {
+    public function add_filter(int $filtertype, array $values = []): void {
         $paramcounterror = false;
 
         switch($filtertype) {
@@ -302,9 +303,9 @@ class summary_table extends table_sql {
      *
      * @param string $columnname The name of the column.
      * @param string $columnheader The title displayed in the column header.
-     * @return void
+     * @return void.
      */
-    protected function add_table_column($columnname, $columnheader) {
+    protected function add_table_column(string $columnname, string $columnheader): void {
         if (!isset($this->columns[$columnname])) {
             $this->columns[$columnname]         = count($this->columns);
             $this->column_style[$columnname]    = [];
@@ -317,8 +318,11 @@ class summary_table extends table_sql {
 
     /**
      * Define various table config options.
+     *
+     * @param void.
+     * @return void.
      */
-    protected function define_table_configs() {
+    protected function define_table_configs(): void {
         $this->collapsible(false);
         $this->sortable(true, 'firstname', SORT_ASC);
         $this->pageable(true);
@@ -331,7 +335,7 @@ class summary_table extends table_sql {
      * @param void.
      * @return void.
      */
-    protected function define_base_sql() {
+    protected function define_base_sql(): void {
         $this->sql = new \stdClass();
 
         // Define base SQL query format.
@@ -385,11 +389,13 @@ class summary_table extends table_sql {
      * Convenience method to call a number of methods for you to display the table.
      * Overrides the parent so SQL for filters is handled.
      *
-     * @param $pagesize int Number of rows to fetch.
-     * @param $useinitialsbar bool Whether to include the initials bar with the table.
-     * @param $downloadhelpbutton string Unused.
+     * @param int $pagesize Number of rows to fetch.
+     * @param bool $useinitialsbar Whether to include the initials bar with the table.
+     * @param string $downloadhelpbutton Unused.
+     *
+     * @return void.
      */
-    public function out($pagesize, $useinitialsbar, $downloadhelpbutton='') {
+    public function out($pagesize, $useinitialsbar, $downloadhelpbutton = ''): void {
         global $DB;
 
         if (!$this->columns) {
@@ -416,7 +422,7 @@ class summary_table extends table_sql {
      *              False selects a count only (used to calculate pagination).
      * @return string The complete SQL statement.
      */
-    private function get_full_sql($fullselect = true) {
+    private function get_full_sql(bool $fullselect = true): string {
         $sql = 'SELECT';
 
         if ($fullselect) {
@@ -450,7 +456,7 @@ class summary_table extends table_sql {
 
         //TODO per page output, and whatever is required for the checkboxes
         /*
-        $data = new stdClass();
+        $data = new \stdClass();
         $data->options = [
             [
                 'value' => 0,

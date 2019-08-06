@@ -29,7 +29,7 @@ if (isguestuser()) {
 }
 
 $courseid = required_param('courseid', PARAM_INT);
-$forumid = optional_param('forumid', 0, PARAM_INT);
+$forumid = required_param('forumid', PARAM_INT); // TODO: Change to optional with 0 default once all is supported.
 $perpage = optional_param('perpage', 10, PARAM_INT); // TODO: Change to 25.
 $url = new moodle_url("/mod/forum/report/summary/");
 $url->param('courseid', $courseid);
@@ -39,7 +39,7 @@ $modinfo = get_fast_modinfo($courseid);
 
 if ($forumid > 0) {
     if (!isset($modinfo->instances['forum'][$forumid])) {
-        throw new \moodle_exception("Unable to find forum with ID {$forumid}.");
+        throw new \moodle_exception("A valid forum ID is required to generate a summary report.");
     }
 
     $foruminfo = $modinfo->instances['forum'][$forumid];
@@ -47,11 +47,21 @@ if ($forumid > 0) {
     $url->param('forumid', $forumid);
     $cm = $foruminfo->get_course_module_record();
 } else {
-    $forumname = get_string('allforums', 'forumreport_summary');
-    $url->param('courseid', $courseid);
+    throw new \moodle_exception("A valid forum ID is required to generate a summary report.");
+    // Not required for MVP - this will never be reached while $forumid is required.
+    //$forumname = get_string('allforums', 'forumreport_summary');
+    //$url->param('courseid', $courseid);
 }
 
 require_login($courseid, false, $cm);
+
+// This capability is rqeuired to view any version of the report.
+$context = \context_module::instance($cm->id);
+if (!has_capability("forumreport/summary:accessreport", $context)) {
+    $redirecturl = new moodle_url("/mod/forum/view.php");
+    $redirecturl->param('id', $forumid);
+    redirect($redirecturl);
+}
 
 $course = $modinfo->get_course();
 

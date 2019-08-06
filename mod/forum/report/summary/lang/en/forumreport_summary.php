@@ -25,8 +25,9 @@
 
 $string['allforums'] = 'all forums';
 $string['filter:forumname'] = 'Forum name';
-$string['forumreport_summary:accessallsummaries'] = 'Access summary report data for each user within a given forum or forums';
-$string['forumreport_summary:accesstotalsummary'] = 'Access totals summarising all users within a given forum or forums';
+$string['summary:accessallsummaries'] = 'Access summary report data for each user within a given forum or forums';
+$string['summary:accessreport'] = 'Access summary report within a given forum or forums';
+$string['summary:accesstotalsummary'] = 'Access totals summarising all users within a given forum or forums';
 $string['fullname'] = 'Full name'; // Fallback if tableSQL doesn't provide the table heading.
 $string['pluginname'] = 'Forum summary report';
 $string['postcount'] = 'Number of discussions posted';

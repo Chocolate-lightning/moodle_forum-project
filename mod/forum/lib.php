@@ -5257,13 +5257,16 @@ function forum_extend_settings_navigation(settings_navigation $settingsnav, navi
         $discussionid = $params['d'];
     }
 
-    //TODO reference get_plugin_list to find the reports in forum, then make this generic
-    //Add the new cap check for a generic one for this report type
-    //print_object(core_component::get_plugin_list('report'));
-    //Link to the summary report for logged in users.
-    if (isloggedin() && !isguestuser()) { //TODO: need to check the report subplugin exists before displaying
-        $reportlink = "{$CFG->wwwroot}/mod/forum/report/summary/?courseid={$forumobject->course}&forumid={$forumobject->id}";
-        $forumnode->add(get_string('pluginname', 'forumreport_summary'), $reportlink, navigation_node::TYPE_CONTAINER);
+    // Display all forum reports user has access to.
+    if (isloggedin() && !isguestuser()) {
+        $reportnames = array_keys(core_component::get_plugin_list('forumreport'));
+
+        foreach ($reportnames as $reportname) {
+            if (has_capability("forumreport/{$reportname}:accessreport", $PAGE->cm->context)) {
+                $reportlink = "{$CFG->wwwroot}/mod/forum/report/{$reportname}/?courseid={$forumobject->course}&forumid={$forumobject->id}";
+                $forumnode->add(get_string('pluginname', "forumreport_{$reportname}"), $reportlink, navigation_node::TYPE_CONTAINER);
+            }
+        }
     }
 
     // For some actions you need to be enrolled, being admin is not enough sometimes here.

@@ -40,6 +40,7 @@ class summary_table extends table_sql {
 
     /** Forum filter type */
     const FILTER_FORUM = 1;
+    const FILTER_GROUPS = 2;
 
     /** @var \stdClass The various SQL segments that will be combined to form queries to fetch various information. */
     public $sql;
@@ -108,6 +109,7 @@ class summary_table extends table_sql {
     public function get_filter_name(int $filtertype): string {
         $filternames = [
             self::FILTER_FORUM => 'Forum',
+            self::FILTER_GROUPS => 'Groups',
         ];
 
         return $filternames[$filtertype];
@@ -207,6 +209,27 @@ class summary_table extends table_sql {
                     // No extra joins required, forum is already joined.
                     $this->sql->filterwhere .= ' AND f.id = :forumid';
                     $this->sql->params['forumid'] = $values[0];
+                }
+
+                break;
+
+            case self::FILTER_GROUPS:
+                $groupcount = count($values);
+                if ($groupcount < 1) {
+                    $paramcounterror = true;
+                } else if (!in_array(0, $values)) {
+                    // Skip adding filter if 'all groups' (0) is included.
+                    // No select fields required - displayed in title.
+                    // No where required - inner joined.
+                    $this->sql->filterfromjoins .= 'JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid IN (';
+                    $groupidbinds = [];
+
+                    for ($i = 0; $i < $groupcount; $i++) {
+                        $groupidbinds[] = ":group{$i}";
+                        $this->sql->params["group{$i}"] = $values[0];
+                    }
+
+                    $this->sql->filterfromjoins .= implode(',', $groupidbinds) . ')';
                 }
 
                 break;

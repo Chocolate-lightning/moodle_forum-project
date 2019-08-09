@@ -22,6 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['filter:groupsname'] = 'Groups';
+$string['filter:groupsdefault'] = 'All groups';
+$string['generatereport'] = 'Generate report';
 $string['nodetitle'] = 'Summary report';
 $string['pluginname'] = 'Forum summary report';
 $string['postcount'] = 'Number of discussions posted';

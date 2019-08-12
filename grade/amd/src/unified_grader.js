@@ -22,11 +22,23 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import Templates from 'core/templates';
+import Notification from 'core/notification';
 import Selectors from './selectors';
+import {createLayout as createFullScreenWindow} from 'mod_forum/local/layout/fullscreen';
+
+const templateNames = {
+    grader: {
+        app: 'core_grades/grading_app',
+    },
+};
 
 const getHelpers = (config) => {
+    let graderLayout = null;
+    let graderContainer = null;
+    let contentRegion = null;
+
     const displayContent = (html, js) => {
-        return Templates.replaceNode(Selectors.regions.moduleReplace, html, js);
+        return Templates.replaceNode(contentRegion, html, js);
     };
 
     const showUser = (userid) => {
@@ -38,26 +50,69 @@ const getHelpers = (config) => {
 
 
     const registerEventListeners = () => {
-        // We have no event listeners to register yet.
+        graderContainer.addEventListener('click', (e) => {
+            if (e.target.matches(Selectors.buttons.toggleFullscreen)) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+
+                graderLayout.toggleFullscreen();
+            } else if (e.target.matches(Selectors.buttons.closeGrader)) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+
+                graderLayout.close();
+            }
+        });
+    };
+
+    const displayGrader = () => {
+        graderLayout = createFullScreenWindow({fullscreen: false});
+        graderContainer = graderLayout.getContainer();
+
+        return Templates.render(templateNames.grader.app, {})
+        .then((html, js) => {
+            Templates.replaceNodeContents(graderContainer, html, js);
+
+            return graderContainer;
+        })
+        .then(() => {
+            graderLayout.hideLoadingIcon();
+
+            return;
+        })
+        .then(() => {
+            contentRegion = graderContainer.querySelector(Selectors.regions.moduleReplace);
+
+            return;
+        })
+        .then(() => {
+            registerEventListeners();
+
+            return;
+        })
+        .catch();
     };
 
     return {
-        registerEventListeners,
         showUser,
+        displayGrader,
     };
 };
 
-export const init = (config) => {
+export const launch = (config) => {
     const {
         showUser,
-        registerEventListeners,
+        displayGrader,
     } = getHelpers(config);
 
-    if (config.initialUserId) {
-        showUser(config.initialUserId);
-    }
+    displayGrader().then(() => {
+        if (config.initialUserId) {
+            showUser(config.initialUserId);
+        }
 
-    registerEventListeners();
+        return;
+    })
+    .catch();
 
     // You might instantiate the user selector here, and pass it the function displayContentForUser as the thing to call
     // when it has selected a user.

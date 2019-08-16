@@ -100,7 +100,7 @@ class forumreport_summary_renderer extends plugin_renderer_base {
      * @return string The filter in HTML format.
      */
     private function render_group_filter(): string {
-        $output = html_writer::label(get_string('filter:groupsname', 'forumreport_summary'), 'groups');
+        $content = html_writer::label(get_string('filter:groupsname', 'forumreport_summary'), 'groups');
         $options = [];
         $selected = [];
         $allgroups = [0 => get_string('filter:groupsdefault', 'forumreport_summary')];
@@ -119,9 +119,12 @@ class forumreport_summary_renderer extends plugin_renderer_base {
             }
         }
 
-        $output .= html_writer::select($options, 'groups[]', $selected, $allgroups);
+        $selectattribs = ['class' => 'form-control'];
+        $content .= html_writer::select($options, 'groups[]', $selected, $allgroups, $selectattribs);
 
-        return $output;
+        // Return wrapped in form-group div.
+        $divattribs = ['class' => 'form-group'];
+        return html_writer::tag('div', $content, $divattribs);
     }
 
     /**

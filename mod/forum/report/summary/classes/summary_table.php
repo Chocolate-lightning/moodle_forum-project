@@ -40,6 +40,8 @@ class summary_table extends table_sql {
 
     /** Forum filter type */
     const FILTER_FORUM = 1;
+
+    /** Groups filter type */
     const FILTER_GROUPS = 2;
 
     /** @var \stdClass The various SQL segments that will be combined to form queries to fetch various information. */
@@ -197,6 +199,8 @@ class summary_table extends table_sql {
      * @throws coding_exception
      */
     public function add_filter(int $filtertype, array $values = []): void {
+        global $DB;
+
         $paramcounterror = false;
 
         switch($filtertype) {
@@ -219,17 +223,11 @@ class summary_table extends table_sql {
                     $paramcounterror = true;
                 } else if (!in_array(0, $values)) {
                     // Skip adding filter if 'all groups' (0) is included.
-                    // No select fields required - displayed in title.
+                    // No select fields required.
                     // No where required - inner joined.
-                    $this->sql->filterfromjoins .= 'JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid IN (';
-                    $groupidbinds = [];
-
-                    for ($i = 0; $i < $groupcount; $i++) {
-                        $groupidbinds[] = ":group{$i}";
-                        $this->sql->params["group{$i}"] = $values[0];
-                    }
-
-                    $this->sql->filterfromjoins .= implode(',', $groupidbinds) . ')';
+                    list($groupidin, $groupidparams) = $DB->get_in_or_equal($values, SQL_PARAMS_NAMED, 'groupid');
+                    $this->sql->filterfromjoins .= "JOIN {groups_members} gm ON gm.userid = u.id AND gm.groupid {$groupidin}";
+                    $this->sql->params += $groupidparams;
                 }
 
                 break;

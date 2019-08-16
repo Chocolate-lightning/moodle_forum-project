@@ -26,7 +26,7 @@ import Notification from 'core/notification';
 import Selectors from './selectors';
 import * as UserPaginator from './unified_grader_user_paginator';
 import {createLayout as createFullScreenWindow} from 'mod_forum/local/layout/fullscreen';
-import {addIconToContainer} from 'core/loadingicon';
+import {addIconToContainerWithPromise} from 'core/loadingicon';
 
 const templateNames = {
     grader: {
@@ -63,22 +63,14 @@ const getHelpers = (config) => {
     };*/
 
     const renderUserContent = (index, user) => {
-        // Add loading icon here.
-        const node = config.rootNode;
-        const nodeReplace = node.querySelector(Selectors.regions.moduleReplace);
-        showLoadingIcon(nodeReplace);
+        const moduleRegion = graderContainer.querySelector(Selectors.region.moduleReplace);
+        const loadingPromise = addIconToContainerWithPromise(moduleRegion);
+
         config.getContentForUserId(user.id)
-            .then(() => {
-                const node = config.rootNode;
-                const nodeReplace = node.querySelector(Selectors.regions.moduleReplace);
-                hideLoadingIcon(nodeReplace);
-            })
             .then((html, js) => {
-                let widget = document.createElement('div');
-                widget.className = "grader-module-content-display col-sm-12";
-                widget.dataset.replace = "grader-module-content";
-                widget.innerHTML = html;
-                return Templates.replaceNode(Selectors.regions.moduleReplace, widget, js);
+                loadingPromise.resolve();
+
+                return Templates.replaceNodeContents(moduleRegion, html, js);
             })
             .catch();
     };
@@ -126,19 +118,6 @@ const getHelpers = (config) => {
             return;
         })
         .catch();
-    };
-
-    const showLoadingIcon = (node) => {
-        addIconToContainer(node);
-    };
-
-    const hideLoadingIcon = (node) => {
-        // Hide the loading container.
-        let child = node.lastElementChild;
-        while (child) {
-            node.removeChild(child);
-            child = node.lastElementChild;
-        }
     };
 
     return {

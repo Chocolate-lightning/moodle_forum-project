@@ -89,6 +89,7 @@ export const registerLaunchListeners = () => {
                     initialUserId: rootNode.dataset.initialuserid,
                     getContentForUserId: wholeForumFunctions.getContentForUserId,
                     getUsersForCmidFunction: wholeForumFunctions.getUsersForCmidFunction,
+                    rootNode: rootNode,
                 });
 
                 e.preventDefault();

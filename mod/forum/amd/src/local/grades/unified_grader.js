@@ -27,6 +27,7 @@ import Selectors from './selectors';
 import * as UserPaginator from './unified_grader_user_paginator';
 import {createLayout as createFullScreenWindow} from 'mod_forum/local/layout/fullscreen';
 import {addIconToContainerWithPromise} from 'core/loadingicon';
+import $ from 'jquery';
 
 const templateNames = {
     grader: {
@@ -37,6 +38,7 @@ const templateNames = {
 const getHelpers = (config) => {
     let graderLayout = null;
     let graderContainer = null;
+    let contentRegion = null;
 
     /*const displayContent = (html, js) => {
         let widget = document.createElement('div');
@@ -63,14 +65,15 @@ const getHelpers = (config) => {
     };*/
 
     const renderUserContent = (index, user) => {
-        const moduleRegion = graderContainer.querySelector(Selectors.region.moduleReplace);
-        const loadingPromise = addIconToContainerWithPromise(moduleRegion);
+        $(contentRegion).fadeOut('20');
+        const loadingPromise = addIconToContainerWithPromise(contentRegion);
 
         config.getContentForUserId(user.id)
             .then((html, js) => {
                 loadingPromise.resolve();
+                $(contentRegion).fadeIn('20');
 
-                return Templates.replaceNodeContents(moduleRegion, html, js);
+                return Templates.replaceNodeContents(contentRegion, html, js);
             })
             .catch();
     };
@@ -110,6 +113,10 @@ const getHelpers = (config) => {
         .then(() => {
             graderLayout.hideLoadingIcon();
 
+            return;
+        })
+        .then(() => {
+            contentRegion = graderContainer.querySelector(Selectors.regions.moduleReplace);
             return;
         })
         .then(() => {

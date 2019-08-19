@@ -13,6 +13,7 @@ export const createPicker = (items, startIndex, callback) => {
             widget.dataset.graderreplace = "grading-panel-display";
             widget.innerHTML = html;
 
+            // Remove widget stuff by having another template.
             let nameElement = widget.querySelector('[data-region="name"]');
             const indexNumber = widget.querySelector('[data-region="index"]');
             const nextButton = widget.querySelector('[data-action="next-user"]');
@@ -20,19 +21,21 @@ export const createPicker = (items, startIndex, callback) => {
 
             nameElement.innerText = `${items[currentIndex].firstname} ${items[currentIndex].lastname}`;
             indexNumber.innerText = context.displayIndex;
-            callback(currentIndex, {id: items[currentIndex].userid});
+            // Move first render out from here
+            callback({id: items[currentIndex].userid});
             nextButton.addEventListener('click', () => {
                 currentIndex++;
                 nameElement.innerText = `${items[currentIndex].firstname} ${items[currentIndex].lastname}`;
                 indexNumber.innerText = currentIndex + 1;
-                callback(currentIndex, {id: items[currentIndex].userid});
+                // Pass full item object back.
+                callback({id: items[currentIndex].userid});
             });
 
             previousButton.addEventListener('click', () => {
                 currentIndex--;
                 nameElement.innerText = `${items[currentIndex].firstname} ${items[currentIndex].lastname}`;
                 indexNumber.innerText = currentIndex + 1;
-                callback(currentIndex, {id: items[currentIndex].userid});
+                callback({id: items[currentIndex].userid});
             });
 
             return widget;

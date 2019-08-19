@@ -52,6 +52,7 @@ const getHelpers = (config) => {
         return Templates.replaceNode(Selectors.regions.gradingReplace, html);
     };
 
+    // Remove from bottom section userpicker rendered up top
     const getUsers = (cmid) => {
         return config
             .getUsersForCmidFunction(cmid)
@@ -64,7 +65,7 @@ const getHelpers = (config) => {
             .catch(Notification.exception);
     };*/
 
-    const renderUserContent = (index, user) => {
+    const renderUserContent = (user) => {
         $(contentRegion).fadeOut('20');
         const loadingPromise = addIconToContainerWithPromise(contentRegion);
 
@@ -111,17 +112,17 @@ const getHelpers = (config) => {
             return graderContainer;
         })
         .then(() => {
-            graderLayout.hideLoadingIcon();
-
-            return;
-        })
-        .then(() => {
+            // Set user picker
             contentRegion = graderContainer.querySelector(Selectors.regions.moduleReplace);
             return;
         })
         .then(() => {
             registerEventListeners();
 
+            return;
+        })
+        .then(() => {
+            graderLayout.hideLoadingIcon();
             return;
         })
         .catch();
@@ -136,12 +137,12 @@ const getHelpers = (config) => {
     };
 };
 
+// Make this explicit rather than object
 export const launch = (config) => {
     const {
         getUsers,
         renderUserPicker,
         displayUsers,
-        registerEventListeners,
         displayGrader,
     } = getHelpers(config);
 
@@ -155,8 +156,6 @@ export const launch = (config) => {
                 });
             })
             .catch();
-
-        registerEventListeners();
     })
     .catch();
 };

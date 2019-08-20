@@ -3,10 +3,8 @@ import Templates from 'core/templates';
 
 const _init = (items, index) => {
     // TODO generate the full name from PHP function.
-    this.index = index;
-    this.items = items;
 
-    this.context = {
+    return {
         firstName: items[index].firstname,
         lastName: items[index].lastname,
         displayindex: index + 1,
@@ -22,19 +20,21 @@ const _renderUserChange = (context) => {
     return Templates.render('mod_forum/local/grades/unified_grader/user_navigator_user', context);
 };
 
-const  _cacheDom = () => {
-    this.paginator = document.querySelector('data-grader="paginator"');
-    this.nextButton = this.paginator.querySelector('[data-action="next-user"]');
-    this.previousButton = this.paginator.querySelector('[data-action="previous-user"]');
+const  _cacheDom = (html) => {
+    let paginator = html.querySelector('data-grader="paginator"');
+    let nextButton = paginator.querySelector('[data-action="next-user"]');
+    let previousButton = paginator.querySelector('[data-action="previous-user"]');
+    return [nextButton, previousButton];
 };
 
-const nextUser = () => {
-    this.index++;
+// Use the next index or the given index here.
+const _nextUser = (items, index) => {
+    index++;
 
     const context = {
-        firstName: this.items[this.index].firstName,
-        lastName: this.items[this.index].lastName,
-        displayIndex: this.index++
+        firstName: items[index].firstName,
+        lastName: items[index].lastName,
+        displayIndex: index++
     };
 
     _renderUserChange(context);
@@ -43,13 +43,13 @@ const nextUser = () => {
     //callback({id: items[currentIndex].userid});
 };
 
-const previousUser = () => {
-    this.index--;
+const _previousUser = (items, index) => {
+    index--;
 
     const context = {
-        firstName: this.items[this.index].firstName,
-        lastName: this.items[this.index].lastName,
-        displayIndex: this.index++
+        firstName: items[index].firstName,
+        lastName: items[index].lastName,
+        displayIndex: index++
     };
 
     _renderUserChange(context);
@@ -58,17 +58,19 @@ const previousUser = () => {
     //callback({id: items[currentIndex].userid});
 };
 
-const _bindEvents = () => {
-    this.nextButton.on('click', nextUser);
-    this.previousButton.on('click', previousUser);
+const _bindEvents = (nextButton, previousButton) => {
+    nextButton.on('click', _nextUser);
+    previousButton.on('click', _previousUser);
 };
 
-export const buildPicker = (items, index) => {
-    _init(items, index);
+export const buildPicker = async (items, index) => {
+    let context = _init(items, index);
 
-    _renderNavigator(this.context);
+    let [html, js] = await Promise.all(_renderNavigator(context));
 
-    _cacheDom();
+    let [nextButton, previousButton] = _cacheDom(html);
 
-    _bindEvents();
+    _bindEvents(nextButton, previousButton);
+
+    return [html, js];
 };

@@ -30,11 +30,10 @@
     {
     }
 }}
-<div class="col-md-12">
+<div data-grader="paginator" class="col-md-12">
     <div class="row">
         <div class="col-md-8">
-            <div class="d-block font-weight-bold" data-region="name" data-userid="{{id}}">{{name}}</div>
-            <div class="d-block"><div class="d-inline" data-region="index">{{diaplyIndex}}</div>/{{total}}</div>
+            {{> mod_forum/local/grades/unified_grader/user_navigator_user }}
         </div>
         <div class="col-md-4">
             <ul class="pagination">

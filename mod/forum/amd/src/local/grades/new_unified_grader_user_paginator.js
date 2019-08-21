@@ -1,4 +1,5 @@
 import Templates from 'core/templates';
+import Selectors from './selectors';
 //import PubSub from 'core/pubsub';
 
 const _init = (items, index) => {
@@ -21,56 +22,54 @@ const _renderUserChange = (context) => {
 };
 
 const  _cacheDom = (html) => {
-    let paginator = html.querySelector('data-grader="paginator"');
+    let widget = document.createElement('div');
+    widget.innerHTML = html;
+    let paginator = widget.querySelector('[data-grader="paginator"]');
     let nextButton = paginator.querySelector('[data-action="next-user"]');
     let previousButton = paginator.querySelector('[data-action="previous-user"]');
     return [nextButton, previousButton];
 };
 
 // Use the next index or the given index here.
-const _nextUser = (items, index) => {
+const _nextUser = async (items, index) => {
     index++;
 
-    const context = {
-        firstName: items[index].firstName,
-        lastName: items[index].lastName,
-        displayIndex: index++
-    };
+    items[index].displayIndex = index++;
 
-    _renderUserChange(context);
+    let [html, js] = await Promise.all([_renderUserChange(items[index])]);
+    Templates.replaceNodeContents(Selectors.regions.paginatorReplace, html, js);
 
     // PubSub
-    //callback({id: items[currentIndex].userid});
 };
 
-const _previousUser = (items, index) => {
+const _previousUser = async (items, index) => {
     index--;
 
-    const context = {
-        firstName: items[index].firstName,
-        lastName: items[index].lastName,
-        displayIndex: index++
-    };
+    items[index].displayIndex = index++;
 
-    _renderUserChange(context);
+    let [html, js] = await Promise.all([_renderUserChange(items[index])]);
+    Templates.replaceNodeContents(Selectors.regions.paginatorReplace, html, js);
 
     // PubSub
-    //callback({id: items[currentIndex].userid});
 };
 
-const _bindEvents = (nextButton, previousButton) => {
-    nextButton.on('click', _nextUser);
-    previousButton.on('click', _previousUser);
+const _bindEvents = (nextButton, previousButton, items, index) => {
+    nextButton.addEventListener('click', function() {
+        _nextUser(items, index);
+    });
+    previousButton.addEventListener('click', function() {
+        _previousUser(items, index);
+    });
 };
 
 export const buildPicker = async (items, index) => {
     let context = _init(items, index);
 
-    let [html, js] = await Promise.all(_renderNavigator(context));
+    let [html, js] = await Promise.all([_renderNavigator(context)]);
 
     let [nextButton, previousButton] = _cacheDom(html);
 
-    _bindEvents(nextButton, previousButton);
+    _bindEvents(nextButton, previousButton, items, index);
 
     return [html, js];
 };

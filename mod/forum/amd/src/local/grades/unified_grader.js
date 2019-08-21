@@ -24,7 +24,7 @@
 import Templates from 'core/templates';
 import Notification from 'core/notification';
 import Selectors from './selectors';
-import * as UserPaginator from './unified_grader_user_paginator';
+import * as UserPaginator from './new_unified_grader_user_paginator';
 import {createLayout as createFullScreenWindow} from 'mod_forum/local/layout/fullscreen';
 import {addIconToContainerWithPromise} from 'core/loadingicon';
 import $ from 'jquery';
@@ -48,8 +48,8 @@ const getHelpers = (config) => {
         return Templates.replaceNode(Selectors.regions.moduleReplace, widget, js);
     };*/
 
-    const displayUsers = (html) => {
-        return Templates.replaceNode(Selectors.regions.gradingReplace, html);
+    const displayUsers = (html, js) => {
+        return Templates.replaceNode(Selectors.regions.gradingReplace, html, js);
     };
 
     // Remove from bottom section userpicker rendered up top
@@ -81,7 +81,7 @@ const getHelpers = (config) => {
 
     const renderUserPicker = (state) => {
         const userNames = state.map(user => ({firstname: user.firstname, lastname: user.lastname, userid: user.id}));
-        const picker = UserPaginator.createPicker(userNames, 0, renderUserContent);
+        const picker = UserPaginator.buildPicker(userNames, 0, renderUserContent);
         return picker;
 
     };
@@ -151,8 +151,8 @@ export const launch = (config) => {
         getUsers(config.cmid)
             .then(state => {
                 renderUserPicker(state.users)
-                    .then((picker) => {
-                        displayUsers(picker);
+                    .then((picker, js) => {
+                        displayUsers(picker, js);
                 });
             })
             .catch();

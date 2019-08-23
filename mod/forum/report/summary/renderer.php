@@ -32,17 +32,6 @@ defined('MOODLE_INTERNAL') || die();
  */
 class forumreport_summary_renderer extends plugin_renderer_base {
 
-    /** @var stdClass $course The course being reported on. */
-    protected $course;
-
-    /** @var context $context The context of the report. */
-    protected $context;
-
-    /** @var array $filters Filters which will be rendered in the format type => [values] */
-    protected $filters = [
-        'groups' => [0],
-    ];
-
     /**
      * Wrap the filter contents in form tags.
      *
@@ -67,64 +56,10 @@ class forumreport_summary_renderer extends plugin_renderer_base {
      * @return string The filter form HTML.
      */
     public function render_report_filters(stdClass $course, context $context, array $filters = []): string {
-        $this->course = $course;
-        $this->context = $context;
-        $output = '';
+        $renderable = new \forumreport_summary\output\filters($course, $context);
+        $templatecontext = $renderable->export_for_template($this);
 
-        // Update any filter values from their defaults.
-        $this->set_filter_values($filters);
-
-        // Prepare HTML for all required filters within it.
-        $output .= $this->render_group_filter();
-
-        return $output;
-    }
-
-    /**
-     * Replaces default filter values with those provided.
-     *
-     * @param array $filters Values for any filter properties to be set.
-     * @return void.
-     */
-    private function set_filter_values($filters): void {
-        foreach ($filters as $filter => $value) {
-            if (array_key_exists($filter, $this->filters)) {
-                $this->filters[$filter] = $value;
-            }
-        }
-    }
-
-    /**
-     * Renders the group selection filter.
-     *
-     * @return string The filter in HTML format.
-     */
-    private function render_group_filter(): string {
-        $content = html_writer::label(get_string('filter:groupsname', 'forumreport_summary'), 'groups');
-        $options = [];
-        $selected = [];
-        $allgroups = [0 => get_string('filter:groupsdefault', 'forumreport_summary')];
-
-        //TODO: Need to check the below is the right thing, because on my test site it seems to show course groups that aren't part of the forum
-
-        // Only fetch groups user has access to.
-        $cm = get_coursemodule_from_instance('forum', $this->context->instanceid, $this->course->id);
-        $groups = groups_get_activity_allowed_groups($cm);
-
-        foreach ($groups as $group) {
-            $options[$group->id] = $group->name;
-
-            if (in_array($group->id, $this->filters['groups'])) {
-                $selected[] = $group->id;
-            }
-        }
-
-        $selectattribs = ['class' => 'form-control'];
-        $content .= html_writer::select($options, 'groups[]', $selected, $allgroups, $selectattribs);
-
-        // Return wrapped in form-group div.
-        $divattribs = ['class' => 'form-group'];
-        return html_writer::tag('div', $content, $divattribs);
+        return self::render_from_template('forumreport_summary/filters', $templatecontext);
     }
 
     /**
@@ -134,6 +69,13 @@ class forumreport_summary_renderer extends plugin_renderer_base {
      * @return string HTML.
      */
     public function render_generate_button($url): string {
+
+
+//////////////////////
+        //TODO - move this into the template and/or renderable.
+        //////////////////////
+
+
         $attributes = [
             'type'       => 'submit',
             'value'      => get_string('generatereport', 'forumreport_summary'),

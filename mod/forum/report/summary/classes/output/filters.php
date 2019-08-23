@@ -32,21 +32,80 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2019 Michael Hawkins <michaelh@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class forumreport_summary_filters implements \renderable, \templatable {
+class filters implements \renderable, \templatable {
+
+    /**
+     * Course the report is being run within.
+     *
+     * @var stdClass $course
+     */
+    protected $course;
+
+    /**
+     * Context the report is being run within.
+     *
+     * @var context $context
+     */
+    protected $context;
 
     /**
      * IDs of groups available for filtering.
+     * Stored in the format groupid => groupname.
      *
-     * @var array $groups
+     * @var array $groupsavailable
      */
-    protected $groups = [];
+    protected $groupsavailable = [];
+
+    /**
+     * IDs of groups selected for filtering.
+     *
+     * @var array $groupsselected
+     */
+    protected $groupsselected = [];
 
     /**
      * Builds renderable filter data.
+     *
+     * @param \stdClass $course The course object.
+     * @param \context $context The context object.
+     * @param array $filterdata (optional) The data that has been set on available filters, if any.
      */
-    public function __construct(array $groups) {
-        $this->groups = $groups;
+    public function __construct(\stdClass $course, \context $context, array $filterdata = []) {
+        $this->course = $course;
+        $this->context = $context;
+
+        // Prepare groups filter data.
+        $groupsdata = empty($filterdata['groups']) ? [] : $filterdata['groups'];
+        $this->prepare_groups_data($groupsdata);
     }
+
+    protected function prepare_groups_data($groupsdata) {
+        // Always include the 'all groups' option and select it if necessary.
+        $groupsavailable = [0 => get_string('filter:groupsdefault', 'forumreport_summary')];
+        $groupsselected = [];
+
+        if (empty($groupsdata) || in_array(0, $groupsdata)) {
+            $groupsselected[] = 0;
+        }
+
+        // Only fetch groups user has access to.
+        $cm = get_coursemodule_from_instance('forum', $this->context->instanceid, $this->course->id);
+        $groups = groups_get_activity_allowed_groups($cm);
+
+        foreach ($groups as $group) {
+            $groupsavailable[$group->id] = $group->name;
+
+            // Select provided groups if 'all' not selected, and group is available.
+            if (!in_array(0, $groupsselected) && in_array($group->id, $groupsdata)) {
+                $groupsselected[] = $group->id;
+            }
+        }
+
+        // Overwrite groups properties
+        $this->groupsavailable = $groupsavailable;
+        $this->groupsselected = $groupsselected;
+    }
+
 
     /**
      * Export data for use as the context of a mustache template.
@@ -54,11 +113,22 @@ class forumreport_summary_filters implements \renderable, \templatable {
      * @param \renderer_base $renderer The renderer to be used to display report filters.
      * @return array Data in a format compatible with a mustache template.
      */
-    public function export_for_template(\renderer_base $renderer): array {
-        $data =[
-            'groups' => $this->groups,
-        ];
+    public function export_for_template(\renderer_base $renderer): \stdClass {
+        $output = new \stdClass();
 
-        return $data;
+        // Groups filters.
+        $groupsdata = [];
+
+        foreach ($this->groupsavailable as $groupid => $groupname) {
+            $groupsdata[] = [
+                'groupid' => $groupid,
+                'groupname' => $groupname,
+                'checked' => in_array($groupid, $this->groupsselected),
+            ];
+        }
+
+        $output->filtergroups = $groupsdata;
+
+        return $output;
     }
 }

@@ -79,9 +79,7 @@ echo $OUTPUT->heading(get_string('summarytitle', 'forumreport_summary', $forumna
 
 // Render the report filters form.
 $renderer = $PAGE->get_renderer('forumreport_summary');
-$formHTML = $renderer->render_report_filters($course, $context, $filters);
-$formHTML .= $renderer->render_generate_button($url);
-echo $renderer->render_form_tags($formHTML);
+echo $renderer->render_filters_form($course, $context, $url, $filters);
 
 // Initialise table.
 $table = new \forumreport_summary\summary_table($courseid, $forumid);

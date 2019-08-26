@@ -19,8 +19,9 @@
 
     Summary report filters.
 
-    Example context (json):
+    Example context (JSON):
     {
+        "actionurl": "https://mymoodlesite.com/mod/forum/report/summary/index.php?courseid=2&forumid=2&perpage=25",
         "filtergroups": [
             {
                 "gropuid": "1",
@@ -44,6 +45,10 @@
         <input type="hidden" id="filter_groups_value" name="filter_groups_value" value=''>
         <br><br>
         <input type="submit" id="submit_button" name="submit_button" formaction="formtesting.php" value="Submit">
+
+        <input type="submit" class="btn btn-primary" title="{{# str}}generatereport, forumreport_summary{{/ str}}"
+               accept=""formaction="{{actionurl}}" value="{{# str}}generatereport, forumreport_summary{{/ str}}">
+
     </form>
 
     <div class="report-filters">

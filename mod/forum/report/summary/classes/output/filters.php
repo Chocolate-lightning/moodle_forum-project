@@ -49,6 +49,13 @@ class filters implements \renderable, \templatable {
     protected $context;
 
     /**
+     * Moodle URL used as the form action on the generate button.
+     *
+     * @var \moodle_url $actionurl
+     */
+    protected $actionurl;
+
+    /**
      * IDs of groups available for filtering.
      * Stored in the format groupid => groupname.
      *
@@ -68,11 +75,14 @@ class filters implements \renderable, \templatable {
      *
      * @param \stdClass $course The course object.
      * @param \context $context The context object.
+     * @param \moodle_url $actionurl The form action URL.
      * @param array $filterdata (optional) The data that has been set on available filters, if any.
      */
-    public function __construct(\stdClass $course, \context $context, array $filterdata = []) {
+    public function __construct(\stdClass $course, \context $context, \moodle_url $actionurl, array $filterdata = []) {
         $this->course = $course;
         $this->context = $context;
+        $this->actionurl = $actionurl;
+
 
         // Prepare groups filter data.
         $groupsdata = empty($filterdata['groups']) ? [] : $filterdata['groups'];
@@ -116,7 +126,10 @@ class filters implements \renderable, \templatable {
     public function export_for_template(\renderer_base $renderer): \stdClass {
         $output = new \stdClass();
 
-        // Groups filters.
+        // Set formaction URL.
+        $output->actionurl = $this->actionurl->out(false);
+
+        // Set groups filter.
         $groupsdata = [];
 
         foreach ($this->groupsavailable as $groupid => $groupname) {

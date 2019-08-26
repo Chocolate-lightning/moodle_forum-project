@@ -50,82 +50,16 @@ class forumreport_summary_renderer extends plugin_renderer_base {
     /**
      * Renders the filters available for the forum summary report.
      *
-     * @param stdClass $course The course object.
-     * @param context $context The context object.
+     * @param \stdClass $course The course object.
+     * @param \context $context The context object.
+     * @param \moodle_url $actionurl The form action URL.
      * @param array $filters Optional array of currently applied filter values.
      * @return string The filter form HTML.
      */
-    public function render_report_filters(stdClass $course, context $context, array $filters = []): string {
-        $renderable = new \forumreport_summary\output\filters($course, $context);
+    public function render_filters_form(\stdClass $course, \context $context, \moodle_url $actionurl, array $filters = []): string {
+        $renderable = new \forumreport_summary\output\filters($course, $context, $actionurl, $filters);
         $templatecontext = $renderable->export_for_template($this);
 
         return self::render_from_template('forumreport_summary/filters', $templatecontext);
-    }
-
-    /**
-     * Renders the button which generates the summary report.
-     *
-     * @param moodle_url $url Moodle URL to generate the report.
-     * @return string HTML.
-     */
-    public function render_generate_button($url): string {
-
-
-//////////////////////
-        //TODO - move this into the template and/or renderable.
-        //////////////////////
-
-
-        $attributes = [
-            'type'       => 'submit',
-            'value'      => get_string('generatereport', 'forumreport_summary'),
-            'title'      => get_string('generatereport', 'forumreport_summary'),
-            'disabled'   => null,
-            'class'      => 'btn btn-primary',
-            'formaction' => $url->out(false),
-        ];
-
-//TODO (maybe) need to add the formaction later -> probs not,
-// and do whatever $url stuff is commented out below or similar so that
-//the URL can be built properly to generate the report << will be post so not needed?
-
-        /*if ($button->actions) {
-            $id = html_writer::random_id('single_button');
-            $attributes['id'] = $id;
-            foreach ($button->actions as $action) {
-                $this->add_action_handler($action, $id);
-            }
-        }*/
-        // Create the input element.
-        $output = html_writer::empty_tag('input', $attributes);
-
-        // Create hidden fields.
-        $params = [];//$button->url->params();
-        /*if ($button->method === 'post') {
-            $params['sesskey'] = sesskey();
-        }*/
-        foreach ($params as $var => $val) {
-           $output .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $var, 'value' => $val]);
-        }
-
-
-        // now the form itself around it - TODO - this should not make the form itself, or should it?
-        /*if ($button->method === 'get') {
-            $url = $button->url->out_omit_querystring(true); // url without params, the anchor part allowed
-        } else {
-            $url = $button->url->out_omit_querystring();     // url without params, the anchor part not allowed
-        }*/
-
-        // Action is required.
-        if ($url === '') {
-            $url = s($url->out());
-        }
-        $attributes = array('method' => 'get', //$button->method,
-                            'action' => $url,
-                            'id'     => 'form ID'); //$button->formid);
-        $output = html_writer::tag('form', $output, $attributes);
-
-        // and finally one more wrapper with class
-        return html_writer::tag('div', $output, array('class' => 'text-center')); //$button->class));
     }
 }

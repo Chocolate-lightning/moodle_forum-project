@@ -24,6 +24,13 @@
 
 namespace forumreport_summary\output;
 
+use context;
+use moodle_url;
+use renderable;
+use renderer_base;
+use stdClass;
+use templatable;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -32,7 +39,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2019 Michael Hawkins <michaelh@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class filters implements \renderable, \templatable {
+class filters implements renderable, templatable {
 
     /**
      * Course the report is being run within.
@@ -51,7 +58,7 @@ class filters implements \renderable, \templatable {
     /**
      * Moodle URL used as the form action on the generate button.
      *
-     * @var \moodle_url $actionurl
+     * @var moodle_url $actionurl
      */
     protected $actionurl;
 
@@ -73,12 +80,12 @@ class filters implements \renderable, \templatable {
     /**
      * Builds renderable filter data.
      *
-     * @param \stdClass $course The course object.
-     * @param \context $context The context object.
-     * @param \moodle_url $actionurl The form action URL.
+     * @param stdClass $course The course object.
+     * @param context $context The context object.
+     * @param moodle_url $actionurl The form action URL.
      * @param array $filterdata (optional) The data that has been set on available filters, if any.
      */
-    public function __construct(\stdClass $course, \context $context, \moodle_url $actionurl, array $filterdata = []) {
+    public function __construct(stdClass $course, context $context, moodle_url $actionurl, array $filterdata = []) {
         $this->course = $course;
         $this->context = $context;
         $this->actionurl = $actionurl;
@@ -120,11 +127,11 @@ class filters implements \renderable, \templatable {
     /**
      * Export data for use as the context of a mustache template.
      *
-     * @param \renderer_base $renderer The renderer to be used to display report filters.
+     * @param renderer_base $renderer The renderer to be used to display report filters.
      * @return array Data in a format compatible with a mustache template.
      */
-    public function export_for_template(\renderer_base $renderer): \stdClass {
-        $output = new \stdClass();
+    public function export_for_template(renderer_base $renderer): stdClass {
+        $output = new stdClass();
 
         // Set formaction URL.
         $output->actionurl = $this->actionurl->out(false);

@@ -34,8 +34,14 @@ const templateNames = {
 };
 
 const displayUserPicker = (root, html) => {
-    window.console.log(Selectors);
     root.querySelector(Selectors.regions.pickerRegion).append(html);
+};
+
+const getUpdateUserContentFunction = (root, getContentForUser) => {
+    return async(user) => {
+        const [html] = await Promise.all([getContentForUser(user.id)]);
+        Templates.replaceNodeContents(root.querySelector(Selectors.regions.moduleReplace), html, '');
+    };
 };
 
 const registerEventListeners = (graderLayout) => {
@@ -45,7 +51,6 @@ const registerEventListeners = (graderLayout) => {
             // TODO the user should not listen to button clicks specifically.
             e.stopImmediatePropagation();
             e.preventDefault();
-
             graderLayout.toggleFullscreen();
         } else if (e.target.matches(Selectors.buttons.closeGrader)) {
             // TODO the user should not listen to button clicks specifically.
@@ -59,13 +64,13 @@ const registerEventListeners = (graderLayout) => {
 
 // Make this explicit rather than object
 export const launch = async(getListOfUsers, getContentForUser, { // eslint-disable-line
-    initialUserId = 0, // eslint-disable-line
+    initialUserId = 0,
 } = {}) => {
 
     const [
         graderLayout,
         graderHTML,
-        userList, // eslint-disable-line
+        userList,
     ] = await Promise.all([
         createFullScreenWindow({fullscreen: false, showLoader: false}),
         Templates.render(templateNames.grader.app, {}),
@@ -76,6 +81,8 @@ export const launch = async(getListOfUsers, getContentForUser, { // eslint-disab
     Templates.replaceNodeContents(graderContainer, graderHTML, '');
     registerEventListeners(graderLayout);
     // TODO const [pickerHTML] = await Promise.all([UserPicker.buildPicker(userList, initialUserId)]);
-    const pickerHTML = await UserPicker.buildPicker(userList, initialUserId);
+    const updateUserContent = getUpdateUserContentFunction(graderContainer, getContentForUser);
+
+    const pickerHTML = await UserPicker.buildPicker(userList, initialUserId, updateUserContent);
     displayUserPicker(graderContainer, pickerHTML);
 };

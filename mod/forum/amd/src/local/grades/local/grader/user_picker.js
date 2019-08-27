@@ -10,27 +10,27 @@ const renderUserChange = (context) => {
     return Templates.render('mod_forum/local/grades/local/grader/user_picker/user', context);
 };
 
-const bindEvents = (root, users, currentUserIndex) => {
+const bindEvents = (root, users, currentUserIndex, showUserCallback) => {
     root.addEventListener('click', (e) => {
         if (e.target.matches(Selectors.actions.changeUser)) {
             currentUserIndex += parseInt(e.target.dataset.direction);
-            showUser(root, users, currentUserIndex);
+            showUser(root, users, currentUserIndex, showUserCallback);
         }
     });
 };
 
-const showUser = async(root, users, currentUserIndex) => {
+const showUser = async(root, users, currentUserIndex, showUserCallback) => {
     const user = {
         ...users[currentUserIndex],
         total: users.length,
         displayIndex: currentUserIndex + 1,
     };
-    const html = await renderUserChange(user);
+    const [html] = await Promise.all([renderUserChange(user), showUserCallback(user)]);
     const userRegion = root.querySelector(Selectors.regions.userRegion);
     Templates.replaceNodeContents(userRegion, html, '');
 };
 
-export const buildPicker = async (users, currentUserID) => {
+export const buildPicker = async (users, currentUserID, showUserCallback) => {
     let root = document.createElement('div');
 
     const [html] = await Promise.all([renderNavigator()]);
@@ -40,11 +40,11 @@ export const buildPicker = async (users, currentUserID) => {
         return user.id === parseInt(currentUserID);
     });
 
-    showUser(root, users, currentUserIndex);
+    showUser(root, users, currentUserIndex, showUserCallback);
 
     //let [nextButton, previousButton] = cacheDom(html);
 
-    bindEvents(root, users, currentUserIndex);
+    bindEvents(root, users, currentUserIndex, showUserCallback);
 
     return root;
 };

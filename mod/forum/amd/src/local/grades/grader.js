@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import Templates from 'core/templates';
-import Notification from 'core/notification';
+// TODO import Notification from 'core/notification';
 import Selectors from './local/grader/selectors';
 import * as UserPaginator from './local/grader/user_picker';
 import {createLayout as createFullScreenWindow} from 'mod_forum/local/layout/fullscreen';
@@ -33,109 +33,68 @@ const templateNames = {
     },
 };
 
-const getHelpers = (config) => {
-    let graderLayout = null;
-    let graderContainer = null;
-    let contentRegion = null;
+const displayUsers = (html) => { // eslint-disable-line
+    return Templates.replaceNode(Selectors.regions.gradingReplace, html);
+};
 
-    /*const displayContent = (html, js) => {
-        let widget = document.createElement('div');
-        widget.className = "grader-module-content-display col-sm-12";
-        widget.dataset.replace = "grader-module-content";
-        widget.innerHTML = html;
-        return Templates.replaceNode(Selectors.regions.moduleReplace, widget, js);
-    };*/
+const renderUserPicker = (state) => { // eslint-disable-line
+    const userNames = state.map(user => ({firstname: user.firstname, lastname: user.lastname, userid: user.id}));
+    const picker = UserPaginator.buildPicker(userNames, 0);
+    return picker;
 
-    const displayUsers = (html) => {
-        return Templates.replaceNode(Selectors.regions.gradingReplace, html);
-    };
+};
+const registerEventListeners = (graderLayout) => {
+    const graderContainer = graderLayout.getContainer();
+    graderContainer.addEventListener('click', (e) => {
+        if (e.target.matches(Selectors.buttons.toggleFullscreen)) {
+            // TODO the user should not listen to button clicks specifically.
+            e.stopImmediatePropagation();
+            e.preventDefault();
 
-    // Remove from bottom section userpicker rendered up top
-    const getUsers = (cmid) => {
-        return config
-            .getUsersForCmidFunction(cmid)
-            .catch(Notification.exception);
-    };
-    /*const showUser = (userid) => {
-        config
-            .getContentForUserId(userid)
-            .then(displayContent)
-            .catch(Notification.exception);
-    };*/
+            graderLayout.toggleFullscreen();
+        } else if (e.target.matches(Selectors.buttons.closeGrader)) {
+            // TODO the user should not listen to button clicks specifically.
+            e.stopImmediatePropagation();
+            e.preventDefault();
 
-    const renderUserPicker = (state) => {
-        const userNames = state.map(user => ({firstname: user.firstname, lastname: user.lastname, userid: user.id}));
-        const picker = UserPaginator.buildPicker(userNames, 0);
-        return picker;
-
-    };
-    const registerEventListeners = () => {
-        graderContainer.addEventListener('click', (e) => {
-            if (e.target.matches(Selectors.buttons.toggleFullscreen)) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-
-                graderLayout.toggleFullscreen();
-            } else if (e.target.matches(Selectors.buttons.closeGrader)) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-
-                graderLayout.close();
-            }
-        });
-    };
-
-    const displayGrader = () => {
-        graderLayout = createFullScreenWindow({fullscreen: false});
-        graderContainer = graderLayout.getContainer();
-
-        return Templates.render(templateNames.grader.app, {})
-            .then((html, js) => {
-                Templates.replaceNodeContents(graderContainer, html, js);
-
-                return graderContainer;
-            })
-            .then(() => {
-                // Set user picker
-                console.log('1');
-                contentRegion = graderContainer.querySelector(Selectors.regions.moduleReplace);
-                return;
-            })
-            .then(() => {
-                console.log('2');
-                registerEventListeners();
-
-                return;
-            })
-            .then(() => {
-                console.log('3');
-                getUsers(config.cmid)
-                    .then(state => {
-                        console.log('4');
-                        renderUserPicker(state.users)
-                            .then((picker) => {
-                                displayUsers(picker);
-                            });
-                    })
-                    .catch();
-            })
-            .then(() => {
-                graderLayout.hideLoadingIcon();
-                return;
-            })
-            .catch();
-    };
-
-    return {
-        displayGrader,
-    };
+            graderLayout.close();
+        }
+    });
 };
 
 // Make this explicit rather than object
-export const launch = (config) => {
-    const {
-        displayGrader,
-    } = getHelpers(config);
+export const launch = async(getListOfUsers, getContentForUser, { // eslint-disable-line
+    initialUserIndex = 0, // eslint-disable-line
+} = {}) => {
 
-    displayGrader();
+    const [
+        graderLayout,
+        graderHTML,
+        userList, // eslint-disable-line
+    ] = await Promise.all([
+        createFullScreenWindow({fullscreen: false, showLoader: false}),
+        Templates.render(templateNames.grader.app, {}),
+        getListOfUsers(),
+    ]);
+    const graderContainer = graderLayout.getContainer();
+
+    Templates.replaceNodeContents(graderContainer, graderHTML, '');
+    registerEventListeners(graderLayout);
+    /*return
+        .then(() => {
+            // Set user picker
+            graderContainer.querySelector(Selectors.regions.moduleReplace);
+            return;
+        })
+        .then(() => {
+            getListOfUsers();
+                /!*.then(state => {
+                    /!*renderUserPicker(state.users)
+                        .then((picker) => {
+                            displayUsers(picker);
+                        });*!/
+                })
+                .catch();*!/
+        })
+        .catch();*/
 };

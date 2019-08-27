@@ -43,6 +43,15 @@ define(['jquery', 'core/popper'], function($, Popper) {
              * Groups filter specific handlers.
              */
 
+            // Set filter button text.
+            var setGroupFilterText = function (groupCount) {
+                if ($('#filtergroups0').prop("checked")) {
+                    groupCount = 'all'; //TODO: Lang string this boi
+                }
+
+               $('#filter_groups_button').text($('#groups_title_base').val() + ' (' + groupCount + ')');
+            };
+
             $('#filter-groups-popover input[name="filtergroups[]"]').on('click', function(event) {
                 // If checking 'all', uncheck others.
                 var filterid = event.target.value;
@@ -64,11 +73,11 @@ define(['jquery', 'core/popper'], function($, Popper) {
 
             // Event handler for showing groups filter popover.
             $('#filter_groups_button').on('click', function() {
-                // Create popper.
+                // Create popover.
                 new Popper(document.querySelector('#filter_groups_button'),
                     document.querySelector('#filter-groups-popover'));
 
-                // Show popper.
+                // Show popover.
                 $('#filter-groups-popover').removeClass('d-none');
                 this.$root.$emit('bv::show::popover', '#filter_groups_button');
             });
@@ -77,6 +86,10 @@ define(['jquery', 'core/popper'], function($, Popper) {
             $(document).on("click", ".filter-save", function() {
                 // Close the popover.
                 $('#filter-groups-popover').addClass('d-none');
+
+                // Update group count on button.
+                var groupsCount = $('#filter-groups-popover').find('input[name="filtergroups[]"]:checked').length;
+                setGroupFilterText(groupsCount);
             });
         }
     };

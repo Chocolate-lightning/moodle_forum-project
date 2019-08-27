@@ -22,6 +22,7 @@
     Example context (JSON):
     {
         "actionurl": "https://mymoodlesite.com/mod/forum/report/summary/index.php?courseid=2&forumid=2&perpage=25",
+        "filtergroupscount" : "all",
         "filtergroups": [
             {
                 "gropuid": "1",
@@ -40,8 +41,9 @@
 <div>
     <form id="filtersform" name="filtersform" method="post">
         <button type="button" id="filter_groups_button" class="btn btn-secondary" data-container="body" data-toggle="filter-groups-popover" data-placement="bottom">
-            {{# str}} filter:groupsname, forumreport_summary {{/ str}}
+            {{# str}} filter:groupsname, forumreport_summary {{/ str}} ({{filtergroupscount}})
         </button>
+        <input type="hidden" id="groups_title_base" value="{{# str}} filter:groupsname, forumreport_summary {{/ str}}">
 
         <input type="submit" name="generate" class="btn btn-primary" title="{{# str}}generatereport, forumreport_summary{{/ str}}"
             formaction="{{actionurl}}" value="{{# str}}generatereport, forumreport_summary{{/ str}}">

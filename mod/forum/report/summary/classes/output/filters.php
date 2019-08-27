@@ -100,6 +100,7 @@ class filters implements renderable, templatable {
         // Always include the 'all groups' option and select it if necessary.
         $groupsavailable = [0 => get_string('filter:groupsdefault', 'forumreport_summary')];
         $groupsselected = [];
+        $groupscount = 0;
 
         if (empty($groupsdata) || in_array(0, $groupsdata)) {
             $groupsselected[] = 0;
@@ -115,12 +116,16 @@ class filters implements renderable, templatable {
             // Select provided groups if 'all' not selected, and group is available.
             if (!in_array(0, $groupsselected) && in_array($group->id, $groupsdata)) {
                 $groupsselected[] = $group->id;
+
+                // Count incremented here so 'all' will have a count of 0.
+                $groupscount++;
             }
         }
 
         // Overwrite groups properties
         $this->groupsavailable = $groupsavailable;
         $this->groupsselected = $groupsselected;
+        $this->groupscount = $groupscount;
     }
 
 
@@ -135,6 +140,9 @@ class filters implements renderable, templatable {
 
         // Set formaction URL.
         $output->actionurl = $this->actionurl->out(false);
+
+        // Set groups count for filter button.
+        $output->filtergroupscount = $this->groupscount > 0 ? $this->groupscount : 'all'; //TODO: this should use a language string, as should the JS version
 
         // Set groups filter.
         $groupsdata = [];

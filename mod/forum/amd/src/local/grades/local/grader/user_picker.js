@@ -12,8 +12,9 @@ const renderUserChange = (context) => {
 
 const bindEvents = (root, users, currentUserIndex, showUserCallback) => {
     root.addEventListener('click', (e) => {
-        if (e.target.matches(Selectors.actions.changeUser)) {
-            currentUserIndex += parseInt(e.target.dataset.direction);
+        const button = e.target.closest(Selectors.actions.changeUser);
+        if (button) {
+            currentUserIndex += parseInt(button.dataset.direction);
             showUser(root, users, currentUserIndex, showUserCallback);
         }
     });

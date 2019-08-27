@@ -23,13 +23,13 @@
  */
 import Templates from 'core/templates';
 import Notification from 'core/notification';
-import Selectors from './selectors';
-import * as UserPaginator from './new_unified_grader_user_paginator';
+import Selectors from './local/grader/selectors';
+import * as UserPaginator from './local/grader/user_picker';
 import {createLayout as createFullScreenWindow} from 'mod_forum/local/layout/fullscreen';
 
 const templateNames = {
     grader: {
-        app: 'mod_forum/local/grades/unified_grader/grading_app',
+        app: 'mod_forum/local/grades/grader',
     },
 };
 

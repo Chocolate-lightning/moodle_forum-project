@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_forum/local/layout/fullscreen
+    @template mod_forum/local/grades/unified_grader/grading_app
 
     Classes required for JS:
     * TODO
@@ -30,6 +30,16 @@
     {
     }
 }}
-<div>
-    <p>Hello</p>
+<div class="container-fluid" {{!
+    }}data-region="unified-grader" {{!
+    }}{{#userid}}data-first-userid="{{userid}}"{{/userid}} {{!
+    }}data-cmid="{{cmid}}" {{!
+    }}>
+    <div class="row-fluid">
+        {{> mod_forum/local/grades/local/grader/navigation }}
+    </div>
+    <div class="row-fluid">
+        {{> mod_forum/local/grades/local/grader/content }}
+        {{> mod_forum/local/grades/local/grader/grading }}
+    </div>
 </div>

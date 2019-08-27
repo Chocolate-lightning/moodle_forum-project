@@ -1,6 +1,5 @@
 import Templates from 'core/templates';
 import Selectors from './user_picker/selectors';
-//import PubSub from 'core/pubsub';
 
 const renderNavigator = () => {
     return Templates.render('mod_forum/local/grades/local/grader/user_picker', {});
@@ -31,7 +30,7 @@ const showUser = async(root, users, currentUserIndex, showUserCallback) => {
     Templates.replaceNodeContents(userRegion, html, '');
 };
 
-export const buildPicker = async (users, currentUserID, showUserCallback) => {
+export const buildPicker = async(users, currentUserID, showUserCallback) => {
     let root = document.createElement('div');
 
     const [html] = await Promise.all([renderNavigator()]);
@@ -42,8 +41,6 @@ export const buildPicker = async (users, currentUserID, showUserCallback) => {
     });
 
     showUser(root, users, currentUserIndex, showUserCallback);
-
-    //let [nextButton, previousButton] = cacheDom(html);
 
     bindEvents(root, users, currentUserIndex, showUserCallback);
 

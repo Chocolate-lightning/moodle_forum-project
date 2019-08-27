@@ -39,8 +39,14 @@ const displayUserPicker = (root, html) => {
 
 const getUpdateUserContentFunction = (root, getContentForUser) => {
     return async(user) => {
-        const [html] = await Promise.all([getContentForUser(user.id)]);
-        Templates.replaceNodeContents(root.querySelector(Selectors.regions.moduleReplace), html, '');
+        const [
+            {html, js},
+        ] = await Promise.all([
+            getContentForUser(user.id).then((html, js) => {
+                return {html, js};
+            }),
+        ]);
+        Templates.replaceNodeContents(root.querySelector(Selectors.regions.moduleReplace), html, js);
     };
 };
 

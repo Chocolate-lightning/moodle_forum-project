@@ -25,6 +25,43 @@ define(['jquery', 'core/popper'], function($, Popper) {
 
     return {
         init: function() {
+
+            /**
+             * Generic filter handlers.
+             */
+
+            // Event handler to clear filters.
+            $(document).on("click", ".filter-clear", function(event) {
+                // Uncheck any checkboxes.
+                $(event.target.parentNode.parentElement).find('input[type=checkbox]:checked').prop("checked", false);
+
+                // Check the default checkbox.
+                $(event.target.parentNode.parentElement).find('input[type=checkbox][value="0"]').prop("checked", true);
+            });
+
+            /**
+             * Groups filter specific handlers.
+             */
+
+            $('#filter-groups-popover input[name="filtergroups[]"]').on('click', function(event) {
+                // If checking 'all', uncheck others.
+                var filterid = event.target.value;
+
+                // Uncheck other groups if 'all' selected.
+                if (filterid == 0) {
+                    if ($('#' + event.target.id).prop('checked')) {
+                        $(event.target.parentNode).find('input[name="filtergroups[]"]:checked').each( function() {
+                            if ($(this).val() != 0) {
+                                $(this).prop('checked', false);
+                            }
+                        });
+                    }
+                } else {
+                    // Uncheck 'all' if another group is checked.
+                    $('#filtergroups0').prop('checked', false);
+                }
+            });
+
             // Event handler for showing groups filter popover.
             $('#filter_groups_button').on('click', function() {
                 // Create popper.
@@ -37,22 +74,9 @@ define(['jquery', 'core/popper'], function($, Popper) {
             });
 
             // Event handler to save groups filter.
-            $(document).on("click", ".filter-save", function(event) {
-                var valuesToSave = [];
-
-                // Find groups that have been checked.
-                $(event.target.parentNode.parentNode).find('input[name="filtergroups[]"]:checked').each( function() {
-                    valuesToSave.push($(this).val());
-                });
-
+            $(document).on("click", ".filter-save", function() {
                 // Close the popover.
                 $('#filter-groups-popover').addClass('d-none');
-            });
-
-            // Event handler to clear groups filter.
-            $(document).on("click", ".filter-clear", function(event) {
-                // Uncheck any checkboxes.
-                $(event.target.parentNode.parentElement).find('input[type=checkbox]:checked').prop("checked", false);
             });
         }
     };

@@ -31,6 +31,7 @@ if (isguestuser()) {
 $courseid = required_param('courseid', PARAM_INT);
 $forumid = required_param('forumid', PARAM_INT);
 $perpage = optional_param('perpage', 25, PARAM_INT);
+$generate = optional_param('generate', 0, PARAM_ALPHANUM);
 
 // Establish filter values.
 $filters['groups'] = optional_param_array('filtergroups', [0], PARAM_INT);
@@ -82,14 +83,17 @@ echo $OUTPUT->heading(get_string('summarytitle', 'forumreport_summary', $forumna
 $renderer = $PAGE->get_renderer('forumreport_summary');
 echo $renderer->render_filters_form($course, $context, $url, $filters);
 
-// Initialise table.
-$table = new \forumreport_summary\summary_table($courseid, $forumid);
-$table->baseurl = $url;
+// Prepare and display the report if submitted.
+if ($generate) {
+    // Initialise table.
+    $table = new \forumreport_summary\summary_table($courseid, $forumid);
+    $table->baseurl = $url;
 
-// Apply filters.
-$table->add_filter($table::FILTER_GROUPS, $filters['groups']);
+    // Apply filters.
+    $table->add_filter($table::FILTER_GROUPS, $filters['groups']);
 
-// Render table.
-$table->out($perpage, false);
+    // Render table.
+    $table->out($perpage, false);
+}
 
 echo $OUTPUT->footer();

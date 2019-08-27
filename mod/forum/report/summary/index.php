@@ -33,7 +33,7 @@ $forumid = required_param('forumid', PARAM_INT);
 $perpage = optional_param('perpage', 25, PARAM_INT);
 
 // Establish filter values.
-$filters['groups'] = optional_param_array('groups', [0], PARAM_INT);
+$filters['groups'] = optional_param_array('filtergroups', [0], PARAM_INT);
 
 $cm = null;
 $modinfo = get_fast_modinfo($courseid);
@@ -73,6 +73,7 @@ $PAGE->set_url($url);
 $PAGE->set_pagelayout('report');
 $PAGE->set_title($forumname);
 $PAGE->set_heading($course->fullname);
+$PAGE->requires->js_call_amd('forumreport_summary/filters', 'init');
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('summarytitle', 'forumreport_summary', $forumname), 2, 'p-b-2');
@@ -90,4 +91,5 @@ $table->add_filter($table::FILTER_GROUPS, $filters['groups']);
 
 // Render table.
 $table->out($perpage, false);
+
 echo $OUTPUT->footer();

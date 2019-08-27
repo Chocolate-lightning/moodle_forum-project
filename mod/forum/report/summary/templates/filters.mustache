@@ -39,34 +39,30 @@
 
 <div>
     <form id="filtersform" name="filtersform" method="post">
-        <button type="button" id="filter_groups_button" class="btn btn-primary" data-container="body" data-toggle="filter-groups-popover" data-placement="bottom">
+        <button type="button" id="filter_groups_button" class="btn btn-secondary" data-container="body" data-toggle="filter-groups-popover" data-placement="bottom">
             {{# str}} filter:groupsname, forumreport_summary {{/ str}}
         </button>
-        <input type="hidden" id="filter_groups_value" name="filter_groups_value" value=''>
-        <br><br>
-        <input type="submit" id="submit_button" name="submit_button" formaction="formtesting.php" value="Submit">
 
         <input type="submit" class="btn btn-primary" title="{{# str}}generatereport, forumreport_summary{{/ str}}"
-               accept=""formaction="{{actionurl}}" value="{{# str}}generatereport, forumreport_summary{{/ str}}">
+            formaction="{{actionurl}}" value="{{# str}}generatereport, forumreport_summary{{/ str}}">
 
-    </form>
-
-    <div class="report-filters">
-        <span id="filter-groups-title" style="display:block;">{{# str}} filter:groupsname, forumreport_summary {{/ str}}</span>
-        <div id="filter-groups-content" style="display:block;">
-            <div class="form-check">
-                {{#filtergroups}}
-                <input id="filtergroups{{groupid}}" class="form-check-input" type="checkbox" name="filtergroups[]"
-                        value="{{groupid}}" {{#checked}} checked="checked" {{/checked}}>
-                <label class="form-check-label" for="filtergroups{{groupid}}">{{groupname}}</label>
-                <br>
-                {{/filtergroups}}
-                <br>
-            </div>
-            <div class="form-group">
-                <button type="button" class="btn btn-primary filter-save">Save</button>
-                <button type="button" class="btn btn-primary filter-cancel">Clear</button>
+        <div id="filter-groups-popover" class="popover b-t-3 d-none">
+            <h3 class="popover-header">{{# str}} filter:groupsname, forumreport_summary {{/ str}}</h3>
+            <div class="popover-body">
+                <div class="form-check">
+                    {{#filtergroups}}
+                    <input id="filtergroups{{groupid}}" class="form-check-input" type="checkbox" name="filtergroups[]"
+                            value="{{groupid}}" {{#checked}} checked="checked" {{/checked}}>
+                    <label class="form-check-label" for="filtergroups{{groupid}}">{{groupname}}</label>
+                    <br>
+                    {{/filtergroups}}
+                    <br>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary filter-save">Save</button>
+                    <button type="button" class="btn btn-primary filter-clear">Clear</button>
+                </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>

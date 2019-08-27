@@ -21,26 +21,22 @@
  * @copyright  2019 Michael Hawkins <michaelh@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/popper'], function($, popper) {
+define(['jquery', 'core/popper'], function($, Popper) {
 
     return {
         init: function() {
-            //TODO
-            //TODO: also check whether this is how popper is correctly included, whether it's needed etc.
-            //Also is bootstrap JS needed to be manually included, or is it part of the core libraries that are included?
+            // Event handler for showing groups filter popover.
+            $('#filter_groups_button').on('click', function() {
+                // Create popper.
+                new Popper(document.querySelector('#filter_groups_button'),
+                    document.querySelector('#filter-groups-popover'));
 
-            // Go popovers go!
-            $('[data-toggle="filter-groups-popover"]').popover({
-                html: true,
-                title: function() {
-                    return $("#filter-groups-title").html();
-                },
-                content: function() {
-                    return $('#filter-groups-content').html();
-                }
+                // Show popper.
+                $('#filter-groups-popover').removeClass('d-none');
+                this.$root.$emit('bv::show::popover', '#filter_groups_button');
             });
 
-            // Save filter.
+            // Event handler to save groups filter.
             $(document).on("click", ".filter-save", function(event) {
                 var valuesToSave = [];
 
@@ -49,18 +45,15 @@ define(['jquery', 'core/popper'], function($, popper) {
                     valuesToSave.push($(this).val());
                 });
 
-                // Store groups that have been checked in the form.
-                $('#filter_groups_value').val(JSON.stringify(valuesToSave));
-
                 // Close the popover.
-                $('[data-toggle="filter-groups-popover"]').popover('hide');
+                $('#filter-groups-popover').addClass('d-none');
             });
 
-            $(document).on("click", ".filter-cancel", function(event) {
+            // Event handler to clear groups filter.
+            $(document).on("click", ".filter-clear", function(event) {
                 // Uncheck any checkboxes.
                 $(event.target.parentNode.parentElement).find('input[type=checkbox]:checked').prop("checked", false);
             });
-
         }
     };
 });

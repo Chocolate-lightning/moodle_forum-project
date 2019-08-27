@@ -22,19 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-const getDataSelector = (name, value) => {
-    return `[data-${name}="${value}"]`;
-};
-
 export default {
-    buttons: {
-        toggleFullscreen: getDataSelector('action', 'togglefullscreen'),
-        closeGrader: getDataSelector('action', 'closegrader'),
-    },
     regions: {
-        moduleReplace: '[data-replace="grader-module-content"]',
-        gradingReplace: '[data-graderreplace="grading-panel-display"]',
-        paginatorReplace: '[data-replace="paginator-user"]',
+        userRegion: '[data-region="user_picker/user"]',
     },
+    actions: {
+        changeUser: '[data-action="change-user"]',
+    }
 };
 

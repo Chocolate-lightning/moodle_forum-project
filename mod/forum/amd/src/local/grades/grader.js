@@ -24,7 +24,7 @@
 import Templates from 'core/templates';
 // TODO import Notification from 'core/notification';
 import Selectors from './local/grader/selectors';
-import * as UserPaginator from './local/grader/user_picker';
+import * as UserPicker from './local/grader/user_picker';
 import {createLayout as createFullScreenWindow} from 'mod_forum/local/layout/fullscreen';
 
 const templateNames = {
@@ -33,16 +33,11 @@ const templateNames = {
     },
 };
 
-const displayUsers = (html) => { // eslint-disable-line
-    return Templates.replaceNode(Selectors.regions.gradingReplace, html);
+const displayUserPicker = (root, html) => {
+    window.console.log(Selectors);
+    root.querySelector(Selectors.regions.pickerRegion).append(html);
 };
 
-const renderUserPicker = (state) => { // eslint-disable-line
-    const userNames = state.map(user => ({firstname: user.firstname, lastname: user.lastname, userid: user.id}));
-    const picker = UserPaginator.buildPicker(userNames, 0);
-    return picker;
-
-};
 const registerEventListeners = (graderLayout) => {
     const graderContainer = graderLayout.getContainer();
     graderContainer.addEventListener('click', (e) => {
@@ -64,7 +59,7 @@ const registerEventListeners = (graderLayout) => {
 
 // Make this explicit rather than object
 export const launch = async(getListOfUsers, getContentForUser, { // eslint-disable-line
-    initialUserIndex = 0, // eslint-disable-line
+    initialUserId = 0, // eslint-disable-line
 } = {}) => {
 
     const [
@@ -80,21 +75,7 @@ export const launch = async(getListOfUsers, getContentForUser, { // eslint-disab
 
     Templates.replaceNodeContents(graderContainer, graderHTML, '');
     registerEventListeners(graderLayout);
-    /*return
-        .then(() => {
-            // Set user picker
-            graderContainer.querySelector(Selectors.regions.moduleReplace);
-            return;
-        })
-        .then(() => {
-            getListOfUsers();
-                /!*.then(state => {
-                    /!*renderUserPicker(state.users)
-                        .then((picker) => {
-                            displayUsers(picker);
-                        });*!/
-                })
-                .catch();*!/
-        })
-        .catch();*/
+    // TODO const [pickerHTML] = await Promise.all([UserPicker.buildPicker(userList, initialUserId)]);
+    const pickerHTML = await UserPicker.buildPicker(userList, initialUserId);
+    displayUserPicker(graderContainer, pickerHTML);
 };

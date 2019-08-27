@@ -2,74 +2,49 @@ import Templates from 'core/templates';
 import Selectors from './user_picker/selectors';
 //import PubSub from 'core/pubsub';
 
-const _init = (items, index) => {
-    // TODO generate the full name from PHP function.
+const renderNavigator = () => {
+    return Templates.render('mod_forum/local/grades/local/grader/user_picker', {});
+};
 
-    return {
-        firstName: items[index].firstname,
-        lastName: items[index].lastname,
-        displayindex: index + 1,
-        total: items.length,
+const renderUserChange = (context) => {
+    return Templates.render('mod_forum/local/grades/local/grader/user_picker/user', context);
+};
+
+const bindEvents = (root, users, currentUserIndex) => {
+    root.addEventListener('click', (e) => {
+        if (e.target.matches(Selectors.actions.changeUser)) {
+            currentUserIndex += parseInt(e.target.dataset.direction);
+            showUser(root, users, currentUserIndex);
+        }
+    });
+};
+
+const showUser = async(root, users, currentUserIndex) => {
+    const user = {
+        ...users[currentUserIndex],
+        total: users.length,
+        displayIndex: currentUserIndex + 1,
     };
+    const html = await renderUserChange(user);
+    const userRegion = root.querySelector(Selectors.regions.userRegion);
+    Templates.replaceNodeContents(userRegion, html, '');
 };
 
-const _renderNavigator = (context) => {
-    return Templates.render('mod_forum/local/grades/unified_grader/user_navigator', context);
-};
+export const buildPicker = async (users, currentUserID) => {
+    let root = document.createElement('div');
 
-const _renderUserChange = (context) => {
-    return Templates.render('mod_forum/local/grades/unified_grader/user_navigator_user', context);
-};
+    const [html] = await Promise.all([renderNavigator()]);
+    Templates.replaceNodeContents(root, html, '');
 
-const  _cacheDom = (html) => {
-    let widget = document.createElement('div');
-    widget.innerHTML = html;
-    let paginator = widget.querySelector('[data-grader="paginator"]');
-    let nextButton = paginator.querySelector('[data-action="next-user"]');
-    let previousButton = paginator.querySelector('[data-action="previous-user"]');
-    return [nextButton, previousButton];
-};
-
-// Use the next index or the given index here.
-const _nextUser = async (items, index) => {
-    index++;
-
-    items[index].displayIndex = index++;
-
-    let [html, js] = await Promise.all([_renderUserChange(items[index])]);
-    Templates.replaceNodeContents(Selectors.regions.paginatorReplace, html, js);
-
-    // PubSub
-};
-
-const _previousUser = async (items, index) => {
-    index--;
-
-    items[index].displayIndex = index++;
-
-    let [html, js] = await Promise.all([_renderUserChange(items[index])]);
-    Templates.replaceNodeContents(Selectors.regions.paginatorReplace, html, js);
-
-    // PubSub
-};
-
-const _bindEvents = (nextButton, previousButton, items, index) => {
-    nextButton.addEventListener('click', function() {
-        _nextUser(items, index);
+    const currentUserIndex = users.findIndex((user) => {
+        return user.id === parseInt(currentUserID);
     });
-    previousButton.addEventListener('click', function() {
-        _previousUser(items, index);
-    });
-};
 
-export const buildPicker = async (items, index) => {
-    let context = _init(items, index);
+    showUser(root, users, currentUserIndex);
 
-    let [html, js] = await Promise.all([_renderNavigator(context)]);
+    //let [nextButton, previousButton] = cacheDom(html);
 
-    let [nextButton, previousButton] = _cacheDom(html);
+    bindEvents(root, users, currentUserIndex);
 
-    _bindEvents(nextButton, previousButton, items, index);
-
-    return [html, js];
+    return root;
 };

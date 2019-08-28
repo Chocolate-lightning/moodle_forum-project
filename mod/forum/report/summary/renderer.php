@@ -33,21 +33,6 @@ defined('MOODLE_INTERNAL') || die();
 class forumreport_summary_renderer extends plugin_renderer_base {
 
     /**
-     * Wrap the filter contents in form tags.
-     *
-     * @param string $formHTML The HTML to be included in the form.
-     * @return string Form HTML wrapped in relevant form tags.
-     */
-    public function render_form_tags($formHTML): string {
-        $attributes = [
-            'method' => 'post',
-            'id'     => 'forumsummaryfilters',
-        ];
-
-        return html_writer::tag('form', $formHTML, $attributes);
-    }
-
-    /**
      * Renders the filters available for the forum summary report.
      *
      * @param \stdClass $course The course object.
@@ -61,5 +46,38 @@ class forumreport_summary_renderer extends plugin_renderer_base {
         $templatecontext = $renderable->export_for_template($this);
 
         return self::render_from_template('forumreport_summary/filters', $templatecontext);
+    }
+
+    public function render_report($courseid, $forumid, $url, $filters, $perpage) {
+        // Initialise table.
+        $table = new \forumreport_summary\summary_table($courseid, $forumid);
+        $table->baseurl = $url;
+
+        // Apply filters.
+        $table->add_filter($table::FILTER_GROUPS, $filters['groups']);
+
+        // Buffer so calling script can output the report as required.
+        ob_start();
+
+        // Render table.
+        $table->out($perpage, false);
+
+        $tablehtml = ob_get_contents();
+
+        ob_end_clean();
+
+        return $tablehtml;
+    }
+
+    /**
+     * Renders the placeholder content for use when the report table is not visible.
+     *
+     * @return string The placeholder HTML.
+     */
+    public function render_report_placeholder() {
+        $generatebuttontext = get_string('generatereport', 'forumreport_summary');
+        $placeholdertext = get_string('reportplaceholder', 'forumreport_summary', $generatebuttontext);
+
+        return "<div class='d-block p-b-10'><h3>{$placeholdertext}</h3></div>";
     }
 }

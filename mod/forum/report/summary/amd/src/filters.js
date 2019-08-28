@@ -39,6 +39,22 @@ define(['jquery', 'core/popper'], function($, Popper) {
                 $(event.target.parentNode.parentElement).find('input[type=checkbox][value="0"]').prop("checked", true);
             });
 
+            // Override table heading sort links so they trigger a proper generate request with filtering.
+            $(document).on("click", "a", function(event) {
+                event.preventDefault();
+     //TODO:
+                //The 'a' within .resetTable for reset, 'a' within thead > tr > th for filters.
+                //Should all be within region-main to make sure it's the right bit possibly too
+//TODO: This needs to be adding the event to the specific headings, not just to "a" above^^
+                //TODO: Check if there are other params before just appending &blah, might need ? instead
+                var filterParams = event.target.search.substr(1),
+                    newLink = $('#generatereport').attr('formaction') + '&' + filterParams;
+
+                $('#generatereport').attr('formaction', newLink);
+                $('#generatereport').click();
+            });
+
+
             /**
              * Groups filter specific handlers.
              */
@@ -54,16 +70,19 @@ define(['jquery', 'core/popper'], function($, Popper) {
 
             $('#filter-groups-popover input[name="filtergroups[]"]').on('click', function(event) {
                 // If checking 'all', uncheck others.
-                var filterid = event.target.value;
+                var filterValue = event.target.value;
 
                 // Uncheck other groups if 'all' selected.
-                if (filterid == 0) {
+                if (filterValue == 0) {
                     if ($('#' + event.target.id).prop('checked')) {
                         $(event.target.parentNode).find('input[name="filtergroups[]"]:checked').each( function() {
                             if ($(this).val() != 0) {
                                 $(this).prop('checked', false);
                             }
                         });
+                    } else {
+                        // Don't allow unchecking of 'all' directly.
+                        $('#' + event.target.id).prop('checked', true);
                     }
                 } else {
                     // Uncheck 'all' if another group is checked.
@@ -74,12 +93,13 @@ define(['jquery', 'core/popper'], function($, Popper) {
             // Event handler for showing groups filter popover.
             $('#filter_groups_button').on('click', function() {
                 // Create popover.
-                new Popper(document.querySelector('#filter_groups_button'),
-                    document.querySelector('#filter-groups-popover'));
+                var referenceElement = document.querySelector('#filter_groups_button'),
+                    popperContent = document.querySelector('#filter-groups-popover');
+
+                new Popper(referenceElement, popperContent, {placement: 'bottom'});
 
                 // Show popover.
                 $('#filter-groups-popover').removeClass('d-none');
-                this.$root.$emit('bv::show::popover', '#filter_groups_button');
             });
 
             // Event handler to save groups filter.

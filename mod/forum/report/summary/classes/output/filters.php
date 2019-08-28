@@ -90,7 +90,6 @@ class filters implements renderable, templatable {
         $this->context = $context;
         $this->actionurl = $actionurl;
 
-
         // Prepare groups filter data.
         $groupsdata = empty($filterdata['groups']) ? [] : $filterdata['groups'];
         $this->prepare_groups_data($groupsdata);

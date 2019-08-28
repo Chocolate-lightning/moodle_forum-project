@@ -31,7 +31,7 @@ if (isguestuser()) {
 $courseid = required_param('courseid', PARAM_INT);
 $forumid = required_param('forumid', PARAM_INT);
 $perpage = optional_param('perpage', 25, PARAM_INT);
-$generate = optional_param('generate', 0, PARAM_ALPHANUM);
+$generate = optional_param('generatereport', 0, PARAM_ALPHANUM);
 
 // Establish filter values.
 $filters['groups'] = optional_param_array('filtergroups', [0], PARAM_INT);
@@ -85,15 +85,10 @@ echo $renderer->render_filters_form($course, $context, $url, $filters);
 
 // Prepare and display the report if submitted.
 if ($generate) {
-    // Initialise table.
-    $table = new \forumreport_summary\summary_table($courseid, $forumid);
-    $table->baseurl = $url;
-
-    // Apply filters.
-    $table->add_filter($table::FILTER_GROUPS, $filters['groups']);
-
-    // Render table.
-    $table->out($perpage, false);
+    echo $renderer->render_report($courseid, $forumid, $url, $filters, $perpage);
+} else {
+    // Display placeholder content if report not yet being generated.
+    echo $renderer->render_report_placeholder();
 }
 
 echo $OUTPUT->footer();

@@ -366,6 +366,7 @@ $string['missingsearchterms'] = 'The following search terms occur only in the HT
 $string['modeflatnewestfirst'] = 'Display replies flat, with newest first';
 $string['modeflatoldestfirst'] = 'Display replies flat, with oldest first';
 $string['modenested'] = 'Display replies in nested form';
+$string['modenew'] = 'Display replies in new form';
 $string['modethreaded'] = 'Display replies in threaded form';
 $string['modulename'] = 'Forum';
 $string['modulename_help'] = 'The forum activity module enables participants to have asynchronous discussions i.e. discussions that take place over an extended period of time.

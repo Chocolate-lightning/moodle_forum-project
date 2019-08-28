@@ -24,6 +24,7 @@
  */
 
 $string['activityoverview'] = 'There are new forum posts';
+$string['actionsforpost'] = 'Actions for post';
 $string['addanewdiscussion'] = 'Add a new discussion topic';
 $string['addanewquestion'] = 'Add a new question';
 $string['addanewtopic'] = 'Add a new topic';
@@ -41,10 +42,12 @@ $string['areaattachment'] = 'Attachments';
 $string['areapost'] = 'Messages';
 $string['attachment'] = 'Attachment';
 $string['attachmentname'] = 'Attachment {$a}';
+$string['attachmentnameandfilesize'] = '{$a->name} ({$a->size})';
 $string['attachment_help'] = 'You can optionally attach one or more files to a forum post. If you attach an image, it will be displayed after the message.';
 $string['attachmentnopost'] = 'You cannot export attachments without a post id';
 $string['attachments'] = 'Attachments';
 $string['attachmentswordcount'] = 'Attachments and word count';
+$string['authorinreplytoauthor'] = '{$a->respondant} in reply to {$a->author}';
 $string['availability'] = 'Availability';
 $string['blockafter'] = 'Post threshold for blocking';
 $string['blockafter_help'] = 'This setting specifies the maximum number of posts which a user can post in the given time period. Users with the capability mod/forum:postwithoutthrottling are exempt from post limits.';

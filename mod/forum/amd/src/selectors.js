@@ -47,7 +47,11 @@ define([], function() {
             inpageSubmitBtnText: "[data-region='submit-text']",
             loadingIconContainer: "[data-region='loading-icon-container']",
             repliesContainer: "[data-region='replies-container']",
-            modeSelect: "select[name='mode']"
+            replyCount: '[data-region="reply-count"]',
+            modeSelect: "select[name='mode']",
+            showReplies: '[data-action="show-replies"]',
+            hideReplies: '[data-action="hide-replies"]',
+            repliesVisibilityToggleContainer: '[data-region="replies-visibility-toggle-container"]'
         },
         lock: {
             toggle: "[data-action='toggle'][data-type='lock-toggle']",
@@ -59,5 +63,8 @@ define([], function() {
         pin: {
             toggle: "[data-type='pin-toggle'][data-action='toggle']",
         },
+        discussion: {
+            toosl: '[data-container="discussion-tools"]'
+        }
     };
 });

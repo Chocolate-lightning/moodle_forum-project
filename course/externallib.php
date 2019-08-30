@@ -4057,9 +4057,13 @@ class core_course_external extends external_api {
         $coursecontext = context_course::instance($course->id);
 
         self::validate_context($coursecontext);
-        $users = get_enrolled_users($coursecontext);
-        // TODO map $users to make full names.
+        $enrolledusers = get_enrolled_users($coursecontext);
         // TODO make use of warnings.
+        $users = array_map(function ($user) {
+            $user->fullname = fullname($user);
+            return $user;
+        }, $enrolledusers);
+
         return ['users' => $users, 'warnings' => $warnings];
     }
 
@@ -4083,6 +4087,7 @@ class core_course_external extends external_api {
     public static function user_description() {
         $userfields = array(
             'id'    => new external_value(core_user::get_property_type('id'), 'ID of the user'),
+            'fullname' => new external_value(PARAM_TEXT, 'The full name of the user', VALUE_OPTIONAL),
             'firstname'   => new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user', VALUE_OPTIONAL),
             'lastname'    => new external_value(core_user::get_property_type('lastname'), 'The family name of the user', VALUE_OPTIONAL),
         );

@@ -16,8 +16,8 @@
 /**
  * This module will tie together all of the different calls the gradable module will make.
  *
- * @module     core_grades/unified_grader
- * @package    core_grades
+ * @module     mod_forum/local/grades/grader
+ * @package    mod_forum
  * @copyright  2019 Mathew May <mathew.solutions>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -69,7 +69,7 @@ const registerEventListeners = (graderLayout) => {
 };
 
 // Make this explicit rather than object
-export const launch = async(getListOfUsers, getContentForUser, { // eslint-disable-line
+export const launch = async(getListOfUsers, getContentForUser, {
     initialUserId = 0,
 } = {}) => {
 

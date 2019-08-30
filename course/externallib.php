@@ -4029,27 +4029,25 @@ class core_course_external extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function get_users_by_cmid_parameters() {
-        return new external_function_parameters(
-                array(
-                    'cmid' => new external_value(PARAM_INT, 'id of the course module', VALUE_REQUIRED),
-                )
-        );
+    public static function get_enrolled_users_by_cmid_parameters() {
+        return new external_function_parameters([
+            'cmid' => new external_value(PARAM_INT, 'id of the course module', VALUE_REQUIRED),
+        ]);
     }
 
     /**
      * Get all users in a course for a given cmid.
      *
      * @param int $cmid Course Module id from which the users will be obtained
-     * @return array List of courses
+     * @return array List of users
      * @throws  invalid_parameter_exception
      */
-    public static function get_users_by_cmid(int $cmid) {
+    public static function get_enrolled_users_by_cmid(int $cmid) {
 
-        $params = self::validate_parameters(self::get_users_by_cmid_parameters(),
-            array(
+        $params = self::validate_parameters(self::get_enrolled_users_by_cmid_parameters(),
+            [
                 'cmid' => $cmid,
-            )
+            ]
         );
         $warnings = [];
         $cmid = $params['cmid'];
@@ -4060,10 +4058,9 @@ class core_course_external extends external_api {
 
         self::validate_context($coursecontext);
         $users = get_enrolled_users($coursecontext);
-        return [
-                'users' => $users,
-                'warnings' => $warnings,
-        ];
+        // TODO map $users to make full names.
+        // TODO make use of warnings.
+        return ['users' => $users, 'warnings' => $warnings];
     }
 
     /**
@@ -4071,10 +4068,10 @@ class core_course_external extends external_api {
      *
      * @return external_description
      */
-    public static function get_users_by_cmid_returns() {
+    public static function get_enrolled_users_by_cmid_returns() {
         return new external_single_structure([
-                'users' => new external_multiple_structure(self::user_description()),
-                'warnings' => new external_warnings(),
+            'users' => new external_multiple_structure(self::user_description()),
+            'warnings' => new external_warnings(),
         ]);
     }
 
@@ -4085,11 +4082,9 @@ class core_course_external extends external_api {
      */
     public static function user_description() {
         $userfields = array(
-                'id'    => new external_value(core_user::get_property_type('id'), 'ID of the user'),
-                'username'    => new external_value(core_user::get_property_type('username'), 'The username', VALUE_OPTIONAL),
-                'firstname'   => new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user', VALUE_OPTIONAL),
-                'lastname'    => new external_value(core_user::get_property_type('lastname'), 'The family name of the user', VALUE_OPTIONAL),
-
+            'id'    => new external_value(core_user::get_property_type('id'), 'ID of the user'),
+            'firstname'   => new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user', VALUE_OPTIONAL),
+            'lastname'    => new external_value(core_user::get_property_type('lastname'), 'The family name of the user', VALUE_OPTIONAL),
         );
         return new external_single_structure($userfields);
     }

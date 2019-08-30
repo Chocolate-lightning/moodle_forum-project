@@ -33,7 +33,6 @@ export default {
     },
     regions: {
         moduleReplace: '[data-replace="grader-module-content"]',
-        gradingReplace: '[data-graderreplace="grading-panel-display"]',
         pickerRegion: '[data-region="user_picker"]',
     },
 };

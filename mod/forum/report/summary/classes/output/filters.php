@@ -141,7 +141,7 @@ class filters implements renderable, templatable {
         $output->actionurl = $this->actionurl->out(false);
 
         // Set groups count for filter button.
-        $output->filtergroupscount = $this->groupscount > 0 ? $this->groupscount : 'all'; //TODO: this should use a language string, as should the JS version
+        $output->filtergroupscount = $this->groupscount > 0 ? $this->groupscount : strtolower(get_string('all'));
 
         // Set groups filter.
         $groupsdata = [];

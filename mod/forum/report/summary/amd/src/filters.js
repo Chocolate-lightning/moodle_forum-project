@@ -21,7 +21,7 @@
  * @copyright  2019 Michael Hawkins <michaelh@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/popper'], function($, Popper) {
+define(['jquery', 'core/popper', 'core/str'], function($, Popper, str) {
 
     return {
         init: function() {
@@ -39,35 +39,51 @@ define(['jquery', 'core/popper'], function($, Popper) {
                 $(event.target.parentNode.parentElement).find('input[type=checkbox][value="0"]').prop("checked", true);
             });
 
-            // Override table heading sort links so they trigger a proper generate request with filtering.
-            $(document).on("click", "a", function(event) {
+            // Called to override click event to trigger a proper generate request with filtering.
+            var generateWithFilters = function(event) {
                 event.preventDefault();
-     //TODO:
-                //The 'a' within .resetTable for reset, 'a' within thead > tr > th for filters.
-                //Should all be within region-main to make sure it's the right bit possibly too
-//TODO: This needs to be adding the event to the specific headings, not just to "a" above^^
-                //TODO: Check if there are other params before just appending &blah, might need ? instead
+
                 var filterParams = event.target.search.substr(1),
                     newLink = $('#generatereport').attr('formaction') + '&' + filterParams;
 
                 $('#generatereport').attr('formaction', newLink);
                 $('#generatereport').click();
+            };
+
+            // Override 'reset table preferences' so it generates with filters.
+            $('.resettable').on("click", "a", function(event) {
+                generateWithFilters(event);
             });
 
+            // Override table heading sort links so they generate with filters.
+            $('thead').on("click", "a", function(event) {
+                generateWithFilters(event);
+            });
+
+            // Override pagination page links so they generate with filters.
+            $('.pagination').on("click", "a", function(event) {
+                generateWithFilters(event);
+            });
 
             /**
              * Groups filter specific handlers.
              */
 
-            // Set filter button text.
+            // Set groups filter button text to include relevant item count (or 'all').
             var setGroupFilterText = function (groupCount) {
-                if ($('#filtergroups0').prop("checked")) {
-                    groupCount = 'all'; //TODO: Lang string this boi
-                }
+                var allString = str.get_string('all');
 
-               $('#filter_groups_button').text($('#groups_title_base').val() + ' (' + groupCount + ')');
+                $.when(allString).done(function(allString){
+                    // Use 'all' if that option is checked.
+                    if ($('#filtergroups0').prop("checked")) {
+                        groupCount = allString.toLowerCase();
+                    }
+
+                   $('#filter_groups_button').text($('#groups_title_base').val() + ' (' + groupCount + ')');
+                });
             };
 
+            // Control groups filter rules around 'all' option.
             $('#filter-groups-popover input[name="filtergroups[]"]').on('click', function(event) {
                 // If checking 'all', uncheck others.
                 var filterValue = event.target.value;

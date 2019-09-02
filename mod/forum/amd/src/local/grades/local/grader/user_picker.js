@@ -39,9 +39,9 @@ const showUser = async(root, users, currentUserIndex, showUserCallback) => {
         total: users.length,
         displayIndex: currentUserIndex + 1,
     };
-    const [html] = await Promise.all([renderUserChange(user), showUserCallback(user)]);
+    const [html, js] = await Promise.all([renderUserChange(user), showUserCallback(user)]);
     const userRegion = root.querySelector(Selectors.regions.userRegion);
-    Templates.replaceNodeContents(userRegion, html, '');
+    Templates.replaceNodeContents(userRegion, html, js);
 };
 
 const bindEvents = (root, users, currentUserIndex, showUserCallback) => {
@@ -57,8 +57,8 @@ const bindEvents = (root, users, currentUserIndex, showUserCallback) => {
 export const buildPicker = async(users, currentUserID, showUserCallback) => {
     let root = document.createElement('div');
 
-    const [html] = await Promise.all([renderNavigator()]);
-    Templates.replaceNodeContents(root, html, '');
+    const [html, js] = await Promise.all([renderNavigator()]);
+    Templates.replaceNodeContents(root, html, js);
 
     const currentUserIndex = users.findIndex((user) => {
         return user.id === parseInt(currentUserID);

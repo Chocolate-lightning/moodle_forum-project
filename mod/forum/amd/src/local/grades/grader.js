@@ -86,7 +86,6 @@ export const launch = async(getListOfUsers, getContentForUser, {
 
     Templates.replaceNodeContents(graderContainer, graderHTML, '');
     registerEventListeners(graderLayout);
-    // TODO const [pickerHTML] = await Promise.all([UserPicker.buildPicker(userList, initialUserId)]);
     const updateUserContent = getUpdateUserContentFunction(graderContainer, getContentForUser);
 
     const pickerHTML = await UserPicker.buildPicker(userList, initialUserId, updateUserContent);

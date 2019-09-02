@@ -45,8 +45,9 @@
                 {{# str}} filter:groupsname, forumreport_summary {{/ str}} ({{filtergroupscount}})
             </button>
 
-            <input type="submit" id="generatereport" name="generatereport" class="btn btn-primary" title="{{# str}}generatereport, forumreport_summary{{/ str}}"
-            formaction="{{actionurl}}" value="{{# str}}generatereport, forumreport_summary{{/ str}}">
+            <input type="submit" id="generatereport" name="generatereport" class="btn btn-primary"
+                title="{{# str}}generatereport, forumreport_summary{{/ str}}"
+                formaction="{{actionurl}}" value="{{# str}}generatereport, forumreport_summary{{/ str}}">
         </div>
 
         <input type="hidden" id="groups_title_base" value="{{# str}} filter:groupsname, forumreport_summary {{/ str}}">
@@ -58,7 +59,7 @@
                 <div class="form-check">
                     {{#filtergroups}}
                     <input id="filtergroups{{groupid}}" class="form-check-input" type="checkbox" name="filtergroups[]"
-                            value="{{groupid}}" {{#checked}} checked="checked" {{/checked}}>
+                        value="{{groupid}}" {{#checked}} checked="checked" {{/checked}}>
                     <label class="form-check-label" for="filtergroups{{groupid}}">{{groupname}}</label>
                     <br>
                     {{/filtergroups}}

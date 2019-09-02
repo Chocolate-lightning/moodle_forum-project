@@ -95,12 +95,19 @@ class filters implements renderable, templatable {
         $this->prepare_groups_data($groupsdata);
     }
 
-    protected function prepare_groups_data($groupsdata) {
-        // Always include the 'all groups' option and select it if necessary.
+    /**
+     * Prepares groups data and sets relevant property values.
+     *
+     * @param array $groupsdata Groups selected for filtering.
+     * @return void.
+     */
+    protected function prepare_groups_data(array $groupsdata): void {
+        // Always include the 'all groups' option.
         $groupsavailable = [0 => get_string('filter:groupsdefault', 'forumreport_summary')];
         $groupsselected = [];
         $groupscount = 0;
 
+        // Select 'all groups' if it is selected, or no groups are specified.
         if (empty($groupsdata) || in_array(0, $groupsdata)) {
             $groupsselected[] = 0;
         }

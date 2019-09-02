@@ -32,8 +32,8 @@ export default {
         closeGrader: getDataSelector('action', 'closegrader'),
     },
     regions: {
-        moduleReplace: '[data-replace="grader-module-content"]',
-        pickerRegion: '[data-region="user_picker"]',
+        moduleReplace: getDataSelector('region', 'module_content'),
+        pickerRegion: getDataSelector('region', 'user_picker'),
     },
 };
 

@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['attachmentcount'] = 'Number of attachments';
 $string['filter:groupsname'] = 'Groups';
 $string['filter:groupsdefault'] = 'All groups';
 $string['generatereport'] = 'Generate report';

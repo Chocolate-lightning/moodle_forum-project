@@ -32,8 +32,8 @@
 {{#discussions}}
     <div class="hr-sect mt-0">{{name}}</div>
     {{#posts}}
-        {{! If has parent show something }}
-        {{> mod_forum/forum_discussion_post }}
+        {{#parentposts}}{{> mod_forum/forum_discussion_post }}{{/parentposts}}
+        {{#userposts}}{{> mod_forum/forum_discussion_post }}{{/userposts}}
     {{/posts}}
 {{/discussions}}
 {{^discussions}}

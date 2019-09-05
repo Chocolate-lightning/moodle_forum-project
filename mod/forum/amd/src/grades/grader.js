@@ -44,6 +44,28 @@ const getWholeForumFunctions = (cmid) => {
         return (userid) => {
             return postContextFunction(userid)
                 .then((context) => {
+                    window.console.log(context);
+                    let parentmap = context.discussions[0].posts.parentposts.map(post => {
+                        return post.id;
+                    });
+                    window.console.log(parentmap);
+                    context.discussions[0].posts.userposts.map(post => {
+                        if (post.parentid) {
+                            parentmap.map((key, index) => {
+                                window.console.log(post.parentid);
+                                window.console.log(key);
+                               if (post.parentid === key) {
+                                   post.parent = context.discussions[0].posts.parentposts[index];
+                               }
+                            });
+
+                        }
+                        return post;
+                    });
+                    window.console.log(context);
+                    return context;
+                })
+                .then((context) => {
                     return Templates.render(templateNames.contentRegion, context);
                 })
                 .catch(Notification.exception);

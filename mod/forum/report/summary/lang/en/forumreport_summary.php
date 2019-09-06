@@ -25,6 +25,7 @@
 $string['attachmentcount'] = 'Number of attachments';
 $string['viewcount'] = 'Number of views';
 $string['earliestpost'] = 'Earliest post';
+$string['filter:datesname'] = 'Dates';
 $string['filter:groupsname'] = 'Groups';
 $string['filter:groupscountall'] = 'Groups (all)';
 $string['filter:groupscountnumber'] = 'Groups ({$a})';

@@ -35,7 +35,9 @@
                 "groupname": "Group C",
                 "checked": false
             }
-        ]
+        ],
+        "filterdatesfrom": "<div>HTML for date filter<select id='datefrom'></select></div>",
+        "filterdatesto": "<div>HTML for date filter<select id='dateto'></select></div>"
     }
 }}
 
@@ -70,6 +72,21 @@
             </div>
             {{! End groups filter popover}}
             {{/hasgroups}}
+
+            {{! Start dates filter popover }}
+            <div id="filter-dates-popover" class="popover m-t-1 d-none">
+                <h3 class="popover-header">{{# str}} filter:datesname, forumreport_summary {{/ str}}</h3>
+                <div class="popover-body">
+                        {{{filterdatesfrom}}}
+                        {{{filterdatesto}}}
+                        <br>
+                    <div class="form-dates">
+                        <button type="button" class="btn btn-primary filter-save">Save</button>
+                        <button type="button" class="btn btn-primary filter-clear">Clear</button>
+                    </div>
+                </div>
+            </div>
+            {{! End dates filter popover }}
         </div>
     </form>
 </div>

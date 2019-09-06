@@ -44,6 +44,9 @@ class summary_table extends table_sql {
     /** Groups filter type */
     const FILTER_GROUPS = 2;
 
+    /** Dates filter type */
+    const FILTER_DATES = 3;
+
     /** Table to store summary data extracted from the log table */
     const LOG_SUMMARY_TEMP_TABLE = 'forum_report_summary_counts';
 
@@ -146,23 +149,26 @@ class summary_table extends table_sql {
         // Define configs.
         $this->define_table_configs();
 
+        // Apply relevant filters.
+        $this->define_base_filter_sql();
+        $this->apply_filters($filters);
+
         // Define the basic SQL data and object format.
         $this->define_base_sql();
-
-        // Apply relevant filters.
-        $this->apply_filters($filters);
     }
 
     /**
-     * Provides the string name of each filter type.
+     * Provides the string name of each filter type, to be used by errors.
+     * Note: This does not use language strings as the value is injected into error strings.
      *
      * @param int $filtertype Type of filter
      * @return string Name of the filter
      */
-    public function get_filter_name(int $filtertype): string {
+    protected function get_filter_name(int $filtertype): string {
         $filternames = [
             self::FILTER_FORUM => 'Forum',
             self::FILTER_GROUPS => 'Groups',
+            self::FILTER_DATES => 'Dates',
         ];
 
         return $filternames[$filtertype];
@@ -308,7 +314,7 @@ class summary_table extends table_sql {
      * @throws coding_exception
      */
     public function add_filter(int $filtertype, array $values = []): void {
-        global $DB;
+        global $DB, $USER;
 
         $paramcounterror = false;
 
@@ -362,6 +368,47 @@ class summary_table extends table_sql {
 
                 break;
 
+            case self::FILTER_DATES:
+                if (!isset($values['from']['enabled']) || !isset($values['to']['enabled']) ||
+                        ($values['from']['enabled'] && !empty(array_diff(['day', 'month', 'year'], array_keys($values['from'])))) ||
+                        ($values['to']['enabled'] && !empty(array_diff(['day', 'month', 'year'], array_keys($values['to']))))) {
+                    $paramcounterror = true;
+                } else {
+                    $this->sql->filterbase['dates'] = '';
+                    $this->sql->filterbase['dateslog'] = '';
+                    $this->sql->filterbase['dateslogparams'] = [];
+                    $timezone = \core_date::get_user_timezone_object();
+
+                    // From date.
+                    if ($values['from']['enabled']) {
+                        // If the filter was enabled, include the date restriction.
+                        $fromdatestr = "{$values['from']['year']}-{$values['from']['month']}-{$values['from']['day']} 00:00:00";
+                        $fromdate = new \DateTime($fromdatestr, $timezone);
+                        $fromdatetimestamp = $fromdate->format('U');
+
+                        // Needs to form part of the base join to posts, so will be injected by define_base_sql().
+                        $this->sql->filterbase['dates'] .= " AND p.created >= :fromdate";
+                        $this->sql->params['fromdate'] = $fromdatetimestamp;
+                        $this->sql->filterbase['dateslog'] .= ' AND timecreated >= :fromdate';
+                        $this->sql->filterbase['dateslogparams']['fromdate'] = $fromdatetimestamp;
+                    }
+
+                    // To date.
+                    if ($values['to']['enabled']) {
+                        // If the filter was enabled, include the date restriction.
+                        $todatestr = "{$values['to']['year']}-{$values['to']['month']}-{$values['to']['day']} 23:59:59";
+                        $todate = new \DateTime($todatestr, $timezone);
+                        $todatetimestamp = $todate->format('U');
+
+                        // Needs to form part of the base join to posts, so will be injected by define_base_sql().
+                        $this->sql->filterbase['dates'] .= " AND p.created <= :todate";
+                        $this->sql->params['todate'] = $todatetimestamp;
+                        $this->sql->filterbase['dateslog'] .= ' AND timecreated <= :todate';
+                        $this->sql->filterbase['dateslogparams']['todate'] = $todatetimestamp;
+                    }
+                }
+
+                break;
             default:
                 throw new coding_exception("Report filter type '{$filtertype}' not found.");
                 break;
@@ -385,6 +432,7 @@ class summary_table extends table_sql {
         $this->is_downloadable(true);
         $this->no_sorting('select');
         $this->set_attribute('id', 'forumreport_summary_table');
+        $this->sql = new \stdClass();
     }
 
     /**
@@ -394,8 +442,6 @@ class summary_table extends table_sql {
      */
     protected function define_base_sql(): void {
         global $USER;
-
-        $this->sql = new \stdClass();
 
         $userfields = get_extra_user_fields($this->context);
         $userfieldssql = \user_picture::fields('u', $userfields);
@@ -429,7 +475,8 @@ class summary_table extends table_sql {
                                     JOIN {forum_discussions} d ON d.forum = f.id
                                LEFT JOIN {forum_posts} p ON p.discussion =  d.id
                                      AND p.userid = ue.userid
-                                     ' . $privaterepliessql . '
+                                     ' . $privaterepliessql
+                                       . $this->sql->filterbase['dates'] . '
                                LEFT JOIN (
                                             SELECT COUNT(fi.id) AS attcount, fi.itemid AS postid, fi.userid
                                               FROM {files} fi
@@ -457,7 +504,7 @@ class summary_table extends table_sql {
             $this->sql->basefields .= ', SUM(CASE WHEN p.charcount IS NOT NULL THEN p.charcount ELSE 0 END) AS charcount';
         }
 
-        $this->sql->params = [
+        $this->sql->params += [
             'component' => 'mod_forum',
             'courseid' => $this->cm->course,
         ] + $privaterepliesparams;
@@ -467,7 +514,14 @@ class summary_table extends table_sql {
             $this->sql->basewhere .= ' AND ue.userid = :userid';
             $this->sql->params['userid'] = $this->userid;
         }
+    }
 
+    /**
+     * Instantiate the properties to store filter values.
+     *
+     * @return void.
+     */
+    protected function define_base_filter_sql(): void {
         // Filter values will be populated separately where required.
         $this->sql->filterfields = '';
         $this->sql->filterfromjoins = '';
@@ -533,6 +587,13 @@ class summary_table extends table_sql {
 
         // Apply groups filter.
         $this->add_filter(self::FILTER_GROUPS, $filters['groups']);
+
+        // Apply dates filter.
+        $datevalues = [
+            'from' => $filters['datefrom'],
+            'to' => $filters['dateto'],
+        ];
+        $this->add_filter(self::FILTER_DATES, $datevalues);
     }
 
     /**
@@ -614,11 +675,17 @@ class summary_table extends table_sql {
             $logtable = $this->logreader->get_internal_log_table_name();
             $nonanonymous = 'AND anonymous = 0';
         }
-        $params = ['contextid' => $contextid];
+
+        // Apply dates filter if applied.
+        $datewhere = $this->sql->filterbase['dateslog'] ?? '';
+        $dateparams = $this->sql->filterbase['dateslogparams'] ?? [];
+
+        $params = ['contextid' => $contextid] + $dateparams;
         $sql = "INSERT INTO {" . self::LOG_SUMMARY_TEMP_TABLE . "} (userid, viewcount)
                      SELECT userid, COUNT(*) AS viewcount
                        FROM {" . $logtable . "}
                       WHERE contextid = :contextid
+                            $datewhere
                             $nonanonymous
                    GROUP BY userid";
         $DB->execute($sql, $params);

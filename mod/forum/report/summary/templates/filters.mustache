@@ -35,14 +35,59 @@
                 "groupname": "Group C",
                 "checked": false
             }
+        ],
+        "filterdatesname": "Dates",
+        "filterdatesform": "<div>HTML for date filters</div>",
+        "filterdatesdata": [
+            {
+                "type": "from",
+                "day": "27",
+                "month": "03",
+                "year": "2017",
+                "enabled": "1"
+            },
+            {
+                "type": "to",
+                "day": "30",
+                "month": "12",
+                "year": "2018",
+                "enabled": "1"
+            }
         ]
     }
 }}
 
 <div class="p-b-3" data-report-id="{{uniqid}}">
+    {{! Start dates filter popover }}
+    <div id="filter-dates-popover" class="popover filter-dates-popover m-t-1 hidden">
+        <h3 class="popover-header">{{# str}} filter:datesname, forumreport_summary {{/ str}}</h3>
+        <div class="popover-body" data-region="filter-dates">
+                {{{filterdatesform}}}
+                <br>&nbsp;
+                <button type="button" class="filter-save float-right btn btn-link p-0" aria-label="{{# str}} save {{/ str}}">
+                    <strong>{{# str}} save {{/ str}}</strong>
+                </button>
+        </div>
+    </div>
+    {{! End dates filter popover }}
+
     <form id="filtersform" name="filtersform" method="post" action="{{actionurl}}">
         <input type="hidden" name="submitted" value="true">
+
+        {{! Hidden dates fields to populate from visible mform in popover. }}
+        {{#filterdatesdata}}
+        <input type="hidden" name="date{{type}}[day]" value="{{day}}">
+        <input type="hidden" name="date{{type}}[month]" value="{{month}}">
+        <input type="hidden" name="date{{type}}[year]" value="{{year}}">
+        <input type="hidden" name="date{{type}}[enabled]" value="{{enabled}}">
+        {{/filterdatesdata}}
+
         <div id="filtersbuttons">
+            <button type="button" id="filter-dates-button" class="btn btn-primary rounded p-1" aria-expanded="false"
+                    aria-haspopup="true" aria-label="{{# str}} filter:datesbuttonlabel, forumreport_summary {{/ str}}">
+                {{filterdatesname}}
+            </button>
+
             {{#hasgroups}}
             <button type="button" id="filter-groups-button" class="btn btn-primary rounded p-1" aria-expanded="false"
                     aria-haspopup="true" aria-label="{{# str}} filter:groupsbuttonlabel, forumreport_summary {{/ str}}">

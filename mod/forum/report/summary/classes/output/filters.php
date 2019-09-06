@@ -78,6 +78,20 @@ class filters implements renderable, templatable {
     protected $groupsselected = [];
 
     /**
+     * HTML for earliest post date filter.
+     *
+     * @var array $datefromdata
+     */
+    protected $datefrom;
+
+    /**
+     * HTML for latest post date filter.
+     *
+     * @var array $datetodata
+     */
+    protected $dateto;
+
+    /**
      * Builds renderable filter data.
      *
      * @param stdClass $course The course object.
@@ -93,6 +107,12 @@ class filters implements renderable, templatable {
         // Prepare groups filter data.
         $groupsdata = empty($filterdata['groups']) ? [] : $filterdata['groups'];
         $this->prepare_groups_data($groupsdata);
+
+        // Prepare date filters data.
+        $datefromdata = empty($filterdata['datefrom']) ?: [];
+        $datetodata = empty($filterdata['dateto']) ?: [];
+
+        $this->prepare_dates_data($datefromdata, $datetodata);
     }
 
     /**
@@ -134,6 +154,33 @@ class filters implements renderable, templatable {
         $this->groupscount = $groupscount;
     }
 
+    /**
+     * Prepares from date and and to date HTML form and sets them to relevant values.
+     * Empty data will default to a disabled filter with today's date.
+     *
+     * @param array $datefromdata From date selected for filtering, and whether the filter is enabled.
+     * @param array $datetodata To date selected for filtering, and whether the filter is enabled.
+     * @return void.
+     */
+    private function prepare_dates_data(array $datefromdata, array $datetodata): void {
+        $datetoday = new DateTime();
+        $defaultdate = [
+            'day' => $datetoday->format('d'),
+            'month' => $datetoday->format('m'),
+            'year' => $datetoday->format('Y'),
+            'enabled' => false,
+        ];
+
+        $datefromdata = empty($datefromdata) ?: $defaultdate;
+        $datetodata = empty($datetodata) ?: $defaultdate;
+
+        //TODO: Generate the HTML here, possibly using  new \MoodleQuickForm_date_selector rather than having to create an $mform class somewhere else
+        $datefromhtml = '';
+        $datetohtml = '';
+
+        $this->datefromhtml = $datefromhtml;
+        $this->datetohtml = $datetohtml;
+    }
 
     /**
      * Export data for use as the context of a mustache template.
@@ -162,6 +209,9 @@ class filters implements renderable, templatable {
         }
 
         $output->filtergroups = $groupsdata;
+
+        $output->filterdatefrom = $this->datefromdata;
+        $output->filterdateto = $this->datetodata;
 
         return $output;
     }

@@ -65,6 +65,8 @@ class forumreport_summary_renderer extends plugin_renderer_base {
 
         // Apply filters.
         $table->add_filter($table::FILTER_GROUPS, $filters['groups']);
+        $table->add_filter($table::FILTER_DATEFROM, $filters['datefrom']);
+        $table->add_filter($table::FILTER_DATETO, $filters['dateto']);
 
         // Buffer so calling script can output the report as required.
         ob_start();

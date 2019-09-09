@@ -44,28 +44,36 @@ const getWholeForumFunctions = (cmid) => {
         return (userid) => {
             return postContextFunction(userid)
                 .then((context) => {
-                    window.console.log(context);
+                    // Lets build a mapping for Parent posts & Children.
                     let parentmap = context.discussions[0].posts.parentposts.map(post => {
                         return post.id;
                     });
-                    window.console.log(parentmap);
-                    context.discussions[0].posts.userposts.map(post => {
+
+                    context.discussions[0].posts.built = context.discussions[0].posts.userposts.map(post => {
+                        post.subject = null;
+                        post.readonly = true;
+                        let passback = null;
                         if (post.parentid) {
                             parentmap.map((key, index) => {
-                                window.console.log(post.parentid);
-                                window.console.log(key);
                                if (post.parentid === key) {
-                                   post.parent = context.discussions[0].posts.parentposts[index];
+                                   passback = context.discussions[0].posts.parentposts[index];
+                                   passback.hasreplies = true;
+                                   passback.replies = [post];
+                                   passback.subject = null;
+                                   passback.readonly = true;
+                                   return passback;
                                }
                             });
-
                         }
-                        return post;
+                        if (passback === null) {
+                            passback = post;
+                        }
+                        return passback;
                     });
-                    window.console.log(context);
                     return context;
                 })
                 .then((context) => {
+                    window.console.log(context);
                     return Templates.render(templateNames.contentRegion, context);
                 })
                 .catch(Notification.exception);

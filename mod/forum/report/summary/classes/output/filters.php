@@ -113,7 +113,7 @@ class filters implements renderable, templatable {
         }
 
         // Only fetch groups user has access to.
-        $cm = get_coursemodule_from_instance('forum', $this->context->instanceid, $this->course->id);
+        $cm = get_coursemodule_from_id('forum', $this->context->instanceid, $this->course->id);
         $groups = groups_get_activity_allowed_groups($cm);
 
         foreach ($groups as $group) {

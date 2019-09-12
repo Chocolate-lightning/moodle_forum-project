@@ -1,0 +1,7 @@
+{{#js}}
+    require(['gradingform_rubric/rubric'], function(Rubric) {
+        const thing = {};
+        thing.name = 'advancedgrading';
+        Rubric.init('{{uniqid}}', thing);
+    });
+{{/js}}

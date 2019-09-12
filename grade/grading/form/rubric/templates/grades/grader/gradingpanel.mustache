@@ -1,0 +1,75 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template gradingform_rubric/grades/grader/gradingpanel
+
+    Classes required for JS:
+    * TODO
+
+    Data attributes required for JS:
+    * TODO
+
+    Context variables required for this template:
+    * TODO
+
+    Example context (json):
+    {
+    }
+}}
+<form>
+    <input type="hidden" name="instanceid" value="{{instanceid}}">
+    <div class="gradingform_rubric-description">{{{teacherdescription}}}</div>
+    <div id="rubric-advancedgrading-{{uniqid}}" class="clearfix gradingform_rubric {{rubricmode}}" data-rubricmode="{{rubricmode}}">
+        <table class="criteria table table-striped" id="advancedgrading-criteria" aria-label="{{#str}}rubric, gradingform_rubric{{/str}}">
+            {{#criteria}}
+                <tr class="criterion" id="advancedgrading-criteria-{{id}}">
+                    <td class="description" id="advancedgrading-criteria-{{id}}-description-cell" tabindex="0" aria-label="Criterion">
+                        {{{description}}}
+                    </td>
+                    <td class="levels">
+                        <table id="advancedgrading-criteria-{{id}}-levels-table" aria-label="Levels group">
+                            <tr id="advancedgrading-criteria-{{id}}-levels" class="criterion-levels" role="radiogroup">
+                                {{#levels}}
+                                    <td id="advancedgrading-criteria-{{criterionid}}-levels-{{id}}" class="level {{#checked}}checked{{/checked}} {{#currentchecked}}currentchecked{{/currentchecked}}" tabindex="0" aria-label="Level " role="radio" aria-checked="{{checked}}">
+                                        <div class="level-wrapper">
+                                            <div class="radio d-none">
+                                                <input type="radio" id="advancedgrading-criteria-{{criterionid}}-levels-{{id}}-definition" name="advancedgrading[criteria][{{criterionid}}][levelid]" value="{{id}}" />
+                                            </div>
+                                            <div class="definition" id="advancedgrading-criteria-{{criterionid}}-levels-{{id}}-definition-container">{{{definition}}}</div>
+                                            <div class="score {{scoreerror}}">
+                                                <span id="advancedgrading-criteria-{{criterionid}}-levels-{{id}}-score" class="scorevalue">{{score}}</span>{{#str}}points, grades{{/str}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                {{/levels}}
+                            </tr>
+                        </table>
+                    </td>
+                    <td class="remark">
+                        <textarea name="advancedgrading[criteria][{{id}}][remark]" id="advancedgrading-criteria-{{id}}-remark" cols="10" rows="5">{{remark}}</textarea>
+                    </td>
+                </tr>
+            {{/criteria}}
+        </table>
+    </div>
+</form>
+
+{{#js}}
+    require(['gradingform_rubric/rubric'], function(Rubric) {
+    Rubric.init("rubric-advancedgrading-{{uniqid}}");
+    });
+{{/js}}

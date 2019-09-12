@@ -1,0 +1,46 @@
+<form>
+    <input type="hidden" name="instanceid" value="{{instanceid}}">
+    <div class="gradingform_rubric-description">{{{teacherdescription}}}</div>
+    <div id="rubric-advancedgrading-{{uniqid}}" class="clearfix gradingform_rubric {{rubricmode}}" data-rubricmode="{{rubricmode}}">
+        <table class="criteria table table-striped" id="advancedgrading-criteria" aria-label="{{#str}}rubric, gradingform_rubric{{/str}}">
+            {{#criteria}}
+                <tr class="criterion" id="advancedgrading-criteria-{{id}}">
+                    <td class="description" id="advancedgrading-criteria-{{id}}-description-cell" tabindex="0" aria-label="Criterion">
+                        {{{description}}}
+                    </td>
+                    <td class="levels">
+                        <table id="advancedgrading-criteria-{{id}}-levels-table" aria-label="Levels group">
+                            <tr id="advancedgrading-criteria-{{id}}-levels" class="criterion-levels" role="radiogroup">
+                                {{#levels}}
+                                    <td id="advancedgrading-criteria-{{criterionid}}-levels-{{id}}" class="level {{#checked}}checked{{/checked}} {{#currentchecked}}currentchecked{{/currentchecked}}" tabindex="0" aria-label="Level " role="radio" aria-checked="{{checked}}">
+                                        <div class="level-wrapper">
+                                            <div class="radio d-none">
+                                                <input type="radio" id="advancedgrading-criteria-{{criterionid}}-levels-{{id}}-definition" name="advancedgrading[criteria][{{criterionid}}][levelid]" value="{{id}}" />
+                                            </div>
+                                            <div class="definition" id="advancedgrading-criteria-{{criterionid}}-levels-{{id}}-definition-container">{{{definition}}}</div>
+                                            <div class="score {{scoreerror}}">
+                                                <span id="advancedgrading-criteria-{{criterionid}}-levels-{{id}}-score" class="scorevalue">{{score}}</span>{{#str}}points, grades{{/str}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                {{/levels}}
+                            </tr>
+                        </table>
+                    </td>
+                    {{! TODO: Change this depending on mode. }}
+                    {{#showremark}}
+                        <td class="remark">
+                            <textarea name="advancedgrading[criteria][{{id}}][remark]" id="advancedgrading-criteria-{{id}}-remark" cols="10" rows="5"></textarea>
+                        </td>
+                    {{/showremark}}
+                </tr>
+            {{/criteria}}
+        </table>
+    </div>
+</form>
+
+{{#js}}
+    require(['gradingform_rubric/rubric'], function(Rubric) {
+    Rubric.init("rubric-advancedgrading-{{uniqid}}");
+    });
+{{/js}}

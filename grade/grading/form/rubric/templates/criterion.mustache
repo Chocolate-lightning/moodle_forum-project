@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template gradingform_rubric/rubric
+    @template gradingform_rubric/criterion
 
     Template to render a list of posts for a discussion.
 
@@ -29,24 +29,14 @@
     {
     }
 }}
-<h6>New rubric below</h6>
-<div class="gradingform_rubric-description"></div>
-<div id="rubric-advancedgrading-{{uniqid}}" class="{{rubric-classes}}">
-    <table class="criteria" id="advancedgrading-criteria" aria-label="{{#str}}rubric, gradingform_rubric{{/str}}">
-        {{#criteria}}
-            <tr class="criterion first {{#even}}even{{/even}}{{^even}}odd{{/even}}" id="{{criteria-id}}">
-                {{#criterion}}
-                    {{> gradingform_rubric/criterion }}
-                {{/criterion}}
-            </tr>
-        {{/criteria}}
-    </table>
-</div>
-
-{{#js}}
-    require(['gradingform_rubric/rubric'], function(Rubric) {
-        const thing = {};
-        thing.name = 'advancedgrading';
-        Rubric.init("rubric-advancedgrading-{{uniqid}}", thing);
-    });
-{{/js}}
+<td id="{{id}}" class="{{classes}}" width="{{width}}" tabindex="0" aria-label="{{aria-label}}" role="radio" aria-checked="{{aria-checked}}">
+    <div class="level-wrapper">
+        <div class="radio">
+            <input type="radio" id="{{input-id}}" name="{{input-name}}" value="{{input-name}}" />
+        </div>
+        <div class="definition" id="{{definition-id}}">{{definition-value}}</div>
+        <div class="score">
+            <span id="{{score-id}}" class="scorevalue">{{score-value}}</span>{{#str}}points, grades{{/str}}
+        </div>
+    </div>
+</td>

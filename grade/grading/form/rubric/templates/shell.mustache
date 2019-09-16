@@ -34,9 +34,9 @@
 <div id="rubric-advancedgrading-{{uniqid}}" class="{{rubric-classes}}">
     <table class="criteria" id="advancedgrading-criteria" aria-label="{{#str}}rubric, gradingform_rubric{{/str}}">
         {{#criteria}}
-            <tr class="criterion first {{#even}}even{{/even}}{{^even}}odd{{/even}}" id="{{criteria-id}}">
+            <tr class="criterion {{#first}}first{{/first}} {{#even}}even{{/even}}{{^even}}odd{{/even}}" id="{{criteria-id}}">
                 {{#criterion}}
-                    {{> gradingform_rubric/criterion }}
+                    {{> gradingform_rubric/levels }}
                 {{/criterion}}
             </tr>
         {{/criteria}}

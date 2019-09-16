@@ -527,6 +527,10 @@ class gradingform_rubric_renderer extends plugin_renderer_base {
             }
             $criteriastr .= $this->criterion_template($mode, $options, $elementname, $criterion, $levelsstr, $criterionvalue);
         }
+        print_object($mode);
+        print_object($options);
+        print_object($elementname);
+        print_object($criteria);
         return $this->rubric_template($mode, $options, $elementname, $criteriastr);
     }
 

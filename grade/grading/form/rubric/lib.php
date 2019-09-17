@@ -941,7 +941,7 @@ class gradingform_rubric_instance extends gradingform_instance {
         $renderable = new gradingform_rubric\output\rubric_grading_panel_renderable($name, $values, $canedit, $hasformfields);
         return $OUTPUT->render_from_template(
             'gradingform_rubric/shell',
-            $renderable->export_for_template($this->get_renderer())
+            $renderable->export_for_template($OUTPUT)
         );
         global $USER, $OUTPUT;
         if (!$gradingformelement->_flagFrozen) {

@@ -32,9 +32,9 @@
 <h6>New rubric below</h6>
 <div class="gradingform_rubric-description"></div>
 <div id="rubric-advancedgrading-{{uniqid}}" class="{{rubric-classes}}">
-    <table class="criteria" id="advancedgrading-criteria" aria-label="{{#str}}rubric, gradingform_rubric{{/str}}">
+    <table class="criteria table table-striped" id="advancedgrading-criteria" aria-label="{{#str}}rubric, gradingform_rubric{{/str}}">
         {{#criteria}}
-            <tr class="criterion {{#first}}first{{/first}} {{#even}}even{{/even}}{{^even}}odd{{/even}}" id="{{criteria-id}}">
+            <tr class="criterion {{#first}}first{{/first}}" id="{{criteria-id}}">
                 {{#criterion}}
                     {{> gradingform_rubric/levels }}
                 {{/criterion}}
@@ -45,8 +45,6 @@
 
 {{#js}}
     require(['gradingform_rubric/rubric'], function(Rubric) {
-        const thing = {};
-        thing.name = 'advancedgrading';
-        Rubric.init("rubric-advancedgrading-{{uniqid}}", thing);
+        Rubric.init("#rubric-advancedgrading-{{uniqid}}");
     });
 {{/js}}

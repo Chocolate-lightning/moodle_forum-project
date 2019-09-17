@@ -929,6 +929,20 @@ class gradingform_rubric_instance extends gradingform_instance {
      * @return string
      */
     public function render_grading_element($page, $gradingformelement) {
+        global $OUTPUT;
+
+        $name = 'test';
+        $values = [
+            ['test' => true],
+            ['fake' => false],
+        ];
+        $canedit = false;
+        $hasformfields = false;
+        $renderable = new gradingform_rubric\output\rubric_grading_panel_renderable($name, $values, $canedit, $hasformfields);
+        return $OUTPUT->render_from_template(
+            'gradingform_rubric/shell',
+            $renderable->export_for_template($this->get_renderer())
+        );
         global $USER, $OUTPUT;
         if (!$gradingformelement->_flagFrozen) {
             $module = array('name'=>'gradingform_rubric', 'fullpath'=>'/grade/grading/form/rubric/js/rubric.js');

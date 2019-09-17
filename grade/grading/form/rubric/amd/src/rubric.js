@@ -22,18 +22,19 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-export const init = (uid, options) => {
-    const level = `#rubric-${options.name} .level`;
-    const radio = `#rubric-${options.name} .radio`;
-    registerActionListeners(level);
-    displayChangesBasedOnData(level, radio);
+export const init = (root) => {
+    const level = `#rubric-advancedgrading .level`;
+    const radio = `#rubric-advancedgrading .radio`;
+    const domElement = root.getContainer();
+    registerActionListeners(domElement, level);
+    displayChangesBasedOnData(domElement, level, radio);
 };
-const displayChangesBasedOnData = (level, radio) => {
-    const radioElements = document.querySelectorAll(radio);
+const displayChangesBasedOnData = (domElement, level, radio) => {
+    const radioElements = domElement.querySelectorAll(radio);
     radioElements.forEach((element) => {
         element.classList.add('d-none');
     });
-    const levelElements = document.querySelectorAll(level);
+    const levelElements = domElement.querySelectorAll(level);
     levelElements.forEach((element) => {
         if (element.querySelector('input[type=radio]').checked) {
             element.classList.add("checked");
@@ -41,14 +42,14 @@ const displayChangesBasedOnData = (level, radio) => {
     });
 };
 
-const registerActionListeners = (level) => {
-    document.addEventListener('click', (e) => {
+const registerActionListeners = (domElement, level) => {
+    domElement.addEventListener('click', (e) => {
         const button = e.target.closest(level);
         if (button) {
             levelClick(button);
         }
     });
-    document.addEventListener('keydown', (e) => {
+    domElement.addEventListener('keydown', (e) => {
         if (e.defaultPrevented) {
             return;
         }

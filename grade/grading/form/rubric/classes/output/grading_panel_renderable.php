@@ -21,7 +21,7 @@
  * @copyright 2019 Mathew May <mathew.solutions>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace core_grades\output;
+namespace gradingform_rubric\output;
 defined('MOODLE_INTERNAL') || die();
 
 use renderable;
@@ -37,12 +37,19 @@ use templatable;
  */
 class rubric_grading_panel_renderable implements renderable, templatable {
 
-    protected $temp;
+    protected $name;
 
-    protected $userid;
+    protected $values;
 
-    public function __construct($temp) {
-        $this->temp = $temp;
+    protected $canedit;
+
+    protected $hasformfields;
+
+    public function __construct($name, $values, $canedit, $hasformfields) {
+        $this->name = $name;
+        $this->values = $values;
+        $this->canedit = $canedit;
+        $this->hasformfields = $hasformfields;
     }
 
     /**
@@ -54,7 +61,10 @@ class rubric_grading_panel_renderable implements renderable, templatable {
     public function export_for_template(\renderer_base $output) {
         $data = new stdClass();
 
-        $data->temp = $this->temp;
+        $data->name = $this->name;
+        $data->values = $this->values;
+        $data->canedit = $this->canedit;
+        $data->hasformfields = $this->hasformfields;
 
         return $data;
     }

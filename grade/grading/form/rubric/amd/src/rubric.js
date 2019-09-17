@@ -23,9 +23,9 @@
  */
 
 export const init = (root) => {
-    const level = `#rubric-advancedgrading .level`;
-    const radio = `#rubric-advancedgrading .radio`;
-    const domElement = root.getContainer();
+    const domElement = document.getElementById(root);
+    const level = `#${root} .level`;
+    const radio = `#${root} .radio`;
     registerActionListeners(domElement, level);
     displayChangesBasedOnData(domElement, level, radio);
 };

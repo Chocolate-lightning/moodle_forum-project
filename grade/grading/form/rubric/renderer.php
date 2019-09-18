@@ -280,6 +280,8 @@ class gradingform_rubric_renderer extends plugin_renderer_base {
                 )
             );
         }
+
+        //TODO mimic?
         $score = html_writer::tag('span', $score, array('id' => '{NAME}-criteria-{CRITERION-id}-levels-{LEVEL-id}-score', 'class' => 'scorevalue'));
         $definitionclass = 'definition';
         if (isset($level['error_definition'])) {
@@ -307,10 +309,13 @@ class gradingform_rubric_renderer extends plugin_renderer_base {
             }
         }
 
+        // TODO mimic?
         $leveltemplateparams = array(
             'id' => '{NAME}-criteria-{CRITERION-id}-levels-{LEVEL-id}-definition-container'
         );
         $leveltemplate .= html_writer::div($definition, $definitionclass, $leveltemplateparams);
+
+
         $displayscore = true;
         if (!$options['showscoreteacher'] && in_array($mode, array(gradingform_rubric_controller::DISPLAY_EVAL, gradingform_rubric_controller::DISPLAY_EVAL_FROZEN, gradingform_rubric_controller::DISPLAY_REVIEW))) {
             $displayscore = false;

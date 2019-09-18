@@ -19,6 +19,9 @@
 
     Template to render a list of posts for a discussion.
 
+TODO:
+checked
+currentchecked
     Classes required for JS:
     * none
 
@@ -29,7 +32,7 @@
     {
     }
 }}
-<td id="{{id}}" class="{{classes}}" width="{{width}}" tabindex="0" aria-label="{{aria-label}}" role="radio" aria-checked="{{aria-checked}}">
+<td id="{{id}}" class="level {{checked}} {{currentchecked}}" width="{{width}}" tabindex="0" aria-label="{{aria-label}}" role="radio" aria-checked="{{aria-checked}}">
     <div class="level-wrapper">
         <div class="radio">
             <input type="radio" id="{{input-id}}" name="{{input-name}}" value="{{input-name}}" />

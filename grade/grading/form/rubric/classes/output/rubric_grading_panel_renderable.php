@@ -39,15 +39,40 @@ class rubric_grading_panel_renderable implements renderable, templatable {
 
     protected $name;
 
+    protected $criteria;
+
     protected $values;
+
+    protected $valuesinvalid;
+
+    protected $instanceupdate;
+
+    protected $rubrichaschanged;
+
+    protected $teacherdescription;
 
     protected $canedit;
 
     protected $hasformfields;
 
-    public function __construct($name, $values, $canedit, $hasformfields) {
+    public function __construct(
+        $name,
+        $criteria,
+        $values,
+        $valuesinvalid,
+        $instanceupdate,
+        $rubrichaschanged,
+        $teacherdescription,
+        $canedit,
+        $hasformfields
+    ) {
         $this->name = $name;
+        $this->criteria = $criteria;
         $this->values = $values;
+        $this->valuesinvalid = $valuesinvalid;
+        $this->instanceupdate = $instanceupdate;
+        $this->rubrichaschanged = $rubrichaschanged;
+        $this->teacherdescription = $teacherdescription;
         $this->canedit = $canedit;
         $this->hasformfields = $hasformfields;
     }
@@ -62,7 +87,12 @@ class rubric_grading_panel_renderable implements renderable, templatable {
         $data = new stdClass();
 
         $data->name = $this->name;
+        $data->criteria = $this->criteria;
         $data->values = $this->values;
+        $data->valuesinvalid = $this->valuesinvalid;
+        $data->instanceupdate = $this->instanceupdate;
+        $data->rubrichaschanged = $this->rubrichaschanged;
+        $data->teacherdescription = $this->teacherdescription;
         $data->canedit = $this->canedit;
         $data->hasformfields = $this->hasformfields;
 

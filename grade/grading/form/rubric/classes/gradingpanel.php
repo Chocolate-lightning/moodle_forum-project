@@ -29,21 +29,107 @@ class gradingpanel {
 
     protected $instance;
 
-    public function __construct($instance) {
+    protected $currentinstance;
+
+    protected $instanceoptions;
+
+    protected $canedit;
+
+    protected $gradingformelement;
+
+    public function __construct($instance, $canedit, $gradingformelement) {
         $this->instance = $instance;
+        $this->canedit = $canedit;
+        $this->gradingformelement = $gradingformelement;
+    }
+
+    protected function get_values() {
+        $value = $this->gradingformelement->getValue();
+        if ($value === null) {
+            $value = $this->instance->get_rubric_filling();
+        }
+        return $value;
+    }
+
+    protected function is_invalid() {
+        if ($value = $this->gradingformelement->getValue()){
+            return !$this->instance->validate_grading_element($value);
+        };
+        return false;
+    }
+
+    protected function get_criteria() {
+        return $this->instance->get_controller()->get_definition()->rubric_criteria;
+    }
+
+    protected function get_instance() {
+        return $this->instance->get_current_instance();
+    }
+
+    protected function instance_update_required() {
+        if($this->currentinstance->get_status() == \gradingform_instance::INSTANCE_STATUS_NEEDUPDATE) {
+            return true;
+        }
+        return false;
+    }
+
+    protected function stored_rubric_has_changes() {
+        $storedinstance = $this->currentinstance->get_rubric_filling();
+        foreach ($storedinstance['criteria'] as $criterionid => $curvalues) {
+            $value['criteria'][$criterionid]['savedlevelid'] = $curvalues['levelid'];
+            $newremark = null;
+            $newlevelid = null;
+            if (isset($value['criteria'][$criterionid]['remark'])) $newremark = $value['criteria'][$criterionid]['remark'];
+            if (isset($value['criteria'][$criterionid]['levelid'])) $newlevelid = $value['criteria'][$criterionid]['levelid'];
+            if ($newlevelid != $curvalues['levelid'] || $newremark != $curvalues['remark']) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function restored_from_draft() {
+        $instancehaschanges = $this->stored_rubric_has_changes();
+        if($instancehaschanges && $this->instance->get_data('isrestored')) {
+            return true;
+        }
+        return false;
+    }
+
+    protected function get_options() {
+        $this->instanceoptions = $this->instance->get_controller()->get_options();
+    }
+
+    protected  function show_description_teacher() {
+        if(!empty($this->instanceoptions['showdescriptionteacher'])) {
+            return $this->instance->get_controller()->get_formatted_description();
+        }
+        return false;
     }
 
     public function build_for_template($page) {
         global $OUTPUT;
 
+        $this->currentinstance = $this->get_instance();
+
+        $this->get_options();
+
+
         $name = 'test';
-        $values = [
-            ['test' => true],
-            ['fake' => false],
-        ];
+
         $canedit = false;
         $hasformfields = false;
-        $renderable = new rubric_grading_panel_renderable($name, $values, $canedit, $hasformfields);
+        $renderable = new rubric_grading_panel_renderable(
+            $name,
+            $this->get_criteria(),
+            $this->get_values(),
+            $this->is_invalid(),
+            $this->instance_update_required(),
+            $this->restored_from_draft(),
+            $this->show_description_teacher(),
+            $canedit,
+            $hasformfields
+        );
         return $OUTPUT->render_from_template(
             'gradingform_rubric/shell',
             $renderable->export_for_template($this->instance->get_controller()->get_renderer($page))

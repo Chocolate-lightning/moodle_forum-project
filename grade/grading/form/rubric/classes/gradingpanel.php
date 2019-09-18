@@ -21,3 +21,33 @@
  * @copyright 2019 Mathew May <mathew.solutions>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace gradingform_rubric;
+
+use gradingform_rubric\output\rubric_grading_panel_renderable;
+
+class gradingpanel {
+
+    protected $instance;
+
+    public function __construct($instance) {
+        $this->instance = $instance;
+    }
+
+    public function build_for_template($page) {
+        global $OUTPUT;
+
+        $name = 'test';
+        $values = [
+            ['test' => true],
+            ['fake' => false],
+        ];
+        $canedit = false;
+        $hasformfields = false;
+        $renderable = new rubric_grading_panel_renderable($name, $values, $canedit, $hasformfields);
+        return $OUTPUT->render_from_template(
+            'gradingform_rubric/shell',
+            $renderable->export_for_template($this->instance->get_controller()->get_renderer($page))
+        );
+    }
+
+}

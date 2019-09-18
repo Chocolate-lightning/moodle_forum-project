@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use gradingform_rubric\gradingpanel;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/grade/grading/form/lib.php');
@@ -929,24 +931,11 @@ class gradingform_rubric_instance extends gradingform_instance {
      * @return string
      */
     public function render_grading_element($page, $gradingformelement) {
-        global $OUTPUT;
-
-        $name = 'test';
-        $values = [
-            ['test' => true],
-            ['fake' => false],
-        ];
-        $canedit = false;
-        $hasformfields = false;
-        $renderable = new gradingform_rubric\output\rubric_grading_panel_renderable($name, $values, $canedit, $hasformfields);
-        return $OUTPUT->render_from_template(
-            'gradingform_rubric/shell',
-            $renderable->export_for_template($OUTPUT)
-        );
+        return (new gradingpanel($this))->build_for_template($page);
         global $USER, $OUTPUT;
         if (!$gradingformelement->_flagFrozen) {
             $module = array('name'=>'gradingform_rubric', 'fullpath'=>'/grade/grading/form/rubric/js/rubric.js');
-            //$page->requires->js_init_call('M.gradingform_rubric.init', array(array('name' => $gradingformelement->getName())), true, $module);
+            $page->requires->js_init_call('M.gradingform_rubric.init', array(array('name' => $gradingformelement->getName())), true, $module);
             $mode = gradingform_rubric_controller::DISPLAY_EVAL;
         } else {
             if ($gradingformelement->_persistantFreeze) {
@@ -990,7 +979,6 @@ class gradingform_rubric_instance extends gradingform_instance {
             $html .= html_writer::tag('div', $this->get_controller()->get_formatted_description(), array('class' => 'gradingform_rubric-description'));
         }
         $html .= $this->get_controller()->get_renderer($page)->display_rubric($criteria, $options, $mode, $gradingformelement->getName(), $value);
-        $html .= $OUTPUT->render_from_template('gradingform_rubric/shell', null);
         return $html;
     }
 }

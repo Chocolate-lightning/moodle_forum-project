@@ -30,34 +30,24 @@
     }
 }}
 <h6>Testing stuff</h6>
-<p>Name</p>
-{{name}}
-<p>criteria</p>
-{{criteria}}
-<p>values</p>
-{{values}}
-<p>valuesinvalid</p>
-{{valuesinvalid}}
-<p>instanceupdate</p>
-{{instanceupdate}}
-<p>rubrichaschanged</p>
-{{rubrichaschanged}}
-<p>canedit</p>
-{{canedit}}
-<p>hasformfields</p>
-{{hasformfields}}
-<p>teacherdescription</p>
-{{teacherdescription}}
-<h6>New rubric below</h6>
 <div class="gradingform_rubric-description"></div>
 <div id="rubric-advancedgrading-{{uniqid}}" class="clearfix gradingform_rubric {{rubric-mode}}">
     <table class="criteria table table-striped" id="advancedgrading-criteria" aria-label="{{#str}}rubric, gradingform_rubric{{/str}}">
         {{#criteria}}
+            {{.}}
             <tr class="criterion" id="{{criteria-id}}">
-                {{#criterion}}
+                <h1>{{description}}</h1>
+                {{#levels}}
+                    {{.}}
                     {{> gradingform_rubric/levels }}
-                {{/criterion}}
+                {{/levels}}
+                {{^levels}}
+                    <h1>LIAR</h1>
+                {{/levels}}
             </tr>
+        {{/criteria}}
+        {{^criteria}}
+            <h1>Something aint right here</h1>
         {{/criteria}}
     </table>
 </div>

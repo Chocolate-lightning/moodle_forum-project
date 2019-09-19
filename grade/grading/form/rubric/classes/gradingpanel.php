@@ -37,6 +37,8 @@ class gradingpanel {
 
     protected $mode;
 
+    protected $rubric;
+
     protected $canedit;
 
     protected $gradingformelement;
@@ -122,13 +124,11 @@ class gradingpanel {
     protected function criteria_mapper() {
         $builtcriteria = array_map(function($criterion) {
             if(isset($this->values['criteria'][$criterion['id']])) {
-                // TODO FIX THIS
-                //$criterionvalue = $this->values['criteria'][$level['id']];
-                print_object('nice');
+                $criterionvalue = $this->values['criteria'][$criterion['id']];
             } else {
-                print_object('null');
                 $criterionvalue = null;
             }
+            $criterion['criteria-id'] = 'advancedgrading-criteria-';
             $index = 1;
             return $this->levels_mapper($criterion, $criterionvalue, $index);
 
@@ -138,7 +138,7 @@ class gradingpanel {
 
     protected function levels_mapper($criterion, $criterionvalue, $index) {
         $criterion['levels'] = array_map(function($level) use (&$criterion, &$criterionvalue) {
-            $level['checked'] = (isset($criterionvalue['levelid']) && ((int)$criterionvalue['levelid'] === $level['id']));
+            $level['checked'] = (isset($criterionvalue['levelid']) && ((int)$criterionvalue['levelid'] === (int)$level['id']));
             if ($level['checked'] && (
                 $this->mode == \gradingform_rubric_controller::DISPLAY_EVAL_FROZEN ||
                 $this->mode == \gradingform_rubric_controller::DISPLAY_REVIEW ||
@@ -147,15 +147,10 @@ class gradingpanel {
                 $level['checked'] = true;
                 //in mode DISPLAY_EVAL the class 'checked' will be added by JS if it is enabled. If JS is not enabled, the 'checked' class will only confuse
             }
-            if (isset($criterionvalue['savedlevelid']) && ((int)$criterionvalue['savedlevelid'] === $level['id'])) {
+            if (isset($criterionvalue['savedlevelid']) && ((int)$criterionvalue['savedlevelid'] === (int)$level['id'])) {
                 $level['currentchecked'] = true;
             }
             $level['tdwidth'] = round(100/count($criterion['levels']));
-
-
-            $level['levelstr?'] = '';
-
-
 
             if (!isset($level['id'])) {
                 $level = array('id' => '{LEVEL-id}', 'definition' => '{LEVEL-definition}', 'score' => '{LEVEL-score}', 'class' => '{LEVEL-class}', 'checked' => false);
@@ -166,34 +161,6 @@ class gradingpanel {
                         $level[$key] = '';
                     }
                 }
-            }
-
-            if($this->mode == \gradingform_rubric_controller::DISPLAY_EDIT_FULL) {
-                $level['definition'] = [
-                    'id' => '{NAME}-criteria-{CRITERION-id}-levels-{LEVEL-id}-definition',
-                    'name' => '{NAME}[criteria][{CRITERION-id}][levels][{LEVEL-id}][definition]',
-                    'aria-label' => get_string('leveldefinition', 'gradingform_rubric', $levelindex),
-                    'cols' => '10', 'rows' => '4'
-                ];
-
-                $level['score'] = [
-                    'type' => 'text',
-                    'id' => '{NAME}[criteria][{CRITERION-id}][levels][{LEVEL-id}][score]',
-                    'name' => '{NAME}[criteria][{CRITERION-id}][levels][{LEVEL-id}][score]',
-                    'aria-label' => get_string('scoreinputforlevel', 'gradingform_rubric', $levelindex),
-                    'size' => '3',
-                    'value' => $level['score']
-                ];
-            } else {
-                /*
-                 * TODO
-                 */
-                if ($this->mode == \gradingform_rubric_controller::DISPLAY_EDIT_FROZEN) {
-                    //$leveltemplate .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => '{NAME}[criteria][{CRITERION-id}][levels][{LEVEL-id}][definition]', 'value' => $level['definition']));
-                    //$leveltemplate .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => '{NAME}[criteria][{CRITERION-id}][levels][{LEVEL-id}][score]', 'value' => $level['score']));
-                }
-                $definition = s($level['definition']);
-                $score = $level['score'];
             }
 
             if ($this->mode == \gradingform_rubric_controller::DISPLAY_EVAL) {
@@ -207,6 +174,8 @@ class gradingpanel {
                     $level['radio']['checked'] = true;
                 }
             }
+
+            $level['scoreid'] = '{NAME}-criteria-{CRITERION-id}-levels-{LEVEL-id}-score';
             if($this->mode != \gradingform_rubric_controller::DISPLAY_EDIT_FULL &&
                 $this->mode != \gradingform_rubric_controller::DISPLAY_EDIT_FROZEN) {
 
@@ -228,13 +197,24 @@ class gradingpanel {
                 }
             }
 
+            $level['definitioncontainerid'] = '{NAME}-criteria-{CRITERION-id}-levels-{LEVEL-id}-definition-container';
+            $displayscore = true;
+            if (!$this->instanceoptions['showscoreteacher'] && in_array($this->mode, array(\gradingform_rubric_controller::DISPLAY_EVAL, \gradingform_rubric_controller::DISPLAY_EVAL_FROZEN, \gradingform_rubric_controller::DISPLAY_REVIEW))) {
+                $displayscore = false;
+            }
+            if (!$this->instanceoptions['showscorestudent'] && in_array($this->mode, array(\gradingform_rubric_controller::DISPLAY_VIEW, \gradingform_rubric_controller::DISPLAY_PREVIEW_GRADED))) {
+                $displayscore = false;
+            }
+            if ($displayscore) {
+                if (isset($level['error_score'])) {
+                    $level['scoreerror'] = true;
+                }
+            }
+            $level['table-id'] = 'advancedgrading-criteria-1-levels-table';
+            $level['table-row-id'] = 'advancedgrading-criteria-1-levels';
             return $level;
         }, $criterion['levels']);
-        print_object($criterion['levels']);
-    }
-
-    protected function level_mapper() {
-
+        return $criterion;
     }
 
     public function build_for_template($page) {
@@ -249,7 +229,10 @@ class gradingpanel {
 
         $this->get_values();
 
-        $this->criteria_mapper();
+        $criteria = $this->criteria_mapper();
+
+        $this->rubric_builder();
+        print_object($this->rubric);
 
 
         $name = 'test';
@@ -271,6 +254,24 @@ class gradingpanel {
             'gradingform_rubric/shell',
             $renderable->export_for_template($this->instance->get_controller()->get_renderer($page))
         );
+    }
+
+    protected function rubric_builder() {
+        switch ($this->mode) {
+            case \gradingform_rubric_controller::DISPLAY_PREVIEW:
+            case \gradingform_rubric_controller::DISPLAY_PREVIEW_GRADED:
+                $this->rubric['rubric-mode'] = 'editor preview';  break;
+            case \gradingform_rubric_controller::DISPLAY_EVAL:
+                $this->rubric['rubric-mode'] = 'evaluate editable'; break;
+            case \gradingform_rubric_controller::DISPLAY_EVAL_FROZEN:
+                $this->rubric['rubric-mode'] = 'evaluate frozen';  break;
+            case \gradingform_rubric_controller::DISPLAY_REVIEW:
+                $this->rubric['rubric-mode'] = 'review';  break;
+            case \gradingform_rubric_controller::DISPLAY_VIEW:
+                $this->rubric['rubric-mode'] = 'view';  break;
+        }
+
+        $this->rubric['criteria'] = $this->criteria_mapper();
     }
 
 }

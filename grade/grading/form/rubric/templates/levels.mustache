@@ -29,12 +29,12 @@
     {
     }
 }}
-<td class="description" id="{{criteria-description-id}}" tabindex="0" aria-label="{{criteria-description-aria}}">
-    {{criteria-description}}
+<td class="description" id="{{id}}" tabindex="0" aria-label="Criterion {{description}}">
+    {{description}}
 </td>
 <td class="levels">
-    <table id="{{criteria-levels-table-id}}" aria-label="{{criteria-levels-table-aria}}">
-        <tr id="{{criteria-levels-id}}" role="radiogroup">
+    <table id="{{table-id}}" aria-label="Levels group">
+        <tr id="{{table-row-id}}" role="radiogroup">
             {{#criterion}}
                 {{> gradingform_rubric/criterion }}
             {{/criterion}}

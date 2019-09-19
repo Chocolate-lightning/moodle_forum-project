@@ -88,19 +88,16 @@ class rubric_grading_panel_renderable implements renderable, templatable {
      * @return stdClass
      */
     public function export_for_template(\renderer_base $output) {
-        $data = new stdClass();
-
-        /*$data->name = $this->name;
-        $data->criteria = $this->criteria;
-        $data->values = $this->values;
-        $data->valuesinvalid = $this->valuesinvalid;
-        $data->instanceupdate = $this->instanceupdate;
-        $data->rubrichaschanged = $this->rubrichaschanged;
-        $data->teacherdescription = $this->teacherdescription;
-        $data->canedit = $this->canedit;
-        $data->hasformfields = $this->hasformfields;*/
-
-
-        return $this->builtobject;
+        return (object) [
+            'name' => $this->name,
+            'criteria' => $this->criteria,
+            'values' => $this->values,
+            'valuesinvalid' => $this->valuesinvalid,
+            'instanceupdate' => $this->instanceupdate,
+            'rubrichaschanged' => $this->rubrichaschanged,
+            'teacherdescription' => $this->teacherdescription,
+            'canedit' => $this->canedit,
+            'hasformfields' => $this->hasformfields,
+        ];
     }
 }

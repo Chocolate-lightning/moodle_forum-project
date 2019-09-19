@@ -29,8 +29,6 @@ class gradingpanel {
 
     protected $instance;
 
-    protected $currentinstance;
-
     protected $instanceoptions;
 
     protected $values;
@@ -66,26 +64,63 @@ class gradingpanel {
     }
 
     protected function get_criteria() {
-        return $this->instance->get_controller()->get_definition()->rubric_criteria;
+        $criteria = $this->instance->get_controller()->get_definition()->rubric_criteria;
+        $return = [];
+        foreach ($criteria as $id => $criterion) {
+            $return[] = [
+                'id' => $id,
+                'description' => $criterion['description'],
+                'levels' => $this->get_levels_for_criterion($criterion['levels']),
+            ];
+        }
+        return $return;
+    }
+
+    protected function get_levels_for_criterion(array $levels): array {
+        $result = [];
+        foreach ($levels as $id => $level) {
+            $result[] = [
+                'id' => $id,
+                'score' => $level['score'],
+                'definition' => $level['definition'],
+                'checked' => $level['checked'],
+            ];
+        }
+
+        return $result;
     }
 
     protected function set_mode() {
         $this->mode = \gradingform_rubric_controller::DISPLAY_EVAL;
     }
 
-    protected function get_instance() {
+    protected function get_current_instance() {
         return $this->instance->get_current_instance();
     }
 
+    protected function has_current_instance(): bool {
+        return $this->get_current_instance() !== null;
+    }
+
     protected function instance_update_required() {
-        if($this->currentinstance->get_status() == \gradingform_instance::INSTANCE_STATUS_NEEDUPDATE) {
+        if (!$this->has_current_instance) {
+            // No instance created yet - not ready for grading yet.
+            return false;
+        }
+
+        if ($this->get_current_instance()->get_status() == \gradingform_instance::INSTANCE_STATUS_NEEDUPDATE) {
             return true;
         }
+
         return false;
     }
 
     protected function stored_rubric_has_changes() {
-        $storedinstance = $this->currentinstance->get_rubric_filling();
+        if (!$this->has_current_instance()) {
+            // No instance created yet - not ready for grading yet.
+            return false;
+        }
+        $storedinstance = $this->get_current_instance()->get_rubric_filling();
         foreach ($storedinstance['criteria'] as $criterionid => $curvalues) {
             $value['criteria'][$criterionid]['savedlevelid'] = $curvalues['levelid'];
             $newremark = null;
@@ -222,8 +257,6 @@ class gradingpanel {
     public function build_for_template($page) {
         global $OUTPUT;
 
-        $this->currentinstance = $this->get_instance();
-
         $this->get_options();
 
         // Till we figure out how we are gonna freeze stuff manually set the mode.
@@ -253,7 +286,7 @@ class gradingpanel {
             $hasformfields,
             $this->rubric
         );
-        print_object($this->rubric);
+        print_object($renderable->export_for_template($this->instance->get_controller()->get_renderer($page)));
         return $OUTPUT->render_from_template(
             'gradingform_rubric/shell',
             $renderable->export_for_template($this->instance->get_controller()->get_renderer($page))

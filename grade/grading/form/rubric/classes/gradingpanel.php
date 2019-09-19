@@ -24,6 +24,7 @@
 namespace gradingform_rubric;
 
 use gradingform_rubric\output\rubric_grading_panel_renderable;
+use moodle_page;
 
 class gradingpanel {
 
@@ -31,63 +32,44 @@ class gradingpanel {
 
     protected $instanceoptions;
 
-    protected $values;
-
     protected $mode;
 
     protected $rubric;
 
     protected $canedit;
 
-    protected $gradingformelement;
+    protected $submittedvalue;
+    protected $name;
 
     public function __construct($instance, $canedit, $gradingformelement) {
+        // TODO Kill off gradingformelement - we only need the getValue and getName functions on it.
         $this->instance = $instance;
         $this->canedit = $canedit;
         $this->gradingformelement = $gradingformelement;
+
+        $this->submittedvalue = $gradingformelement->getValue();
+        $this->name = $gradingformelement->getName();
     }
 
     protected function get_values() {
-        $value = $this->gradingformelement->getValue();
-        if ($value === null) {
-            $value = $this->instance->get_rubric_filling();
+        $values = $this->submittedvalue;
+        if ($values === null) {
+            $values = $this->instance->get_rubric_filling();
         }
 
-        $this->values = $value;
+        return $values;
     }
 
     protected function is_invalid() {
-        if ($value = $this->gradingformelement->getValue()){
-            return !$this->instance->validate_grading_element($value);
+        if ($values = $this->submittedvalue) {
+            return !$this->instance->validate_grading_element($values);
         };
+
         return false;
     }
 
     protected function get_criteria() {
-        $criteria = $this->instance->get_controller()->get_definition()->rubric_criteria;
-        $return = [];
-        foreach ($criteria as $id => $criterion) {
-            $return[] = [
-                'id' => $id,
-                'description' => $criterion['description'],
-                'levels' => $this->get_levels_for_criterion($criterion['levels']),
-            ];
-        }
-        return $return;
-    }
-
-    protected function get_levels_for_criterion(array $levels): array {
-        $result = [];
-        foreach ($levels as $id => $level) {
-            $result[] = [
-                'id' => $id,
-                'score' => $level['score'],
-                'definition' => $level['definition'],
-                'checked' => $level['checked'],
-            ];
-        }
-
-        return $result;
+        return $this->instance->get_controller()->get_definition()->rubric_criteria;
     }
 
     protected function set_mode() {
@@ -156,14 +138,12 @@ class gradingpanel {
         return false;
     }
 
-    protected function criteria_mapper() {
-        $builtcriteria = array_map(function($criterion) {
-            if(isset($this->values['criteria'][$criterion['id']])) {
-                $criterionvalue = $this->values['criteria'][$criterion['id']];
-            } else {
-                $criterionvalue = null;
-            }
+    protected function criteria_mapper(array $values) {
+        $builtcriteria = array_map(function($criterion) use ($values) {
+            // TODO Move to renderable or get_criteria as appropriate.
+            $criterionvalue = $values['criteria'][$criterion['id']] ?: null;
             $criterion['criteria-id'] = 'advancedgrading-criteria-';
+
             $index = 1;
             return $this->levels_mapper($criterion, $criterionvalue, $index);
 
@@ -172,6 +152,7 @@ class gradingpanel {
     }
 
     protected function levels_mapper($criterion, $criterionvalue, $index) {
+        // TODO Move to renderable or get_criteria as appropriate.
         $criterion['levels'] = array_map(function($level) use (&$criterion, &$criterionvalue) {
             $level['checked'] = (isset($criterionvalue['levelid']) && ((int)$criterionvalue['levelid'] === (int)$level['id']));
             if ($level['checked'] && (
@@ -254,46 +235,58 @@ class gradingpanel {
         return $criterion;
     }
 
-    public function build_for_template($page) {
+    protected function can_edit(): bool {
+        // TODO
+        return false;
+    }
+
+    protected function include_form_fields(): bool {
+        // TODO. This should be based on the mode.
+        return true;
+    }
+
+    protected function get_name(): string {
+        // TODO. Check if this needs any formatting.
+        return $this->name;
+    }
+
+    public function get_data(moodle_page $page) {
         global $OUTPUT;
 
+        // TODO We should find a way to avoid these kinds of things. They change the state of the current object.
         $this->get_options();
 
         // Till we figure out how we are gonna freeze stuff manually set the mode.
         $this->set_mode();
 
-        $this->get_values();
+        // TODO What is rubric_builder doing?
+        $values = $this->get_values();
+        $this->rubric_builder($values);
 
-        $criteria = $this->criteria_mapper();
-
-        $this->rubric_builder();
-        //print_object($this->rubric);
-
-
-        $name = 'test';
-
-        $canedit = false;
-        $hasformfields = false;
         $renderable = new rubric_grading_panel_renderable(
-            $name,
+            $this->get_name(),
             $this->get_criteria(),
-            $this->values,
+            $values,
+
             $this->is_invalid(),
             $this->instance_update_required(),
             $this->restored_from_draft(),
             $this->show_description_teacher(),
-            $canedit,
-            $hasformfields,
+            $this->can_edit(),
+            $this->include_form_fields(),
             $this->rubric
         );
-        print_object($renderable->export_for_template($this->instance->get_controller()->get_renderer($page)));
-        return $OUTPUT->render_from_template(
-            'gradingform_rubric/shell',
-            $renderable->export_for_template($this->instance->get_controller()->get_renderer($page))
-        );
+
+        return $renderable->export_for_template($page->get_renderer('gradingform_rubric'));
     }
 
-    protected function rubric_builder() {
+    public function build_for_template(moodle_page $page) {
+        return $page
+            ->get_renderer('gradingform_rubric')
+            ->render_from_template('gradingform_rubric/shell', $this->get_data($page));
+    }
+
+    protected function rubric_builder($values) {
         switch ($this->mode) {
             case \gradingform_rubric_controller::DISPLAY_PREVIEW:
             case \gradingform_rubric_controller::DISPLAY_PREVIEW_GRADED:
@@ -308,7 +301,7 @@ class gradingpanel {
                 $this->rubric['rubric-mode'] = 'view';  break;
         }
 
-        $this->rubric['criteria'] = $this->criteria_mapper();
+        $this->rubric['criteria'] = $this->criteria_mapper($values);
     }
 
 }

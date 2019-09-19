@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 use renderable;
 use stdClass;
 use templatable;
+use renderer_base as renderer;
 
 /**
  * Callable class to be used in our webservice.
@@ -43,7 +44,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
 
     protected $values;
 
-    protected $valuesinvalid;
+    protected $arevaluesinvalid;
 
     protected $instanceupdate;
 
@@ -61,7 +62,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
         $name,
         $criteria,
         $values,
-        $valuesinvalid,
+        $arevaluesinvalid,
         $instanceupdate,
         $rubrichaschanged,
         $teacherdescription,
@@ -72,7 +73,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
         $this->name = $name;
         $this->criteria = $criteria;
         $this->values = $values;
-        $this->valuesinvalid = $valuesinvalid;
+        $this->arevaluesinvalid = $arevaluesinvalid;
         $this->instanceupdate = $instanceupdate;
         $this->rubrichaschanged = $rubrichaschanged;
         $this->teacherdescription = $teacherdescription;
@@ -82,20 +83,65 @@ class rubric_grading_panel_renderable implements renderable, templatable {
     }
 
     /**
+     * Convert the compiled criteria data into the structure we require.
+     *
+     * Remember: No business logic here.
+     *
+     * @return array
+     */
+    protected function get_criteria(): array {
+        // The criteria we were passed is a nested object.
+        // Extra the parts we want and add any current values to the data structure.
+        $result = [];
+        foreach ($this->criteria as $id => $criterion) {
+            $result[] = [
+                'id' => $id,
+                'description' => format_text($criterion['description'], $criterion['descriptionformat']),
+                'levels' => $this->get_levels_from_criterion($criterion),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get the level definition for a single criterion.
+     *
+     * @param array $criterion
+     * @return array
+     */
+    protected function get_levels_from_criterion(array $criterion): array {
+        $result = [];
+        foreach ($criterion['levels'] as $id => $level) {
+            $result[] = [
+                'id' => $id,
+                'score' => $level['score'],
+                'definition' => format_text($level['definition'], $level['definitionformat']),
+                'checked' => $level['checked'],
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
      * Export the data.
      *
-     * @param renderer_base $output
+     * @param renderer $output
      * @return stdClass
      */
-    public function export_for_template(\renderer_base $output) {
+    public function export_for_template(renderer $renderer) {
         return (object) [
+            // TODO Format string.
             'name' => $this->name,
-            'criteria' => $this->criteria,
-            'values' => $this->values,
-            'valuesinvalid' => $this->valuesinvalid,
+            'criteria' => $this->get_criteria(),
+
+            'arevaluesinvalid' => $this->arevaluesinvalid,
+
             'instanceupdate' => $this->instanceupdate,
             'rubrichaschanged' => $this->rubrichaschanged,
             'teacherdescription' => $this->teacherdescription,
+
             'canedit' => $this->canedit,
             'hasformfields' => $this->hasformfields,
         ];

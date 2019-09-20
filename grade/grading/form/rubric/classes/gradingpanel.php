@@ -261,11 +261,12 @@ class gradingpanel {
 
         // TODO What is rubric_builder doing?
         $values = $this->get_values();
-        $this->rubric_builder($values);
+        //$this->rubric['criteria'] = $this->criteria_mapper($values);
 
         $renderable = new rubric_grading_panel_renderable(
             $this->get_name(),
             $this->get_criteria(),
+            $this->rubric_mode(),
             $values,
 
             $this->is_invalid(),
@@ -273,8 +274,7 @@ class gradingpanel {
             $this->restored_from_draft(),
             $this->show_description_teacher(),
             $this->can_edit(),
-            $this->include_form_fields(),
-            $this->rubric
+            $this->include_form_fields()
         );
 
         return $renderable->export_for_template($page->get_renderer('gradingform_rubric'));
@@ -283,25 +283,25 @@ class gradingpanel {
     public function build_for_template(moodle_page $page) {
         return $page
             ->get_renderer('gradingform_rubric')
-            ->render_from_template('gradingform_rubric/shell', $this->get_data($page));
+            ->render_from_template('gradingform_rubric/rubric', $this->get_data($page));
     }
 
-    protected function rubric_builder($values) {
+    protected function rubric_mode() {
+        $mode = '';
         switch ($this->mode) {
             case \gradingform_rubric_controller::DISPLAY_PREVIEW:
             case \gradingform_rubric_controller::DISPLAY_PREVIEW_GRADED:
-                $this->rubric['rubric-mode'] = 'editor preview';  break;
+                $mode = 'editor preview';  break;
             case \gradingform_rubric_controller::DISPLAY_EVAL:
-                $this->rubric['rubric-mode'] = 'evaluate editable'; break;
+                $mode = 'evaluate editable'; break;
             case \gradingform_rubric_controller::DISPLAY_EVAL_FROZEN:
-                $this->rubric['rubric-mode'] = 'evaluate frozen';  break;
+                $mode = 'evaluate frozen';  break;
             case \gradingform_rubric_controller::DISPLAY_REVIEW:
-                $this->rubric['rubric-mode'] = 'review';  break;
+                $mode = 'review';  break;
             case \gradingform_rubric_controller::DISPLAY_VIEW:
-                $this->rubric['rubric-mode'] = 'view';  break;
+                $mode = 'view';  break;
         }
-
-        $this->rubric['criteria'] = $this->criteria_mapper($values);
+        return $mode;
     }
 
 }

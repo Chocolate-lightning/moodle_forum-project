@@ -42,6 +42,8 @@ class rubric_grading_panel_renderable implements renderable, templatable {
 
     protected $criteria;
 
+    protected $mode;
+
     protected $values;
 
     protected $arevaluesinvalid;
@@ -56,22 +58,21 @@ class rubric_grading_panel_renderable implements renderable, templatable {
 
     protected $hasformfields;
 
-    protected $builtobject;
-
     public function __construct(
         $name,
         $criteria,
+        $mode,
         $values,
         $arevaluesinvalid,
         $instanceupdate,
         $rubrichaschanged,
         $teacherdescription,
         $canedit,
-        $hasformfields,
-        $builtobject
+        $hasformfields
     ) {
         $this->name = $name;
         $this->criteria = $criteria;
+        $this->mode = $mode;
         $this->values = $values;
         $this->arevaluesinvalid = $arevaluesinvalid;
         $this->instanceupdate = $instanceupdate;
@@ -79,7 +80,6 @@ class rubric_grading_panel_renderable implements renderable, templatable {
         $this->teacherdescription = $teacherdescription;
         $this->canedit = $canedit;
         $this->hasformfields = $hasformfields;
-        $this->builtobject = $builtobject;
     }
 
     /**
@@ -116,6 +116,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
             $result[] = [
                 'id' => $id,
                 'score' => $level['score'],
+                'aria-label' => $level['definition'],
                 'definition' => format_text($level['definition'], $level['definitionformat']),
                 'checked' => $level['checked'],
             ];
@@ -131,10 +132,11 @@ class rubric_grading_panel_renderable implements renderable, templatable {
      * @return stdClass
      */
     public function export_for_template(renderer $renderer) {
-        return (object) [
+        $rtnobj = (object) [
             // TODO Format string.
             'name' => $this->name,
             'criteria' => $this->get_criteria(),
+            'rubric-mode' => $this->mode,
 
             'arevaluesinvalid' => $this->arevaluesinvalid,
 
@@ -145,5 +147,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
             'canedit' => $this->canedit,
             'hasformfields' => $this->hasformfields,
         ];
+        print_object($rtnobj);
+        return $rtnobj;
     }
 }

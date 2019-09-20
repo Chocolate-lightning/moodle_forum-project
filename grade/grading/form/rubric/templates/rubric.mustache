@@ -35,18 +35,22 @@
     <table class="criteria table table-striped" id="advancedgrading-criteria" aria-label="{{#str}}rubric, gradingform_rubric{{/str}}">
         {{#criteria}}
             <tr class="criterion" id="criteria-{{id}}">
-                <th>{{description}}</th>
-                {{#levels}}
-                    <td>
-                        {{> gradingform_rubric/levels }}
-                    </td>
-                {{/levels}}
+                <th>{{{description}}}</th>
+                <td class="description" id="{{id}}" tabindex="0" aria-label="Criterion {{aria-label}}">
+                    {{{definition}}}
+                </td>
+                <td class="levels">
+                    <table id="{{table-id}}" aria-label="Levels group">
+                        <tr id="{{table-row-id}}" role="radiogroup">
+                            {{#levels}}
+                                {{> gradingform_rubric/level }}
+                            {{/levels}}
+                        </tr>
+                    </table>
+                </td>
             </tr>
         {{/criteria}}
     </table>
-    {{^criteria}}
-        <h1>Something aint right here</h1>
-    {{/criteria}}
 </div>
 
 {{#js}}

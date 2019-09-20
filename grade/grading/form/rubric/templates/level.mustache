@@ -32,14 +32,14 @@ currentchecked
     {
     }
 }}
-<td id="{{id}}" class="level {{checked}} {{currentchecked}}" width="{{width}}" tabindex="0" aria-label="{{aria-label}}" role="radio" aria-checked="{{aria-checked}}">
+<td id="advancedgrading-criteria-{{criterionid}}-levels-{{id}}" class="level {{checked}} {{currentchecked}}"tabindex="0" aria-label="{{aria-label}}" role="radio" aria-checked="{{aria-checked}}">
     <div class="level-wrapper">
         <div class="radio">
             <input type="radio" id="{{input-id}}" name="{{input-name}}" value="{{input-name}}" />
         </div>
-        <div class="definition" id="{{definition-id}}">{{definition-value}}</div>
+        <div class="definition" id="{{definition-id}}">{{{definition}}}</div>
         <div class="score {{scoreerror}}">
-            <span id="{{score-id}}" class="scorevalue">{{score-value}}</span>{{#str}}points, grades{{/str}}
+            <span id="{{id}}" class="scorevalue">{{score}}</span>{{#str}}points, grades{{/str}}
         </div>
     </div>
 </td>

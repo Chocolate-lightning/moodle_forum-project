@@ -115,6 +115,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
         foreach ($criterion['levels'] as $id => $level) {
             $result[] = [
                 'id' => $id,
+                'criterionid' => $criterion['id'],
                 'score' => $level['score'],
                 'aria-label' => $level['definition'],
                 'definition' => format_text($level['definition'], $level['definitionformat']),

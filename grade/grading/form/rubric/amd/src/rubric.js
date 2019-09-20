@@ -24,17 +24,11 @@
 
 export const init = (root) => {
     const domElement = document.getElementById(root);
-    const level = `#${root} .level`;
-    const radio = `#${root} .radio`;
-    registerActionListeners(domElement, level);
-    displayChangesBasedOnData(domElement, level, radio);
+    registerActionListeners(domElement);
+    displayChangesBasedOnData(domElement);
 };
-const displayChangesBasedOnData = (domElement, level, radio) => {
-    const radioElements = domElement.querySelectorAll(radio);
-    radioElements.forEach((element) => {
-        element.classList.add('d-none');
-    });
-    const levelElements = domElement.querySelectorAll(level);
+const displayChangesBasedOnData = (domElement) => {
+    const levelElements = domElement.querySelectorAll('.level');
     levelElements.forEach((element) => {
         if (element.querySelector('input[type=radio]').checked) {
             element.classList.add("checked");
@@ -42,9 +36,9 @@ const displayChangesBasedOnData = (domElement, level, radio) => {
     });
 };
 
-const registerActionListeners = (domElement, level) => {
+const registerActionListeners = (domElement) => {
     domElement.addEventListener('click', (e) => {
-        const button = e.target.closest(level);
+        const button = e.target.closest('.level');
         if (button) {
             levelClick(button);
         }
@@ -53,22 +47,23 @@ const registerActionListeners = (domElement, level) => {
         if (e.defaultPrevented) {
             return;
         }
-        if (level) {
+        // TODO
+        /*if (level) {
             const button = e.target.closest(level);
             // Use key_codes module here?
             var key = event.key || event.keyCode;
             if (key === 'Enter' || key === 'enter' || key === 13) {
                 levelClick(button);
             }
-        }
+        }*/
     });
 };
 
 const levelClick = (element) => {
     //event.classList.contains('level');
 
-    const parent = element.parentElement;
-    const children = parent.childNodes;
+    const parent = element.closest('.criterion-levels');
+    const children = parent.querySelectorAll('.level');
     children.forEach((child) => {
         const radio = child.querySelector('input[type=radio]');
         if (child.isEqualNode(element)) {

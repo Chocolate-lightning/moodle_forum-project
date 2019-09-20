@@ -97,6 +97,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
             $result[] = [
                 'id' => $id,
                 'description' => format_text($criterion['description'], $criterion['descriptionformat']),
+                'aria-label' => $criterion['description'],
                 'levels' => $this->get_levels_from_criterion($criterion),
             ];
         }
@@ -112,7 +113,22 @@ class rubric_grading_panel_renderable implements renderable, templatable {
      */
     protected function get_levels_from_criterion(array $criterion): array {
         $result = [];
+        print_object($this->values['criteria']);
+        $criterionvalue = array_reduce($this->values['criteria'], function($carry, $value) use ($criterion) {
+            if($value['criterionid'] === $criterion['id']) {
+                $carry = $value;
+            }
+            return $carry;
+        });
+
         foreach ($criterion['levels'] as $id => $level) {
+
+
+            $level['checked'] = (isset($criterionvalue['levelid']) && ((int)$criterionvalue['levelid'] === (int)$level['id']));
+            if (isset($criterionvalue['savedlevelid']) && ((int)$criterionvalue['savedlevelid'] === (int)$level['id'])) {
+                $level['currentchecked'] = true;
+            }
+            //Get checked from values.
             $result[] = [
                 'id' => $id,
                 'criterionid' => $criterion['id'],
@@ -120,6 +136,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
                 'aria-label' => $level['definition'],
                 'definition' => format_text($level['definition'], $level['definitionformat']),
                 'checked' => $level['checked'],
+                'currentchecked' => $level['currentchecked'],
             ];
         }
 

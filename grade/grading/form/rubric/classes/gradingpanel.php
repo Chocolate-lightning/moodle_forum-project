@@ -138,103 +138,6 @@ class gradingpanel {
         return false;
     }
 
-    protected function criteria_mapper(array $values) {
-        $builtcriteria = array_map(function($criterion) use ($values) {
-            // TODO Move to renderable or get_criteria as appropriate.
-            $criterionvalue = $values['criteria'][$criterion['id']] ?: null;
-            $criterion['criteria-id'] = 'advancedgrading-criteria-';
-
-            $index = 1;
-            return $this->levels_mapper($criterion, $criterionvalue, $index);
-
-        }, $this->get_criteria());
-        return $builtcriteria;
-    }
-
-    protected function levels_mapper($criterion, $criterionvalue, $index) {
-        // TODO Move to renderable or get_criteria as appropriate.
-        $criterion['levels'] = array_map(function($level) use (&$criterion, &$criterionvalue) {
-            $level['checked'] = (isset($criterionvalue['levelid']) && ((int)$criterionvalue['levelid'] === (int)$level['id']));
-            if ($level['checked'] && (
-                $this->mode == \gradingform_rubric_controller::DISPLAY_EVAL_FROZEN ||
-                $this->mode == \gradingform_rubric_controller::DISPLAY_REVIEW ||
-                $this->mode == \gradingform_rubric_controller::DISPLAY_VIEW)
-            ) {
-                $level['criterion']['checked'] = true;
-                //in mode DISPLAY_EVAL the class 'checked' will be added by JS if it is enabled. If JS is not enabled, the 'checked' class will only confuse
-            }
-            if (isset($criterionvalue['savedlevelid']) && ((int)$criterionvalue['savedlevelid'] === (int)$level['id'])) {
-                $level['criterion']['currentchecked'] = true;
-            }
-            $level['criterion']['tdwidth'] = round(100/count($criterion['levels']));
-
-            if (!isset($level['id'])) {
-                $level = array('id' => '{LEVEL-id}', 'definition' => '{LEVEL-definition}', 'score' => '{LEVEL-score}', 'class' => '{LEVEL-class}', 'checked' => false);
-            } else {
-                foreach (array('score', 'definition', 'class', 'checked', 'index') as $key) {
-                    // set missing array elements to empty strings to avoid warnings
-                    if (!array_key_exists($key, $level)) {
-                        $level['criterion'][$key] = '';
-                    }
-                }
-            }
-
-            if ($this->mode == \gradingform_rubric_controller::DISPLAY_EVAL) {
-                $level['criterion']['radio'] = [
-                    'type' => 'radio',
-                    'id' => '{NAME}-criteria-{CRITERION-id}-levels-{LEVEL-id}-definition',
-                    'name' => '{NAME}[criteria][{CRITERION-id}][levelid]',
-                    'value' => $level['id']
-                ];
-                if ($level['checked']) {
-                    $level['criterion']['radio']['checked'] = true;
-                }
-            }
-
-            $level['criterion']['score-id'] = '{NAME}-criteria-{CRITERION-id}-levels-{LEVEL-id}-score';
-            $level['criterion']['score-value'] = $level['score'];
-            $level['criterion']['definition-value'] = $level['definition'];
-            $level['criterion']['definition-id'] = '{NAME}-criteria-{CRITERION-id}-levels-{LEVEL-id}-definition-container';
-            if($this->mode != \gradingform_rubric_controller::DISPLAY_EDIT_FULL &&
-                $this->mode != \gradingform_rubric_controller::DISPLAY_EDIT_FROZEN) {
-
-                $level['criterion']['tabindex'] = '0';
-                $levelinfo = new \stdClass();
-                $levelinfo->definition = s($level['definition']);
-                $levelinfo->score = $level['score'];
-                $tdattributes['criterion']['aria-label'] = get_string('level', 'gradingform_rubric', $levelinfo);
-
-                if ($this->mode != \gradingform_rubric_controller::DISPLAY_PREVIEW &&
-                    $this->mode != \gradingform_rubric_controller::DISPLAY_PREVIEW_GRADED) {
-                    // Add role of radio button to level cell if not in edit and preview mode.
-                    $level['role'] = 'radio';
-                    if ($level['checked']) {
-                        $level['criterion']['aria-checked'] = 'true';
-                    } else {
-                        $level['criterion']['aria-checked'] = 'false';
-                    }
-                }
-            }
-
-            $displayscore = true;
-            if (!$this->instanceoptions['showscoreteacher'] && in_array($this->mode, array(\gradingform_rubric_controller::DISPLAY_EVAL, \gradingform_rubric_controller::DISPLAY_EVAL_FROZEN, \gradingform_rubric_controller::DISPLAY_REVIEW))) {
-                $displayscore = false;
-            }
-            if (!$this->instanceoptions['showscorestudent'] && in_array($this->mode, array(\gradingform_rubric_controller::DISPLAY_VIEW, \gradingform_rubric_controller::DISPLAY_PREVIEW_GRADED))) {
-                $displayscore = false;
-            }
-            if ($displayscore) {
-                if (isset($level['error_score'])) {
-                    $level['criterion']['scoreerror'] = true;
-                }
-            }
-            $level['table-id'] = 'advancedgrading-criteria-1-levels-table';
-            $level['table-row-id'] = 'advancedgrading-criteria-1-levels';
-            return $level;
-        }, $criterion['levels']);
-        return $criterion;
-    }
-
     protected function can_edit(): bool {
         // TODO
         return false;
@@ -259,9 +162,7 @@ class gradingpanel {
         // Till we figure out how we are gonna freeze stuff manually set the mode.
         $this->set_mode();
 
-        // TODO What is rubric_builder doing?
         $values = $this->get_values();
-        //$this->rubric['criteria'] = $this->criteria_mapper($values);
 
         $renderable = new rubric_grading_panel_renderable(
             $this->get_name(),

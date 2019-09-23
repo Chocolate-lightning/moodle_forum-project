@@ -54,6 +54,8 @@ class rubric_grading_panel_renderable implements renderable, templatable {
 
     protected $teacherdescription;
 
+    protected $showremarkbox;
+
     protected $canedit;
 
     protected $hasformfields;
@@ -67,6 +69,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
         $instanceupdate,
         $rubrichaschanged,
         $teacherdescription,
+        $showremarkbox,
         $canedit,
         $hasformfields
     ) {
@@ -78,6 +81,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
         $this->instanceupdate = $instanceupdate;
         $this->rubrichaschanged = $rubrichaschanged;
         $this->teacherdescription = $teacherdescription;
+        $this->showremarkbox = $showremarkbox;
         $this->canedit = $canedit;
         $this->hasformfields = $hasformfields;
     }
@@ -99,6 +103,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
                 'description' => format_text($criterion['description'], $criterion['descriptionformat']),
                 'aria-label' => $criterion['description'],
                 'levels' => $this->get_levels_from_criterion($criterion),
+                'showremark' => $this->showremarkbox,
             ];
         }
 
@@ -113,7 +118,6 @@ class rubric_grading_panel_renderable implements renderable, templatable {
      */
     protected function get_levels_from_criterion(array $criterion): array {
         $result = [];
-        print_object($this->values['criteria']);
         $criterionvalue = array_reduce($this->values['criteria'], function($carry, $value) use ($criterion) {
             if($value['criterionid'] === $criterion['id']) {
                 $carry = $value;
@@ -165,7 +169,7 @@ class rubric_grading_panel_renderable implements renderable, templatable {
             'canedit' => $this->canedit,
             'hasformfields' => $this->hasformfields,
         ];
-        print_object($rtnobj);
+        //print_object($rtnobj);
         return $rtnobj;
     }
 }

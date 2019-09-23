@@ -138,6 +138,17 @@ class gradingpanel {
         return false;
     }
 
+    /*
+     * This should be handled in the renderable in the coming future.
+     */
+    protected function show_remark(): bool {
+        if(!empty($this->instanceoptions['enableremarks']) &&
+            ($this->mode != \gradingform_rubric_controller::DISPLAY_VIEW || $this->instanceoptions['showremarksstudent'])) {
+            return true;
+        }
+        return false;
+    }
+
     protected function can_edit(): bool {
         // TODO
         return false;
@@ -174,6 +185,7 @@ class gradingpanel {
             $this->instance_update_required(),
             $this->restored_from_draft(),
             $this->show_description_teacher(),
+            $this->show_remark(),
             $this->can_edit(),
             $this->include_form_fields()
         );

@@ -46,7 +46,12 @@
                         </tr>
                     </table>
                 </td>
-                {{! Regrade }}
+                {{! TODO: Change this depending on mode. }}
+                {{#showremark}}
+                    <td class="remark">
+                        <textarea name="advancedgrading[criteria][{{id}}][remark]" id="advancedgrading-criteria-{{id}}-remark" cols="10" rows="5"></textarea>
+                    </td>
+                {{/showremark}}
             </tr>
         {{/criteria}}
     </table>

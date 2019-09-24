@@ -31,18 +31,28 @@ class gradingform_rubric_external extends external_api {
     /**
      * Get the rubric.
      *
+     * @param stdClass $context the context of the form
+     * @param string $component the frankenstyle name of the component
+     * @param string $area the name of the gradable area
+     * @param int $areaid the id of the gradable area record
      * @return  array
      */
-    public static function testing(string $test) {
-        global $USER, $DB;
+    public static function testing(int $cmid, string $component, string $area, int $areaid) {
         // Validate the parameter.
         $params = self::validate_parameters(self::testing_parameters(), [
-                'test' => $test,
+                'cmid' => $cmid,
+                'component' => $component,
+                'area' => $area,
+                'areaid' => $areaid,
         ]);
         $warnings = [];
 
+        $modulecontext = context_module::instance_by_id($params['id']);
+        $controller = new gradingform_rubric_controller($modulecontext, $params['component'], $params['area'], $params['areaid']);
+        print_object($controller);
+
         return [
-            'test' => $test,
+            'test' => $params['component'],
             'warnings' => $warnings,
         ];
     }
@@ -54,8 +64,15 @@ class gradingform_rubric_external extends external_api {
      */
     public static function testing_parameters() {
         return new external_function_parameters ([
-                'test' => new external_value(
-                        PARAM_ALPHA, 'Wow a test', VALUE_REQUIRED)
+            'cmid' => new external_value(
+                    PARAM_INT, 'ID of the context this rubric belongs to', VALUE_REQUIRED),
+            'component' => new external_value(
+                PARAM_ALPHA, 'Name of the component the rubric belongs to', VALUE_REQUIRED),
+            'area' => new external_value(
+                PARAM_ALPHA, 'Name of the gradeable area', VALUE_REQUIRED),
+            'areaid' => new external_value(
+                PARAM_INT, 'ID of the gradeable area', VALUE_REQUIRED),
+
         ]);
     }
 

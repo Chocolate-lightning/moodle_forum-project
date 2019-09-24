@@ -32,7 +32,10 @@ const testTesting = () => {
     const request = {
         methodname: 'grading_form_rubric_fetch_rubric_testing',
         args: {
-            test: 'wow',
+            cmid: 107,
+            component: 'mod_assign',
+            area: 'submissions',
+            areaid: 1,
         },
     };
     return Ajax.call([request])[0];

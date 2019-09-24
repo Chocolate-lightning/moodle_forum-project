@@ -27,6 +27,7 @@ import Templates from 'core/templates';
 import * as Grader from '../local/grades/grader';
 import Notification from 'core/notification';
 import CourseRepository from 'core_course/repository';
+import * as Rubric from 'gradingform_rubric/repository';
 
 const templateNames = {
     contentRegion: 'mod_forum/grader/forum_grader_discussion_posts',
@@ -70,9 +71,20 @@ const getWholeForumFunctions = (cmid) => {
         };
     };
 
+    const getRubricForCmidFunction = () => {
+        return () => {
+            return Rubric.testTesting(cmid);
+        };
+    };
+
+    /**
+     * Make something for grade type template name
+     * const getRubricForCmidFunction = () => {};
+    */
     return {
         getContentForUserId: getContentForUserIdFunction(),
-        getUsers: getUsersForCmidFunction()
+        getUsers: getUsersForCmidFunction(),
+        getGrades: getRubricForCmidFunction()
     };
 };
 

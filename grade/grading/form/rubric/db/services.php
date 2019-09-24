@@ -25,7 +25,7 @@
 $functions = [
     'grading_form_rubric_fetch_rubric' => [
         'classname' => 'gradingform_rubric_external',
-        'methodname' => 'testing',
+        'methodname' => 'fetch_rubric',
         'classpath' => 'grade/grading/form/rubric/externallib.php',
         'description' => 'Testing',
         'type' => 'read',

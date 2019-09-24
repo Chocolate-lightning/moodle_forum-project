@@ -37,9 +37,9 @@ class gradingform_rubric_external extends external_api {
      * @param int $areaid the id of the gradable area record
      * @return  array
      */
-    public static function testing(int $cmid, string $component, string $area, int $areaid) {
+    public static function fetch_rubric(int $cmid, string $component, string $area, int $areaid) {
         // Validate the parameter.
-        $params = self::validate_parameters(self::testing_parameters(), [
+        $params = self::validate_parameters(self::fetch_rubric_parameters(), [
                 'cmid' => $cmid,
                 'component' => $component,
                 'area' => $area,
@@ -62,7 +62,7 @@ class gradingform_rubric_external extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function testing_parameters() {
+    public static function fetch_rubric_parameters() {
         return new external_function_parameters ([
             'cmid' => new external_value(
                     PARAM_INT, 'ID of the context this rubric belongs to', VALUE_REQUIRED),
@@ -81,7 +81,7 @@ class gradingform_rubric_external extends external_api {
      *
      * @return external_single_structure
      */
-    public static function testing_returns() {
+    public static function fetch_rubric_returns() {
         return new external_single_structure([
             'test' => new external_value(PARAM_RAW, 'Test'),
             'warnings' => new external_warnings(),

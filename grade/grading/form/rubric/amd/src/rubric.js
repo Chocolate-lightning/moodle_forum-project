@@ -22,18 +22,13 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-export const init = (uid, options) => {
-    const level = `#rubric-${options.name} .level`;
-    const radio = `#rubric-${options.name} .radio`;
-    registerActionListeners(level);
-    displayChangesBasedOnData(level, radio);
+export const init = (root) => {
+    const domElement = document.getElementById(root);
+    registerActionListeners(domElement);
+    displayChangesBasedOnData(domElement);
 };
-const displayChangesBasedOnData = (level, radio) => {
-    const radioElements = document.querySelectorAll(radio);
-    radioElements.forEach((element) => {
-        element.classList.add('d-none');
-    });
-    const levelElements = document.querySelectorAll(level);
+const displayChangesBasedOnData = (domElement) => {
+    const levelElements = domElement.querySelectorAll('.level');
     levelElements.forEach((element) => {
         if (element.querySelector('input[type=radio]').checked) {
             element.classList.add("checked");
@@ -41,33 +36,34 @@ const displayChangesBasedOnData = (level, radio) => {
     });
 };
 
-const registerActionListeners = (level) => {
-    document.addEventListener('click', (e) => {
-        const button = e.target.closest(level);
+const registerActionListeners = (domElement) => {
+    domElement.addEventListener('click', (e) => {
+        const button = e.target.closest('.level');
         if (button) {
             levelClick(button);
         }
     });
-    document.addEventListener('keydown', (e) => {
+    domElement.addEventListener('keydown', (e) => {
         if (e.defaultPrevented) {
             return;
         }
-        if (level) {
+        // TODO
+        /*if (level) {
             const button = e.target.closest(level);
             // Use key_codes module here?
             var key = event.key || event.keyCode;
             if (key === 'Enter' || key === 'enter' || key === 13) {
                 levelClick(button);
             }
-        }
+        }*/
     });
 };
 
 const levelClick = (element) => {
     //event.classList.contains('level');
 
-    const parent = element.parentElement;
-    const children = parent.childNodes;
+    const parent = element.closest('.criterion-levels');
+    const children = parent.querySelectorAll('.level');
     children.forEach((child) => {
         const radio = child.querySelector('input[type=radio]');
         if (child.isEqualNode(element)) {

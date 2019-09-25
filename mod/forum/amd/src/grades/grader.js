@@ -27,7 +27,7 @@ import Templates from 'core/templates';
 import * as Grader from '../local/grades/grader';
 import Notification from 'core/notification';
 import CourseRepository from 'core_course/repository';
-import * as Rubric from 'gradingform_rubric/repository';
+import Rubric from 'gradingform_rubric/repository';
 
 const templateNames = {
     contentRegion: 'mod_forum/grader/forum_grader_discussion_posts',
@@ -129,7 +129,11 @@ export const registerLaunchListeners = () => {
     document.addEventListener('click', (e) => {
         if (e.target.matches(Selectors.launch)) {
             const rootNode = findGradableNode(e.target);
-
+            Rubric.testTesting()
+                .then((context) => {
+                    window.console.log(context);
+                })
+                .catch(Notification.exception);
             if (!rootNode) {
                 throw Error('Unable to find a gradable item');
             }

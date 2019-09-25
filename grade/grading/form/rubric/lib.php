@@ -27,6 +27,7 @@ use gradingform_rubric\gradingpanel;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/grade/grading/form/lib.php');
+require_once($CFG->dirroot.'/lib/filelib.php');
 
 /**
  * This controller encapsulates the rubric grading logic

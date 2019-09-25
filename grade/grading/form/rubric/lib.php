@@ -931,7 +931,7 @@ class gradingform_rubric_instance extends gradingform_instance {
      * @return string
      */
     public function render_grading_element($page, $gradingformelement) {
-        return (new gradingpanel($this, true, $gradingformelement))->build_for_template($page);
+        return (new gradingpanel($this, true))->build_for_template($page);
         global $USER, $OUTPUT;
         if (!$gradingformelement->_flagFrozen) {
             $module = array('name'=>'gradingform_rubric', 'fullpath'=>'/grade/grading/form/rubric/js/rubric.js');

@@ -41,14 +41,42 @@ class gradingpanel {
     protected $submittedvalue;
     protected $name;
 
-    public function __construct($instance, $canedit, $gradingformelement) {
+    public function __construct($instance, $canedit) {
         // TODO Kill off gradingformelement - we only need the getValue and getName functions on it.
         $this->instance = $instance;
         $this->canedit = $canedit;
-        $this->gradingformelement = $gradingformelement;
+        //$this->gradingformelement = $gradingformelement;
 
-        $this->submittedvalue = $gradingformelement->getValue();
-        $this->name = $gradingformelement->getName();
+        // Upon save this is filled out.
+        /**
+         * Regraded the first criteria to the first level i.e.
+         *
+         * A was selected.
+         * -----------------
+         * | A | B | C | D |
+         * -----------------
+         * -----------------
+         * | E | F | G | H |
+         * -----------------
+         * [
+            [criteria] => [
+                [1] => [
+                        [levelid] => 1
+                        [remark] =>
+                    ]
+
+                [2] => [
+                        [remark] =>
+                    ]
+
+                [3] => [
+                        [remark] =>
+                    ]
+                ]
+        ]
+         */
+        //$this->submittedvalue = $gradingformelement->getValue();
+        $this->name = 'advancedgrading';
     }
 
     protected function get_values() {

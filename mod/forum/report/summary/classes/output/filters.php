@@ -100,8 +100,8 @@ class filters implements renderable, templatable {
         $this->prepare_groups_data($groupsdata);
 
         // Prepare date filters data.
-        $datefromdata = empty($filterdata['datefrom']) ?: [];
-        $datetodata = empty($filterdata['dateto']) ?: [];
+        $datefromdata = empty($filterdata['datefrom']) ? [] : $filterdata['datefrom'];
+        $datetodata = empty($filterdata['dateto']) ? [] : $filterdata['dateto'];
 
         $this->prepare_dates_data($datefromdata, $datetodata);
     }
@@ -150,7 +150,7 @@ class filters implements renderable, templatable {
      * @return void.
      */
     private function prepare_dates_data(array $datefromdata, array $datetodata): void {
-        $datetoday = new DateTime();
+        $datetoday = new \DateTime();
         $defaultdate = [
             'day' => $datetoday->format('d'),
             'month' => $datetoday->format('m'),
@@ -158,8 +158,8 @@ class filters implements renderable, templatable {
             'enabled' => false,
         ];
 
-        $datefromdata = empty($datefromdata) ?: $defaultdate;
-        $datetodata = empty($datetodata) ?: $defaultdate;
+        $datefromdata = empty($datefromdata) ? $defaultdate : $datefromdata;
+        $datetodata = empty($datetodata) ? $defaultdate : $datetodata;
 
         //TODO: Generate the HTML here, possibly using  new \MoodleQuickForm_date_selector rather than having to create an $mform class somewhere else
         $datefromhtml = '';

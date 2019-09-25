@@ -30,9 +30,9 @@ import Ajax from 'core/ajax';
  */
 const testTesting = () => {
     const request = {
-        methodname: 'grading_form_rubric_fetch_rubric_testing',
+        methodname: 'grading_form_rubric_fetch_rubric',
         args: {
-            cmid: 107,
+            cmid: 8,
             component: 'mod_assign',
             area: 'submissions',
             areaid: 1,
@@ -41,6 +41,6 @@ const testTesting = () => {
     return Ajax.call([request])[0];
 };
 
-export const functions = () => {
-    return testTesting();
+export default {
+    testTesting: testTesting,
 };

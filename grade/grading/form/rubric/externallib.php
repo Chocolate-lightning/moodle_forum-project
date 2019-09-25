@@ -22,9 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use gradingform_rubric\gradingpanel;
+
 defined('MOODLE_INTERNAL') || die;
 
 require_once("$CFG->libdir/externallib.php");
+require_once($CFG->dirroot.'/grade/grading/form/rubric/lib.php');
 
 class gradingform_rubric_external extends external_api {
 
@@ -38,6 +41,7 @@ class gradingform_rubric_external extends external_api {
      * @return  array
      */
     public static function fetch_rubric(int $cmid, string $component, string $area, int $areaid) {
+        global $PAGE;
         // Validate the parameter.
         $params = self::validate_parameters(self::fetch_rubric_parameters(), [
                 'cmid' => $cmid,
@@ -47,12 +51,15 @@ class gradingform_rubric_external extends external_api {
         ]);
         $warnings = [];
 
-        $modulecontext = context_module::instance_by_id($params['id']);
+        $modulecontext = context_module::instance($params['cmid']);
         $controller = new gradingform_rubric_controller($modulecontext, $params['component'], $params['area'], $params['areaid']);
-        print_object($controller);
+        $rubricinstance = $controller->get_or_create_instance(0, 2, 1);
+        $gradingpanel = new gradingpanel($rubricinstance, true);
+        $PAGE->set_context($modulecontext);
+        $datareturn = $gradingpanel->get_data($PAGE);
 
         return [
-            'test' => $params['component'],
+            'test' => $datareturn,
             'warnings' => $warnings,
         ];
     }
@@ -67,7 +74,7 @@ class gradingform_rubric_external extends external_api {
             'cmid' => new external_value(
                     PARAM_INT, 'ID of the context this rubric belongs to', VALUE_REQUIRED),
             'component' => new external_value(
-                PARAM_ALPHA, 'Name of the component the rubric belongs to', VALUE_REQUIRED),
+                PARAM_RAW, 'Name of the component the rubric belongs to', VALUE_REQUIRED),
             'area' => new external_value(
                 PARAM_ALPHA, 'Name of the gradeable area', VALUE_REQUIRED),
             'areaid' => new external_value(
@@ -83,7 +90,36 @@ class gradingform_rubric_external extends external_api {
      */
     public static function fetch_rubric_returns() {
         return new external_single_structure([
-            'test' => new external_value(PARAM_RAW, 'Test'),
+            'test' => new external_multiple_structure(
+                new external_single_structure([
+                    'name' => new external_value(PARAM_RAW, 'Name of '),
+                    'rubric-mode' => new external_value(PARAM_RAW, 'Name of '),
+                    'arevaluesinvalid' => new external_value(PARAM_INT, 'ID of '),
+                    'instanceupdate' => new external_value(PARAM_INT, 'ID of '),
+                    'rubrichaschanged' => new external_value(PARAM_INT, 'ID of '),
+                    'teacherdescription' => new external_value(PARAM_RAW, 'Name of '),
+                    'canedit' => new external_value(PARAM_INT, 'ID of '),
+                    'hasformfields' => new external_value(PARAM_INT, 'ID of '),
+                    'criteria' => new external_single_structure([
+                        'id' => new external_value(PARAM_INT, 'ID of '),
+                        'description' => new external_value(PARAM_RAW, 'Name of '),
+                        'aria-label' => new external_value(PARAM_RAW, 'Name of '),
+                        'showremark' => new external_value(PARAM_INT, 'ID of '),
+                        'levels' => new external_single_structure([
+                            'id' => new external_value(PARAM_INT, 'ID of '),
+                            'criterionid' => new external_value(PARAM_INT, 'ID of '),
+                            'score' => new external_value(PARAM_INT, 'ID of '),
+                            'aria-label' => new external_value(PARAM_RAW, 'Name of '),
+                            'definition' => new external_value(PARAM_RAW, 'Name of '),
+                            'checked' => new external_value(PARAM_INT, 'ID of '),
+                            'currentchecked' => new external_value(PARAM_INT, 'ID of '),
+                        ]),
+
+                    ]),
+
+
+
+                ])),
             'warnings' => new external_warnings(),
         ]);
     }

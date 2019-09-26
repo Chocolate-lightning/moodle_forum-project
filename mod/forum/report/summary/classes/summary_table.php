@@ -44,11 +44,8 @@ class summary_table extends table_sql {
     /** Groups filter type */
     const FILTER_GROUPS = 2;
 
-    /** From date filter type */
-    const FILTER_DATEFROM = 3;
-
-    /** To date filter type */
-    const FILTER_DATETO = 4;
+    /** Dates filter type */
+    const FILTER_DATES = 3;
 
     /** Table to store summary data extracted from the log table */
     const LOG_SUMMARY_TEMP_TABLE = 'forum_report_summary_counts';
@@ -156,8 +153,7 @@ class summary_table extends table_sql {
         $filternames = [
             self::FILTER_FORUM => 'Forum',
             self::FILTER_GROUPS => 'Groups',
-            self::FILTER_DATEFROM => 'From date',
-            self::FILTER_DATETO => 'To date',
+            self::FILTER_DATES => 'Dates',
         ];
 
         return $filternames[$filtertype];
@@ -376,45 +372,47 @@ class summary_table extends table_sql {
 
                 break;
 
-            case self::FILTER_DATEFROM:
-                if (count($values) != 4 || !empty(array_diff(array_keys($values), ['enabled', 'day', 'month', 'year']))) {
+            case self::FILTER_DATES:
+                if (!isset($values['from']['enabled']) || !isset($values['to']['enabled']) ||
+                        ($values['from']['enabled'] && !empty(array_diff(['day', 'month', 'year'], array_keys($values['from'])))) ||
+                        ($values['to']['enabled'] && !empty(array_diff(['day', 'month', 'year'], array_keys($values['to']))))) {
                     $paramcounterror = true;
-                } else if ($values['enabled']) {
-                    // If the filter was enabled, include the date restriction.
-                    $fromdate = strtotime("{$values['year']}-{$values['month']}-{$values['day']}");
+                } else {
+                    // From date.
+                    if ($values['from']['enabled']) {
+                        // If the filter was enabled, include the date restriction.
+                        $fromdate = strtotime("{$values['from']['year']}-{$values['from']['month']}-{$values['from']['day']}");
 
-                    if ($fromdate === false) {
-                        $filtername = $this->get_filter_name($filtertype);
-                        //TODO: Fix this to use the right exception type (and add a 'use' statment at the top for it), also need handling in the UI for that probably.
-                        throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
+                        if ($fromdate === false) {
+                            $filtername = $this->get_filter_name($filtertype);
+                            //TODO: Fix this to use the right exception type (and add a 'use' statment at the top for it), also need handling in the UI for that probably.
+                            throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
+                        }
+
+                        // No select fields required.
+                        // No joins required - posts are already joined.
+                        $this->sql->filterwhere .= "p.created >= :from_date";
+                        $this->sql->params += ['fromdate' => $fromdate];
                     }
 
-                    // No select fields required.
-                    // No joins required - posts are already joined.
-                    $this->sql->filterwhere .= "p.created >= :from_date";
-                    $this->sql->params += ['fromdate' => $fromdate];
+                    // To date.
+                    if ($values['to']['enabled']) {
+                        // If the filter was enabled, include the date restriction.
+                        $todate = strtotime("{$values['to']['year']}-{$values['to']['month']}-{$values['to']['day']}");
 
-                }
-                break;
-            case self::FILTER_DATETO: //TODO: CONSIDER Making this just a single filter - FILTER_DATES, where the from and to are the parameters. Simpler.
-                if (count($values) != 4 || !empty(array_diff(array_keys($values), ['enabled', 'day', 'month', 'year']))) {
-                    $paramcounterror = true;
-                } else if ($values['enabled']) {
-                    // If the filter was enabled, include the date restriction.
-                    $todate = strtotime("{$values['year']}-{$values['month']}-{$values['day']}");
+                        if ($todate === false) {
+                            $filtername = $this->get_filter_name($filtertype);
+                            //TODO: Fix this to use the right exception type (and add a 'use' statment at the top for it), also need handling in the UI for that probably.
+                            throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
+                        }
 
-                    if ($todate === false) {
-                        $filtername = $this->get_filter_name($filtertype);
-                        //TODO: Fix this to use the right exception type (and add a 'use' statment at the top for it), also need handling in the UI for that probably.
-                        throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
+                        // No select fields required.
+                        // No joins required - posts are already joined.
+                        $this->sql->filterwhere .= "p.created <= :to_date";
+                        $this->sql->params += ['todate' => $todate];
                     }
-
-                    // No select fields required.
-                    // No joins required - posts are already joined.
-                    $this->sql->filterwhere .= "p.created <= :from_date";
-                    $this->sql->params += ['todate' => $todate];
-
                 }
+
                 break;
             default:
                 throw new coding_exception("Report filter type '{$filtertype}' not found.");
@@ -570,8 +568,7 @@ class summary_table extends table_sql {
         $this->add_filter(self::FILTER_GROUPS, $filters['groups']);
 
         // Apply dates filter.
-        $table->add_filter($table::FILTER_DATEFROM, $filters['datefrom']);
-        $table->add_filter($table::FILTER_DATETO, $filters['dateto']);
+        $this->add_filter(self::FILTER_DATES, $filters['dates']);
     }
 
     /**

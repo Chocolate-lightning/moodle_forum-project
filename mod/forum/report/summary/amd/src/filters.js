@@ -89,6 +89,27 @@ export const init = (root) => {
 
     // Groups filter specific handlers.
 
+    // Event handler for showing dates filter popover.
+    $('#filter-dates-button').on('click', function() {
+        // Create popover.
+        var referenceElement = document.querySelector('#filter-dates-button'),
+            popperContent = document.querySelector('#filter-dates-popover');
+
+        new Popper(referenceElement, popperContent, {placement: 'bottom'});
+
+        // Show popover.
+        $('#filter-dates-popover').removeClass('hidden');
+    });
+
+    // Event handler to save dates filter.
+    $(root).on("click", "#filter-dates-popover .filter-save", function() {
+        // Close the popover.
+        $('#filter-dates-popover').addClass('hidden');
+
+        // Submit the filter values and re-generate report.
+        generateWithFilters(false);
+    });
+
     // Event to handle select all groups.
     $('#filter-groups-popover .select-all').on('click', function() {
         selectAll('filter-groups-popover');

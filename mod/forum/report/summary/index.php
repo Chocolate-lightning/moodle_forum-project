@@ -36,6 +36,10 @@ $filters = [];
 // Establish filter values.
 $filters['forums'] = [$forumid];
 $filters['groups'] = optional_param_array('filtergroups', [], PARAM_INT);
+$filters['dates'] = [
+    'from' => optional_param_array('filterdatesfrom', ['enabled' => false], PARAM_INT), //TODO: Check type
+    'to' => optional_param_array('filterdatesto', ['enabled' => false], PARAM_INT), //TODO: Check type
+];
 
 $cm = null;
 $modinfo = get_fast_modinfo($courseid);

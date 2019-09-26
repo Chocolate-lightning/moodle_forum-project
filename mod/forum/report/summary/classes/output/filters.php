@@ -29,6 +29,7 @@ use renderable;
 use renderer_base;
 use stdClass;
 use templatable;
+use forumreport_summary;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -70,18 +71,11 @@ class filters implements renderable, templatable {
     protected $groupsselected = [];
 
     /**
-     * HTML for earliest post date filter.
+     * HTML for dates filter.
      *
-     * @var array $datefromdata
+     * @var array $datesdata
      */
-    protected $datefrom;
-
-    /**
-     * HTML for latest post date filter.
-     *
-     * @var array $datetodata
-     */
-    protected $dateto;
+    protected $datesdata;
 
     /**
      * Builds renderable filter data.
@@ -99,9 +93,9 @@ class filters implements renderable, templatable {
         $groupsdata = $filterdata['groups'] ?? [];
         $this->prepare_groups_data($groupsdata);
 
-        // Prepare date filters data.
-        $datefromdata = empty($filterdata['datefrom']) ? [] : $filterdata['datefrom'];
-        $datetodata = empty($filterdata['dateto']) ? [] : $filterdata['dateto'];
+        // Prepare dates filter data.
+        $datefromdata = empty($filterdata['dates']['from']) ? [] : $filterdata['dates']['from'];
+        $datetodata = empty($filterdata['dates']['to']) ? [] : $filterdata['dates']['to'];
 
         $this->prepare_dates_data($datefromdata, $datetodata);
     }
@@ -162,11 +156,17 @@ class filters implements renderable, templatable {
         $datetodata = empty($datetodata) ? $defaultdate : $datetodata;
 
         //TODO: Generate the HTML here, possibly using  new \MoodleQuickForm_date_selector rather than having to create an $mform class somewhere else
-        $datefromhtml = '';
-        $datetohtml = '';
+        //require_once('/var/www/html/moodle_forum-project/lib/form/dateselector.php');
+        //$blah = new \MoodleQuickForm_date_selector('datefrom', 'Test', ['optional' => true]);
+        //$blah->toHTML();
+        //var_export($blah);
+        $datefromhtml = 'TODO';
+        $datetohtml = 'TODO';
 
-        $this->datefromhtml = $datefromhtml;
-        $this->datetohtml = $datetohtml;
+        $this->datesdata = [
+            'from' => $datefromhtml,
+            'to' => $datetohtml,
+        ];
     }
 
     /**
@@ -211,8 +211,8 @@ class filters implements renderable, templatable {
             $output->hasgroups = false;
         }
 
-        $output->filterdatefrom = $this->datefromdata;
-        $output->filterdateto = $this->datetodata;
+        $datesform = new forumreport_summary\dates_filter_form(); //TODO: pass in the from and to dates
+        $output->filterdates = $datesform->render();
 
         return $output;
     }

@@ -36,8 +36,7 @@
                 "checked": false
             }
         ],
-        "filterdatesfrom": "<div>HTML for date filter<select id='datefrom'></select></div>",
-        "filterdatesto": "<div>HTML for date filter<select id='dateto'></select></div>"
+        "filterdates": "<div>HTML for date filters</div>",
     }
 }}
 
@@ -45,6 +44,23 @@
     <form id="filtersform" name="filtersform" method="post" action="{{actionurl}}">
         <input type="hidden" name="submitted" value="true">
         <div id="filtersbuttons">
+            <button type="button" id="filter-dates-button" class="btn btn-primary filter-button">
+                {{# str}} filter:datesname, forumreport_summary {{/ str}}
+            </button>
+            <input type="hidden" id="dates_title_base" value="{{# str}} filter:datesname, forumreport_summary {{/ str}}">
+            {{! Start dates filter popover }}
+            <div id="filter-dates-popover" class="popover m-t-1 hidden">
+                <h3 class="filter-header">{{# str}} filter:datesname, forumreport_summary {{/ str}}</h3>
+                <div class="filter-body">
+                        {{{filterdates}}}
+                        <br>
+                    <div class="float-right">
+                        <a href="#"><span class="filter-save"><strong>{{# str}} save {{/ str}}</strong></span></a>
+                    </div>
+                </div>
+            </div>
+            {{! End dates filter popover }}
+
             {{#hasgroups}}
             <button type="button" id="filter-groups-button" class="btn btn-primary filter-button">
                 {{filtergroupsname}}
@@ -72,21 +88,6 @@
             </div>
             {{! End groups filter popover}}
             {{/hasgroups}}
-
-            {{! Start dates filter popover }}
-            <div id="filter-dates-popover" class="popover m-t-1 d-none">
-                <h3 class="popover-header">{{# str}} filter:datesname, forumreport_summary {{/ str}}</h3>
-                <div class="popover-body">
-                        {{{filterdatesfrom}}}
-                        {{{filterdatesto}}}
-                        <br>
-                    <div class="form-dates">
-                        <button type="button" class="btn btn-primary filter-save">Save</button>
-                        <button type="button" class="btn btn-primary filter-clear">Clear</button>
-                    </div>
-                </div>
-            </div>
-            {{! End dates filter popover }}
         </div>
     </form>
 </div>

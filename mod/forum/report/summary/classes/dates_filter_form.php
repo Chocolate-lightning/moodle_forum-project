@@ -57,7 +57,7 @@ class dates_filter_form extends \moodleform {
      * The form definition
      */
     public function definition() {
-        global $PAGE;
+        //global $PAGE;
 
         $mform = $this->_form;
         //$starttime = isset($this->_customdata['starttime']) ? $this->_customdata['starttime'] : 0;
@@ -71,11 +71,11 @@ class dates_filter_form extends \moodleform {
         //$this->add_default_hidden_elements($mform);
 
         // Event time start field.
-        $mform->addElement('date_selector', 'fromdate', get_string('from'), ['optional' => true]);
-        $mform->addElement('date_selector', 'todate', get_string('to'), ['optional' => true]);
+        $mform->addElement('date_selector', 'filterdatefrom', get_string('from'), ['optional' => true]);
+        $mform->addElement('date_selector', 'filterdateto', get_string('to'), ['optional' => true]);
 
         // Add the javascript required to enhance this mform.
-        $PAGE->requires->js_call_amd('core_calendar/event_form', 'init', [$mform->getAttribute('id')]);
+        //$PAGE->requires->js_call_amd('core_calendar/event_form', 'init', [$mform->getAttribute('id')]);
     }
 
     /**

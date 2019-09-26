@@ -211,6 +211,9 @@ class filters implements renderable, templatable {
             $output->hasgroups = false;
         }
 
+        // Set dates filter data.
+        //TODO: set the button name if certain date ranges are applied.
+        $output->filterdatesname = get_string('filter:datesall', 'forumreport_summary');
         $datesform = new forumreport_summary\dates_filter_form(); //TODO: pass in the from and to dates
         $output->filterdates = $datesform->render();
 

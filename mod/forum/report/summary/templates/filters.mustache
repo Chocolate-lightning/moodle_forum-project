@@ -36,20 +36,21 @@
                 "checked": false
             }
         ],
-        "filterdates": "<div>HTML for date filters</div>",
+        "filterdatesname": "All dates",
+        "filterdates": "<div>HTML for date filters</div>"
     }
 }}
 
-<div class="p-b-3" data-report-id="{{uniqid}}">
+<div class="p-b-3" data-report-id="{{uniqid}}">{{{filterdates}}}
     <form id="filtersform" name="filtersform" method="post" action="{{actionurl}}">
         <input type="hidden" name="submitted" value="true">
         <div id="filtersbuttons">
             <button type="button" id="filter-dates-button" class="btn btn-primary filter-button">
-                {{# str}} filter:datesname, forumreport_summary {{/ str}}
+                {{filterdatesname}}
             </button>
-            <input type="hidden" id="dates_title_base" value="{{# str}} filter:datesname, forumreport_summary {{/ str}}">
+
             {{! Start dates filter popover }}
-            <div id="filter-dates-popover" class="popover m-t-1 hidden">
+            <div id="filter-dates-popover" class="popover mw-100 m-t-1 hidden">
                 <h3 class="filter-header">{{# str}} filter:datesname, forumreport_summary {{/ str}}</h3>
                 <div class="filter-body">
                         {{{filterdates}}}

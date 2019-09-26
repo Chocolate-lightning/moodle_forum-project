@@ -41,26 +41,35 @@
     }
 }}
 
-<div class="p-b-3" data-report-id="{{uniqid}}">{{{filterdates}}}
+<div class="p-b-3" data-report-id="{{uniqid}}">
+    {{! Start dates filter popover }}
+    <div id="filter-dates-popover" class="popover mw-100 m-t-1 hidden">
+        <h3 class="filter-header">{{# str}} filter:datesname, forumreport_summary {{/ str}}</h3>
+        <div class="filter-body">
+                {{{filterdates}}}
+                <br>&nbsp;
+                <a href="#"><span class="filter-save float-right"><strong>{{# str}} save {{/ str}}</strong></span></a>
+        </div>
+    </div>
+    {{! End dates filter popover }}
+
     <form id="filtersform" name="filtersform" method="post" action="{{actionurl}}">
         <input type="hidden" name="submitted" value="true">
+
+        {{! Hidden dates fields to populate from visible mform in popover. }}
+        <input type="hidden" name="filterdatesfrom[day]" value="">
+        <input type="hidden" name="filterdatesfrom[month]" value="">
+        <input type="hidden" name="filterdatesfrom[year]" value="">
+        <input type="hidden" name="filterdatesfrom[enabled]" value="0">
+        <input type="hidden" name="filterdatesto[day]" value="">
+        <input type="hidden" name="filterdatesto[month]" value="">
+        <input type="hidden" name="filterdatesto[year]" value="">
+        <input type="hidden" name="filterdatesto[enabled]" value="0">
+
         <div id="filtersbuttons">
             <button type="button" id="filter-dates-button" class="btn btn-primary filter-button">
                 {{filterdatesname}}
             </button>
-
-            {{! Start dates filter popover }}
-            <div id="filter-dates-popover" class="popover mw-100 m-t-1 hidden">
-                <h3 class="filter-header">{{# str}} filter:datesname, forumreport_summary {{/ str}}</h3>
-                <div class="filter-body">
-                        {{{filterdates}}}
-                        <br>
-                    <div class="float-right">
-                        <a href="#"><span class="filter-save"><strong>{{# str}} save {{/ str}}</strong></span></a>
-                    </div>
-                </div>
-            </div>
-            {{! End dates filter popover }}
 
             {{#hasgroups}}
             <button type="button" id="filter-groups-button" class="btn btn-primary filter-button">

@@ -213,7 +213,20 @@ class filters implements renderable, templatable {
 
         // Set dates filter data.
         //TODO: set the button name if certain date ranges are applied.
-        $output->filterdatesname = get_string('filter:datesall', 'forumreport_summary');
+        if (1 == 2) {//TODO if start and end date
+            $datestrings = [
+                'datefrom' => '1 Jan 19', //TODO - replace eg data
+                'dateto' => '1 Oct 19', //TODO - replace eg data
+            ];
+            $output->filterdatesname = get_string('filter:datesfromto', 'forumreport_summary', $datestrings);
+        } else if (1 == 2) {//TODO if start date
+            $output->filterdatesname = get_string('filter:datesfrom', 'forumreport_summary', 'TODO: start');
+        } else if (1 == 3) { //TODO if end date
+            $output->filterdatesname = get_string('filter:datesto', 'forumreport_summary', 'TODO: end');
+        } else {
+            $output->filterdatesname = get_string('filter:datesall', 'forumreport_summary');
+        }
+
         $datesform = new forumreport_summary\dates_filter_form(); //TODO: pass in the from and to dates
         $output->filterdates = $datesform->render();
 

@@ -71,8 +71,8 @@ class dates_filter_form extends \moodleform {
         //$this->add_default_hidden_elements($mform);
 
         // Event time start field.
-        $mform->addElement('date_selector', 'filterdatefrom', get_string('from'), ['optional' => true]);
-        $mform->addElement('date_selector', 'filterdateto', get_string('to'), ['optional' => true]);
+        $mform->addElement('date_selector', 'filterdatefrompopover', get_string('from'), ['optional' => true]);
+        $mform->addElement('date_selector', 'filterdatetopopover', get_string('to'), ['optional' => true]);
 
         // Add the javascript required to enhance this mform.
         //$PAGE->requires->js_call_amd('core_calendar/event_form', 'init', [$mform->getAttribute('id')]);

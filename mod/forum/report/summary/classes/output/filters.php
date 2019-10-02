@@ -78,6 +78,13 @@ class filters implements renderable, templatable {
     protected $datesdata = [];
 
     /**
+     * Text to display on the dates filter button.
+     *
+     * @var string $datesbuttontext
+     */
+    protected $datesbuttontext;
+
+    /**
      * Builds renderable filter data.
      *
      * @param stdClass $cm The course module object.
@@ -165,11 +172,15 @@ class filters implements renderable, templatable {
 
         $this->datesdata = [
             'from' => [
-                'date'    => $fromdate,
+                'day'     => $fromdate->format('d'),
+                'month'   => $fromdate->format('m'),
+                'year'    => $fromdate->format('Y'),
                 'enabled' => $fromenabled,
             ],
             'to' => [
-                'date'    => $todate,
+                'day'     => $todate->format('d'),
+                'month'   => $todate->format('m'),
+                'year'    => $todate->format('Y'),
                 'enabled' => $toenabled,
             ],
         ];
@@ -180,13 +191,13 @@ class filters implements renderable, templatable {
                 'datefrom' => $fromdate->format('d M y'),
                 'dateto'   => $todate->format('d M y'),
             ];
-            $this->datesdata['buttontext'] = get_string('filter:datesfromto', 'forumreport_summary', $datestrings);
+            $this->datesbuttontext = get_string('filter:datesfromto', 'forumreport_summary', $datestrings);
         } else if ($fromenabled) {
-            $this->datesdata['buttontext'] = get_string('filter:datesfrom', 'forumreport_summary', $fromdate->format('d M y'));
+            $this->datesbuttontext = get_string('filter:datesfrom', 'forumreport_summary', $fromdate->format('d M Y'));
         } else if ($toenabled) {
-            $this->datesdata['buttontext'] = get_string('filter:datesto', 'forumreport_summary', $todate->format('d M y'));
+            $this->datesbuttontext = get_string('filter:datesto', 'forumreport_summary', $todate->format('d M Y'));
         } else {
-            $this->datesdata['buttontext'] = get_string('filter:datesname', 'forumreport_summary');
+            $this->datesbuttontext = get_string('filter:datesname', 'forumreport_summary');
         }
     }
 
@@ -232,10 +243,21 @@ class filters implements renderable, templatable {
             $output->hasgroups = false;
         }
 
-        // Set dates filter data.
-        $output->filterdatesname = $this->datesdata['buttontext'];
-        $datesform = new forumreport_summary\dates_filter_form(); //TODO: pass in the from and to dates
-        $output->filterdates = $datesform->render();
+        // Set date button and generate dates popover mform.
+        $output->filterdatesname = $this->datesbuttontext;
+        $datesform = new forumreport_summary\dates_filter_form(null, $this->datesdata);
+        $output->filterdatesform = $datesform->render();
+
+         // Set dates filter data within filters form.
+        $disableddate = [
+            'day' => '',
+            'month' => '',
+            'year' => '',
+            'enabled' => '0',
+        ];
+        $datefromdata = ['type' => 'from'] + ($this->datesdata['from']['enabled'] ? $this->datesdata['from'] : $disableddate);
+        $datetodata = ['type' => 'to'] + ($this->datesdata['to']['enabled'] ? $this->datesdata['to'] : $disableddate);
+        $output->filterdatesdata = [$datefromdata, $datetodata];
 
         return $output;
     }

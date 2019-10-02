@@ -391,12 +391,6 @@ class summary_table extends table_sql {
                         $fromdate = new \DateTime($fromdatestr, $timezone);
                         $fromdatetimestamp = $fromdate->format('U');
 
-                        if ($fromdatetimestamp === false) {
-                            $filtername = $this->get_filter_name($filtertype);
-                            //TODO: Fix this to use the right exception type (and add a 'use' statment at the top for it), also need handling in the UI for that probably.
-                            throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
-                        }
-
                         // Needs to form part of the base join to posts, so will be injected by define_base_sql().
                         $this->sql->filterbase['dates'] .= " AND p.created >= :fromdate";
                         $this->sql->params['fromdate'] = $fromdatetimestamp;
@@ -410,12 +404,6 @@ class summary_table extends table_sql {
                         $todatestr = "{$values['to']['year']}-{$values['to']['month']}-{$values['to']['day']} 23:59:59";
                         $todate = new \DateTime($todatestr, $timezone);
                         $todatetimestamp = $todate->format('U');
-
-                        if ($todatetimestamp === false) {
-                            $filtername = $this->get_filter_name($filtertype);
-                            //TODO: Fix this to use the right exception type (and add a 'use' statment at the top for it), also need handling in the UI for that probably.
-                            throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
-                        }
 
                         // Needs to form part of the base join to posts, so will be injected by define_base_sql().
                         $this->sql->filterbase['dates'] .= " AND p.created <= :todate";

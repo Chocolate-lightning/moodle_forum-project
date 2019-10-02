@@ -34,78 +34,25 @@ require_once($CFG->dirroot.'/lib/formslib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class dates_filter_form extends \moodleform {
-
     /**
-     * Build the editor options using the given context.
+     * The form definition.
      *
-     * @param \context $context A Moodle context
-     * @return array
-     */
-//    public static function build_editor_options(\context $context) {
-//        global $CFG;
-//
-//        return [
-//            'context' => $context,
-//            'maxfiles' => EDITOR_UNLIMITED_FILES,
-//            'maxbytes' => $CFG->maxbytes,
-//            'noclean' => true,
-//            'autosave' => false
-//        ];
-//    }
-
-    /**
-     * The form definition
      */
     public function definition() {
-        //global $PAGE;
+        $existingdata = [];
 
-        $mform = $this->_form;
-        //$starttime = isset($this->_customdata['starttime']) ? $this->_customdata['starttime'] : 0;
+        if ($this->_customdata['from']['enabled']) {
+            $existingdata['filterdatefrompopover'] = $this->_customdata['from'];
+        }
 
-        //$mform->setDisableShortforms();
-        //$mform->disable_form_change_checker();
+        if ($this->_customdata['to']['enabled']) {
+            $existingdata['filterdatetopopover'] = $this->_customdata['to'];
+        }
 
-        // Empty string so that the element doesn't get rendered.
-        //$mform->addElement('header', 'general', '');
-
-        //$this->add_default_hidden_elements($mform);
+        $this->set_data($existingdata);
 
         // Event time start field.
-        $mform->addElement('date_selector', 'filterdatefrompopover', get_string('from'), ['optional' => true]);
-        $mform->addElement('date_selector', 'filterdatetopopover', get_string('to'), ['optional' => true]);
-
-        // Add the javascript required to enhance this mform.
-        //$PAGE->requires->js_call_amd('core_calendar/event_form', 'init', [$mform->getAttribute('id')]);
+        $this->_form->addElement('date_selector', 'filterdatefrompopover', get_string('from'), ['optional' => true]);
+        $this->_form->addElement('date_selector', 'filterdatetopopover', get_string('to'), ['optional' => true]);
     }
-
-    /**
-     * Add the list of hidden elements that should appear in this form each
-     * time. These elements will never be visible to the user.
-     *
-     * @param MoodleQuickForm $mform
-     */
-//    protected function add_default_hidden_elements($mform) {
-//        global $USER;
-//
-//        // Add some hidden fields.
-//        $mform->addElement('hidden', 'id');
-//        $mform->setType('id', PARAM_INT);
-//        $mform->setDefault('id', 0);
-//
-//        $mform->addElement('hidden', 'userid');
-//        $mform->setType('userid', PARAM_INT);
-//        $mform->setDefault('userid', $USER->id);
-//
-//        $mform->addElement('hidden', 'modulename');
-//        $mform->setType('modulename', PARAM_INT);
-//        $mform->setDefault('modulename', '');
-//
-//        $mform->addElement('hidden', 'instance');
-//        $mform->setType('instance', PARAM_INT);
-//        $mform->setDefault('instance', 0);
-//
-//        $mform->addElement('hidden', 'visible');
-//        $mform->setType('visible', PARAM_INT);
-//        $mform->setDefault('visible', 1);
-//    }
 }

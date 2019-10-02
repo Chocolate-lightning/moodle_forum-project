@@ -37,7 +37,11 @@
             }
         ],
         "filterdatesname": "Dates",
-        "filterdates": "<div>HTML for date filters</div>"
+        "filterdatesform": "<div>HTML for date filters</div>"
+        "filterdatesdata": [
+            {"type": "from", "day": "27", "month": "03", "year": "2017", "enabled": "1"},
+            {"type": "to", "day": "30", "month": "12", "year": "2018", "enabled": "1"}
+        ]
     }
 }}
 
@@ -46,7 +50,7 @@
     <div id="filter-dates-popover" class="popover mw-100 m-t-1 hidden">
         <h3 class="filter-header">{{# str}} filter:datesname, forumreport_summary {{/ str}}</h3>
         <div class="filter-body">
-                {{{filterdates}}}
+                {{{filterdatesform}}}
                 <br>&nbsp;
                 <a href="#"><span class="filter-save float-right"><strong>{{# str}} save {{/ str}}</strong></span></a>
         </div>
@@ -57,14 +61,12 @@
         <input type="hidden" name="submitted" value="true">
 
         {{! Hidden dates fields to populate from visible mform in popover. }}
-        <input type="hidden" name="datefrom[day]" value="">
-        <input type="hidden" name="datefrom[month]" value="">
-        <input type="hidden" name="datefrom[year]" value="">
-        <input type="hidden" name="datefrom[enabled]" value="0">
-        <input type="hidden" name="dateto[day]" value="">
-        <input type="hidden" name="dateto[month]" value="">
-        <input type="hidden" name="dateto[year]" value="">
-        <input type="hidden" name="dateto[enabled]" value="0">
+        {{#filterdatesdata}}
+        <input type="hidden" name="date{{type}}[day]" value="{{day}}">
+        <input type="hidden" name="date{{type}}[month]" value="{{month}}">
+        <input type="hidden" name="date{{type}}[year]" value="{{year}}">
+        <input type="hidden" name="date{{type}}[enabled]" value="{{enabled}}">
+        {{/filterdatesdata}}
 
         <div id="filtersbuttons">
             <button type="button" id="filter-dates-button" class="btn btn-primary filter-button">

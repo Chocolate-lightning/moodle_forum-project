@@ -47,6 +47,16 @@ export const init = (root) => {
         });
     });
 
+    // Call when opening filter to ensure only one can be activated.
+    var canOpenFilter = (event) => {
+        if (document.querySelector('[data-openfilter="true"]')) {
+            return false;
+        }
+
+        event.target.setAttribute('data-openfilter', "true");
+        return true;
+    };
+
     // Called to override click event to trigger a proper generate request with filtering.
     var generateWithFilters = (event) => {
         var newLink = $('#filtersform').attr('action');
@@ -90,7 +100,11 @@ export const init = (root) => {
     // Groups filter specific handlers.
 
     // Event handler for showing dates filter popover.
-    $('#filter-dates-button').on('click', function() {
+    $('#filter-dates-button').on('click', function(event) {
+        if (!canOpenFilter(event)) {
+            return false;
+        }
+
         // Create popover.
         let referenceElement = document.querySelector('#filter-dates-button'),
             popperContent = document.querySelector('#filter-dates-popover');
@@ -138,6 +152,10 @@ export const init = (root) => {
 
     // Event handler for showing groups filter popover.
     $('#filter-groups-button').on('click', function() {
+        if (!canOpenFilter(event)) {
+            return false;
+        }
+
         // Create popover.
         var referenceElement = document.querySelector('#filter-groups-button'),
             popperContent = document.querySelector('#filter-groups-popover');

@@ -106,6 +106,21 @@ export const init = (root) => {
         // Close the popover.
         $('#filter-dates-popover').addClass('hidden');
 
+        // Populate the hidden form inputs to submit the data.
+        let filtersform = document.forms['filtersform'];
+        filtersform.elements['datefrom[day]'].value =
+                document.getElementById('filter-dates-popover').querySelector('[name="filterdatefrompopover[day]"]').value;
+        filtersform.elements['datefrom[month]'].value =
+                document.getElementById('filter-dates-popover').querySelector('[name="filterdatefrompopover[month]"]').value;
+        filtersform.elements['datefrom[year]'].value =
+                document.getElementById('filter-dates-popover').querySelector('[name="filterdatefrompopover[year]"]').value;
+
+        // Disable the date filters in the mform to prevent unsaved data warning.
+        let checkedboxes = document.getElementById('filter-dates-popover').querySelectorAll('input [type="checkbox"]:checked');
+        checkedboxes.forEach(function(checkbox) {
+            checkbox.checked = false;
+        });
+
         // Submit the filter values and re-generate report.
         generateWithFilters(false);
     });

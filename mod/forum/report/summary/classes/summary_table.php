@@ -135,11 +135,12 @@ class summary_table extends table_sql {
         // Define configs.
         $this->define_table_configs();
 
+        // Apply relevant filters.
+        $this->define_base_filter_sql();
+        $this->apply_filters($filters);
+
         // Define the basic SQL data and object format.
         $this->define_base_sql();
-
-        // Apply relevant filters.
-        $this->apply_filters($filters);
     }
 
     /**
@@ -378,6 +379,7 @@ class summary_table extends table_sql {
                         ($values['to']['enabled'] && !empty(array_diff(['day', 'month', 'year'], array_keys($values['to']))))) {
                     $paramcounterror = true;
                 } else {
+                    $this->sql->filterbase['dates'] = '';
                     $timezone = \core_date::get_user_timezone_object();
 
                     // From date.
@@ -393,9 +395,8 @@ class summary_table extends table_sql {
                             throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
                         }
 
-                        // No select fields required.
-                        // No joins required - posts are already joined.
-                        $this->sql->filterwhere .= "p.created >= :from_date";
+                        // Needs to form part of the base join to posts, so will be injected by define_base_sql().
+                        $this->sql->filterbase['dates'] .= " AND p.created >= :fromdate";
                         $this->sql->params += ['fromdate' => $fromdatetimestamp];
                     }
 
@@ -412,9 +413,8 @@ class summary_table extends table_sql {
                             throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
                         }
 
-                        // No select fields required.
-                        // No joins required - posts are already joined.
-                        $this->sql->filterwhere .= "p.created <= :to_date";
+                        // Needs to form part of the base join to posts, so will be injected by define_base_sql().
+                        $this->sql->filterbase['dates'] .= " AND p.created <= :todate";
                         $this->sql->params += ['todate' => $todatetimestamp];
                     }
                 }
@@ -442,6 +442,7 @@ class summary_table extends table_sql {
         $this->pageable(true);
         $this->no_sorting('select');
         $this->set_attribute('id', 'forumreport_summary_table');
+        $this->sql = new \stdClass();
     }
 
     /**
@@ -450,8 +451,6 @@ class summary_table extends table_sql {
      * @return void.
      */
     protected function define_base_sql(): void {
-        $this->sql = new \stdClass();
-
         $userfields = get_extra_user_fields($this->context);
         $userfieldssql = \user_picture::fields('u', $userfields);
 
@@ -474,6 +473,7 @@ class summary_table extends table_sql {
                                     JOIN {forum_discussions} d ON d.forum = f.id
                                LEFT JOIN {forum_posts} p ON p.discussion =  d.id
                                      AND p.userid = ue.userid
+                                     ' . $this->sql->filterbase['dates'] . '
                                      AND p.privatereplyto = 0
                                LEFT JOIN (
                                             SELECT COUNT(fi.id) AS attcount, fi.itemid AS postid, fi.userid
@@ -496,7 +496,7 @@ class summary_table extends table_sql {
             $this->sql->basegroupby .= ', tmp.viewcount';
         }
 
-        $this->sql->params = [
+        $this->sql->params += [
             'component' => 'mod_forum',
             'courseid' => $this->cm->course,
         ];
@@ -506,7 +506,14 @@ class summary_table extends table_sql {
             $this->sql->basewhere .= ' AND ue.userid = :userid';
             $this->sql->params['userid'] = $this->userid;
         }
+    }
 
+    /**
+     * Instantiate the properties to store filter values.
+     *
+     * @return void.
+     */
+    protected function define_base_filter_sql(): void {
         // Filter values will be populated separately where required.
         $this->sql->filterfields = '';
         $this->sql->filterfromjoins = '';

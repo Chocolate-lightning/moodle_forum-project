@@ -92,7 +92,7 @@ export const init = (root) => {
     // Event handler for showing dates filter popover.
     $('#filter-dates-button').on('click', function() {
         // Create popover.
-        var referenceElement = document.querySelector('#filter-dates-button'),
+        let referenceElement = document.querySelector('#filter-dates-button'),
             popperContent = document.querySelector('#filter-dates-popover');
 
         new Popper(referenceElement, popperContent, {placement: 'bottom'});
@@ -107,15 +107,21 @@ export const init = (root) => {
         $('#filter-dates-popover').addClass('hidden');
 
         // Populate the hidden form inputs to submit the data.
-        let filtersform = document.forms['filtersform'];
-        filtersform.elements['datefrom[day]'].value =
-                document.getElementById('filter-dates-popover').querySelector('[name="filterdatefrompopover[day]"]').value;
-        filtersform.elements['datefrom[month]'].value =
-                document.getElementById('filter-dates-popover').querySelector('[name="filterdatefrompopover[month]"]').value;
-        filtersform.elements['datefrom[year]'].value =
-                document.getElementById('filter-dates-popover').querySelector('[name="filterdatefrompopover[year]"]').value;
+        let filtersform = document.forms['filtersform'],
+            datespopover = document.getElementById('filter-dates-popover');
+        filtersform.elements['datefrom[day]'].value = datespopover.querySelector('[name="filterdatefrompopover[day]"]').value;
+        filtersform.elements['datefrom[month]'].value = datespopover.querySelector('[name="filterdatefrompopover[month]"]').value;
+        filtersform.elements['datefrom[year]'].value = datespopover.querySelector('[name="filterdatefrompopover[year]"]').value;
+        filtersform.elements['datefrom[enabled]'].value =
+                datespopover.querySelector('[name="filterdatefrompopover[enabled]"]').checked ? 1 : 0;
+        filtersform.elements['dateto[day]'].value = datespopover.querySelector('[name="filterdatetopopover[day]"]').value;
+        filtersform.elements['dateto[month]'].value = datespopover.querySelector('[name="filterdatetopopover[month]"]').value;
+        filtersform.elements['dateto[year]'].value = datespopover.querySelector('[name="filterdatetopopover[year]"]').value;
+        filtersform.elements['dateto[enabled]'].value =
+                datespopover.querySelector('[name="filterdatetopopover[enabled]"]').checked ? 1 : 0;
 
         // Disable the date filters in the mform to prevent unsaved data warning.
+        //TODO: DOESNT FIX THE PROBLEM
         let checkedboxes = document.getElementById('filter-dates-popover').querySelectorAll('input [type="checkbox"]:checked');
         checkedboxes.forEach(function(checkbox) {
             checkbox.checked = false;

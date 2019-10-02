@@ -380,6 +380,8 @@ class summary_table extends table_sql {
                     $paramcounterror = true;
                 } else {
                     $this->sql->filterbase['dates'] = '';
+                    $this->sql->filterbase['dateslog'] = '';
+                    $this->sql->filterbase['dateslogparams'] = [];
                     $timezone = \core_date::get_user_timezone_object();
 
                     // From date.
@@ -397,7 +399,9 @@ class summary_table extends table_sql {
 
                         // Needs to form part of the base join to posts, so will be injected by define_base_sql().
                         $this->sql->filterbase['dates'] .= " AND p.created >= :fromdate";
-                        $this->sql->params += ['fromdate' => $fromdatetimestamp];
+                        $this->sql->params['fromdate'] = $fromdatetimestamp;
+                        $this->sql->filterbase['dateslog'] .= ' AND timecreated >= :fromdate';
+                        $this->sql->filterbase['dateslogparams']['fromdate'] = $fromdatetimestamp;
                     }
 
                     // To date.
@@ -415,7 +419,9 @@ class summary_table extends table_sql {
 
                         // Needs to form part of the base join to posts, so will be injected by define_base_sql().
                         $this->sql->filterbase['dates'] .= " AND p.created <= :todate";
-                        $this->sql->params += ['todate' => $todatetimestamp];
+                        $this->sql->params['todate'] = $todatetimestamp;
+                        $this->sql->filterbase['dateslog'] .= ' AND timecreated <= :todate';
+                        $this->sql->filterbase['dateslogparams']['todate'] = $todatetimestamp;
                     }
                 }
 
@@ -668,11 +674,17 @@ class summary_table extends table_sql {
             $logtable = $this->logreader->get_internal_log_table_name();
             $nonanonymous = 'AND anonymous = 0';
         }
-        $params = ['contextid' => $contextid];
+
+        // Apply dates filter if applied.
+        $datewhere = $this->sql->filterbase['dateslog'] ?? '';
+        $dateparams = $this->sql->filterbase['dateslogparams'] ?? [];
+
+        $params = ['contextid' => $contextid] + $dateparams;
         $sql = "INSERT INTO {" . self::LOG_SUMMARY_TEMP_TABLE . "} (userid, viewcount)
                      SELECT userid, COUNT(*) AS viewcount
                        FROM {" . $logtable . "}
                       WHERE contextid = :contextid
+                            $datewhere
                             $nonanonymous
                    GROUP BY userid";
         $DB->execute($sql, $params);

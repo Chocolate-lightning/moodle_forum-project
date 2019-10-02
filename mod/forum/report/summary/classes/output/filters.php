@@ -159,7 +159,7 @@ class filters implements renderable, templatable {
             $todate = $datetoday;
             $toenabled = false;
         } else {
-            $todate = new \DateTime("{$datefromdata['year']}-{$datefromdata['month']}-{$datefromdata['day']} 23:59:59", $timezone);
+            $todate = new \DateTime("{$datetodata['year']}-{$datetodata['month']}-{$datetodata['day']} 23:59:59", $timezone);
             $toenabled = true;
         }
 
@@ -177,8 +177,8 @@ class filters implements renderable, templatable {
         // Prepare button string data.
         if ($fromenabled && $toenabled) {
             $datestrings = [
-                'datefrom' => $fromdate->format('d M yy'),
-                'dateto'   => $todate->format('d M yy'),
+                'datefrom' => $fromdate->format('d M y'),
+                'dateto'   => $todate->format('d M y'),
             ];
             $this->datesdata['buttontext'] = get_string('filter:datesfromto', 'forumreport_summary', $datestrings);
         } else if ($fromenabled) {

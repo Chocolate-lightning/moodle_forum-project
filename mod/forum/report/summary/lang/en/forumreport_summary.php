@@ -25,7 +25,6 @@
 $string['attachmentcount'] = 'Number of attachments';
 $string['viewcount'] = 'Number of views';
 $string['earliestpost'] = 'Earliest post';
-$string['filter:datesall'] = 'All dates';
 $string['filter:datesname'] = 'Dates';
 $string['filter:datesfrom'] = 'From {$a}';
 $string['filter:datesfromto'] = '{$a->datefrom} - {$a->dateto}';

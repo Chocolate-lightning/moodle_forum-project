@@ -36,7 +36,7 @@
                 "checked": false
             }
         ],
-        "filterdatesname": "All dates",
+        "filterdatesname": "Dates",
         "filterdates": "<div>HTML for date filters</div>"
     }
 }}
@@ -57,14 +57,14 @@
         <input type="hidden" name="submitted" value="true">
 
         {{! Hidden dates fields to populate from visible mform in popover. }}
-        <input type="hidden" name="filterdatesfrom[day]" value="">
-        <input type="hidden" name="filterdatesfrom[month]" value="">
-        <input type="hidden" name="filterdatesfrom[year]" value="">
-        <input type="hidden" name="filterdatesfrom[enabled]" value="0">
-        <input type="hidden" name="filterdatesto[day]" value="">
-        <input type="hidden" name="filterdatesto[month]" value="">
-        <input type="hidden" name="filterdatesto[year]" value="">
-        <input type="hidden" name="filterdatesto[enabled]" value="0">
+        <input type="hidden" name="datefrom[day]" value="">
+        <input type="hidden" name="datefrom[month]" value="">
+        <input type="hidden" name="datefrom[year]" value="">
+        <input type="hidden" name="datefrom[enabled]" value="0">
+        <input type="hidden" name="dateto[day]" value="">
+        <input type="hidden" name="dateto[month]" value="">
+        <input type="hidden" name="dateto[year]" value="">
+        <input type="hidden" name="dateto[enabled]" value="0">
 
         <div id="filtersbuttons">
             <button type="button" id="filter-dates-button" class="btn btn-primary filter-button">

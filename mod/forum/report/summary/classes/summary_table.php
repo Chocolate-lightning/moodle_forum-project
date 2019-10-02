@@ -296,7 +296,7 @@ class summary_table extends table_sql {
      * @throws coding_exception
      */
     public function add_filter(int $filtertype, array $values = []): void {
-        global $DB;
+        global $DB, $USER;
 
         $paramcounterror = false;
 
@@ -378,12 +378,16 @@ class summary_table extends table_sql {
                         ($values['to']['enabled'] && !empty(array_diff(['day', 'month', 'year'], array_keys($values['to']))))) {
                     $paramcounterror = true;
                 } else {
+                    $timezone = \core_date::get_user_timezone_object();
+
                     // From date.
                     if ($values['from']['enabled']) {
                         // If the filter was enabled, include the date restriction.
-                        $fromdate = strtotime("{$values['from']['year']}-{$values['from']['month']}-{$values['from']['day']}");
+                        $fromdatestr = "{$values['from']['year']}-{$values['from']['month']}-{$values['from']['day']} 00:00:00";
+                        $fromdate = new \DateTime($fromdatestr, $timezone);
+                        $fromdatetimestamp = $fromdate->format('U');
 
-                        if ($fromdate === false) {
+                        if ($fromdatetimestamp === false) {
                             $filtername = $this->get_filter_name($filtertype);
                             //TODO: Fix this to use the right exception type (and add a 'use' statment at the top for it), also need handling in the UI for that probably.
                             throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
@@ -392,15 +396,17 @@ class summary_table extends table_sql {
                         // No select fields required.
                         // No joins required - posts are already joined.
                         $this->sql->filterwhere .= "p.created >= :from_date";
-                        $this->sql->params += ['fromdate' => $fromdate];
+                        $this->sql->params += ['fromdate' => $fromdatetimestamp];
                     }
 
                     // To date.
                     if ($values['to']['enabled']) {
                         // If the filter was enabled, include the date restriction.
-                        $todate = strtotime("{$values['to']['year']}-{$values['to']['month']}-{$values['to']['day']}");
+                        $todatestr = "{$values['to']['year']}-{$values['to']['month']}-{$values['to']['day']} 23:59:59";
+                        $todate = new \DateTime($todatestr, $timezone);
+                        $todatetimestamp = $todate->format('U');
 
-                        if ($todate === false) {
+                        if ($todatetimestamp === false) {
                             $filtername = $this->get_filter_name($filtertype);
                             //TODO: Fix this to use the right exception type (and add a 'use' statment at the top for it), also need handling in the UI for that probably.
                             throw new coding_exception("An invalid date has been selected for the {$filtername} filter.");
@@ -409,7 +415,7 @@ class summary_table extends table_sql {
                         // No select fields required.
                         // No joins required - posts are already joined.
                         $this->sql->filterwhere .= "p.created <= :to_date";
-                        $this->sql->params += ['todate' => $todate];
+                        $this->sql->params += ['todate' => $todatetimestamp];
                     }
                 }
 
@@ -568,7 +574,11 @@ class summary_table extends table_sql {
         $this->add_filter(self::FILTER_GROUPS, $filters['groups']);
 
         // Apply dates filter.
-        $this->add_filter(self::FILTER_DATES, $filters['dates']);
+        $datevalues = [
+            'from' => $filters['datefrom'],
+            'to' => $filters['dateto'],
+        ];
+        $this->add_filter(self::FILTER_DATES, $datevalues);
     }
 
     /**

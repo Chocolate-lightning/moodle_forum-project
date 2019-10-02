@@ -548,7 +548,9 @@ abstract class gradingform_controller {
 
         $instance = null;
         if (null === $instanceid) {
-            $instancerecord = $this->get_current_instance($raterid, $itemid);
+            if ($instance = $this->get_current_instance($raterid, $itemid)) {
+                return $instance;
+            }
             $instanceid = $instancerecord->id ?? null;
         }
 

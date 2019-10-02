@@ -394,7 +394,9 @@ abstract class component_gradeitem {
         require_once(__DIR__ . '/../../lib/gradelib.php');
         $grade = $this->get_grade_for_user($gradeduser, $grader);
 
-        if ($gradinginstance = $this->get_advanced_grading_instance($grader, $grade)) {
+        if ($this->is_using_advanced_grading()) {
+            $instanceid = $formdata->instanceid;
+            $gradinginstance = $this->get_advanced_grading_instance($grader, $grade, (int) $instanceid);
             $grade->grade = $gradinginstance->submit_and_get_grade($formdata->advancedgrading, $grade->id);
         } else {
             // Handle the case when grade is set to No Grade.
@@ -409,10 +411,12 @@ abstract class component_gradeitem {
     /**
      * Get the advanced grading instance for the specified grade entry.
      *
+     * @param stdClass $grader The user who is grading
      * @param stdClass $grade The row from the grade table.
+     * @param int $instanceid The instanceid of the advanced grading form
      * @return gradingform_instance
      */
-    public function get_advanced_grading_instance(stdClass $grader, stdClass $grade): ?gradingform_instance {
+    public function get_advanced_grading_instance(stdClass $grader, stdClass $grade, int $instanceid = null): ?gradingform_instance {
         $controller = $this->get_advanced_grading_controller($this->itemname);
 
         if (empty($controller)) {
@@ -429,8 +433,7 @@ abstract class component_gradeitem {
         $gradinginstance = $controller->fetch_instance(
             (int) $grader->id,
             (int) $grade->id,
-            // We do not know the instanceid of the grade effort.
-            null
+            $instanceid
         );
 
         // Set the allowed grade range.

@@ -24,6 +24,7 @@
 
 import $ from 'jquery';
 import Popper from 'core/popper';
+import Y from 'core/yui';
 
 export const init = (root) => {
     root = $(root);
@@ -134,11 +135,9 @@ export const init = (root) => {
         filtersform.elements['dateto[enabled]'].value =
                 datespopover.querySelector('[name="filterdatetopopover[enabled]"]').checked ? 1 : 0;
 
-        // Disable the date filters in the mform to prevent unsaved data warning.
-        //TODO: DOESNT FIX THE PROBLEM
-        let checkedboxes = document.getElementById('filter-dates-popover').querySelectorAll('input [type="checkbox"]:checked');
-        checkedboxes.forEach(function(checkbox) {
-            checkbox.checked = false;
+        // Disable the mform checker to prevent unsubmitted form warning to the user when closing the popover.
+        Y.use('moodle-core-formchangechecker', function() {
+            M.core_formchangechecker.reset_form_dirty_state();
         });
 
         // Submit the filter values and re-generate report.

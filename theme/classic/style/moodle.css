@@ -14641,6 +14641,13 @@ a.ygtvspacer:hover {
   max-height: 25em;
   margin-bottom: 1em; }
 
+/* Required to fit a date mform into a filter popover */
+.filter-date-popover {
+  width: 100%;
+  max-width: 41.5em; }
+  .filter-date-popover .mform {
+    margin-left: -3em; }
+
 /** The message area **/
 .hidden {
   display: none; }

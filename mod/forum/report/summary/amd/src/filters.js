@@ -98,9 +98,49 @@ export const init = (root) => {
         });
     };
 
+    // Use popper to override date mform calendar position.
+    var updateCalendarPosition = () => {
+        let referenceElement = document.querySelector('#filter-dates-popover'),
+            popperContent = document.querySelector('#dateselector-calendar-panel');
+
+        new Popper(referenceElement, popperContent, {placement: 'bottom'});
+    };
+
     // Groups filter specific handlers.
 
-    // Event handler for showing dates filter popover.
+    // Event to handle select all groups.
+    $('#filter-groups-popover .select-all').on('click', function() {
+        selectAll('filter-groups-popover');
+    });
+
+    // Event handler for showing groups filter popover.
+    $('#filter-groups-button').on('click', function() {
+        if (!canOpenFilter(event)) {
+            return false;
+        }
+
+        // Create popover.
+        var referenceElement = document.querySelector('#filter-groups-button'),
+            popperContent = document.querySelector('#filter-groups-popover');
+
+        new Popper(referenceElement, popperContent, {placement: 'bottom'});
+
+        // Show popover.
+        $('#filter-groups-popover').removeClass('hidden');
+    });
+
+    // Event handler to save groups filter.
+    $(root).on("click", "#filter-groups-popover .filter-save", function() {
+        // Close the popover.
+        $('#filter-groups-popover').addClass('hidden');
+
+        // Submit the filter values and re-generate report.
+        generateWithFilters(false);
+    });
+
+    // Dates filter specific handlers.
+
+   // Event handler for showing dates filter popover.
     $('#filter-dates-button').on('click', function(event) {
         if (!canOpenFilter(event)) {
             return false;
@@ -144,33 +184,11 @@ export const init = (root) => {
         generateWithFilters(false);
     });
 
-    // Event to handle select all groups.
-    $('#filter-groups-popover .select-all').on('click', function() {
-        selectAll('filter-groups-popover');
+    $(root).on("click", "#id_filterdatefrompopover_calendar", function(){
+        updateCalendarPosition();
     });
 
-    // Event handler for showing groups filter popover.
-    $('#filter-groups-button').on('click', function() {
-        if (!canOpenFilter(event)) {
-            return false;
-        }
-
-        // Create popover.
-        var referenceElement = document.querySelector('#filter-groups-button'),
-            popperContent = document.querySelector('#filter-groups-popover');
-
-        new Popper(referenceElement, popperContent, {placement: 'bottom'});
-
-        // Show popover.
-        $('#filter-groups-popover').removeClass('hidden');
-    });
-
-    // Event handler to save groups filter.
-    $(root).on("click", "#filter-groups-popover .filter-save", function() {
-        // Close the popover.
-        $('#filter-groups-popover').addClass('hidden');
-
-        // Submit the filter values and re-generate report.
-        generateWithFilters(false);
+    $(root).on("click", "#id_filterdatetopopover_calendar", function(){
+        updateCalendarPosition();
     });
 };

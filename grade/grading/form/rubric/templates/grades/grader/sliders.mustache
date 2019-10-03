@@ -1,0 +1,28 @@
+<div class="slider-test">
+    {{#criteria}}
+        <div class="criteria-slider mb-3">
+            <h4>{{{description}}}</h4>
+            <input type="range" class="custom-range" list="tickmarks" min="0" max="4">
+            <datalist class="d-flex" id="tickmarks">
+                {{#levels}}
+                    <option class="d-block" value="{{score}}" label="{{score}}">{{score}}</option>
+                {{/levels}}
+            </datalist>
+        </div>
+    {{/criteria}}
+</div>
+<style>
+    .criteria-slider {
+        position: relative;
+    }
+    datalist#tickmarks {
+        justify-content: space-between;
+        height: auto;
+        overflow: hidden;
+        margin-top: 6px;
+    }
+    datalist#tickmarks option {
+        content: '';
+        height: auto;
+    }
+</style>

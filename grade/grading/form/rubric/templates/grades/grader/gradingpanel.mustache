@@ -32,6 +32,7 @@
 }}
 <form>
     <input type="hidden" name="instanceid" value="{{instanceid}}">
+    {{> gradingform_rubric/grades/grader/sliders }}
     <div class="gradingform_rubric-description">{{{teacherdescription}}}</div>
     <div id="rubric-advancedgrading-{{uniqid}}" class="clearfix gradingform_rubric {{rubricmode}}" data-rubricmode="{{rubricmode}}">
         <table class="criteria table table-striped" id="advancedgrading-criteria" aria-label="{{#str}}rubric, gradingform_rubric{{/str}}">

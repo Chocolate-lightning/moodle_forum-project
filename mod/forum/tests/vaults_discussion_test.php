@@ -108,7 +108,7 @@ class mod_forum_vaults_discussion_testcase extends advanced_testcase {
         $context = context_module::instance($coursemodule->id);
         $forumentity = $entityfactory->get_forum_from_stdclass($forum, $context, $coursemodule, $course);
 
-        $this->assertEquals(null, $vault->get_all_discussions_in_forum($forumentity));
+        $this->assertEquals([], $vault->get_all_discussions_in_forum($forumentity));
 
         [$discussion1, $post] = $this->helper_post_to_forum($forum, $user, ['timemodified' => 2]);
         [$discussion2, $post] = $this->helper_post_to_forum($forum, $user, ['timemodified' => 1]);

@@ -119,10 +119,11 @@ export const init = (root) => {
         new Popper(referenceElement, popperContent, {placement: 'bottom'});
 
         // Show popover and announce to screen reader.
+        var groupsbutton = document.getElementById('filter-groups-button');
         document.getElementById('filter-groups-popover').classList.remove('hidden');
-        document.getElementById('filter-groups-popover').setAttribute('aria-expanded', true);
-        document.getElementById('filter-groups-button').classList.add('btn-outline-primary');
-        document.getElementById('filter-groups-button').classList.remove('btn-primary');
+        groupsbutton.setAttribute('aria-expanded', true);
+        groupsbutton.classList.add('btn-outline-primary');
+        groupsbutton.classList.remove('btn-primary');
     });
 
     // Event handler to click save groups filter.

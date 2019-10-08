@@ -44,13 +44,13 @@
         <input type="hidden" name="submitted" value="true">
         <div id="filtersbuttons">
             {{#hasgroups}}
-            <button type="button" id="filter-groups-button" class="btn btn-primary filter-button"
+            <button type="button" id="filter-groups-button" class="btn btn-primary filter-button" aria-expanded="false"
                     aria-label="{{# str}} filter:groupsbuttonlabel, forumreport_summary {{/ str}}">
                 {{filtergroupsname}}
             </button>
 
             {{! Start groups filter popover}}
-            <div id="filter-groups-popover" class="popover m-t-1 hidden" aria-expanded="false">
+            <div id="filter-groups-popover" class="popover m-t-1 hidden">
                 <h3 class="filter-header">{{# str}} filter:groupsname, forumreport_summary {{/ str}}</h3>
                 <div class="filter-body">
                     <div class="form-check filter-scrollable">

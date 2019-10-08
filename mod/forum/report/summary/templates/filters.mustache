@@ -44,12 +44,13 @@
         <input type="hidden" name="submitted" value="true">
         <div id="filtersbuttons">
             {{#hasgroups}}
-            <button type="button" id="filter-groups-button" class="btn btn-primary filter-button">
+            <button type="button" id="filter-groups-button" class="btn btn-primary filter-button"
+                    aria-label="{{# str}} filter:groupsbuttonlabel, forumreport_summary {{/ str}}">
                 {{filtergroupsname}}
             </button>
 
             {{! Start groups filter popover}}
-            <div id="filter-groups-popover" class="popover m-t-1 hidden">
+            <div id="filter-groups-popover" class="popover m-t-1 hidden" aria-expanded="false">
                 <h3 class="filter-header">{{# str}} filter:groupsname, forumreport_summary {{/ str}}</h3>
                 <div class="filter-body">
                     <div class="form-check filter-scrollable">
@@ -61,10 +62,11 @@
                         {{/filtergroups}}
                         <br>
                     </div>
-                    <a href="#"><span class="select-all">{{# str}} selectall {{/ str}}</span></a>
+                    <a href="#" aria-label="{{# str}} selectall {{/ str}}"><span class="select-all">{{# str}} selectall {{/ str}}</span></a>
                     <div class="float-right">
-                        <a href="#"><span class="filter-clear p-1">{{# str}} clear {{/ str}}</span></a>
-                        <a href="#"><span class="filter-save"><strong>{{# str}} save {{/ str}}</strong></span></a>
+                        <a href="#" aria-label="{{# str}} clear {{/ str}}"><span class="filter-clear p-1">{{# str}} clear {{/ str}}</span></a>
+                        <a href="#" aria-label="{{# str}} save {{/ str}}"><span class="filter-save">
+                                <strong>{{# str}} save {{/ str}}</strong></span></a>
                     </div>
                 </div>
             </div>

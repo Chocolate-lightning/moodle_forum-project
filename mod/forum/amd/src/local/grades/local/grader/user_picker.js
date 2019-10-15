@@ -154,17 +154,15 @@ class UserPicker {
                         this.root.querySelector(Selectors.actions.searchUserBox).addEventListener('click', async(e) => {
                             e.preventDefault();
                             const user = e.target.closest(Selectors.actions.selectUser);
-                            if (user !== null) {
-                                const foundUser = userList.findIndex(item => parseInt(item.id) === parseInt(user.dataset.userid));
-                                const result = await this.preChangeUserCallback(this.currentUser);
-                                const spinner = addIconToContainerWithPromise(graderRegion);
+                            const foundUser = userList.findIndex(item => parseInt(item.id) === parseInt(user.dataset.userid));
+                            const result = await this.preChangeUserCallback(this.currentUser);
+                            const spinner = addIconToContainerWithPromise(graderRegion);
 
-                                if (!result.failed) {
-                                    this.updateIndex(0, parseInt(foundUser));
-                                    await this.showUser(this.currentUser);
-                                }
-                                spinner.resolve();
+                            if (!result.failed) {
+                                this.updateIndex(0, parseInt(foundUser));
+                                await this.showUser(this.currentUser);
                             }
+                            spinner.resolve();
                         });
                     }, 300, this.userList);
                 };

@@ -80,6 +80,9 @@ class UserPicker {
         // Call the showUser function to show the first user immediately.
         await this.showUser(this.currentUser);
 
+        // Show a list of users under the user search box.
+        await this.renderSearch(this.userList.slice(0, 10));
+
         // Ensure that the event listeners are all bound.
         this.registerEventListeners();
     }
@@ -117,7 +120,7 @@ class UserPicker {
     /**
      * Register the event listeners for the user picker.
      */
-    async registerEventListeners() {
+    registerEventListeners() {
         this.root.addEventListener('click', async e => {
             const button = e.target.closest(Selectors.actions.changeUser);
             const input = e.target.closest(Selectors.actions.searchUserInput);
@@ -141,14 +144,14 @@ class UserPicker {
                 input.onkeyup = () => {
                     // Clear the timeout if it has already been set.
                     clearTimeout(timeout);
-                    // Make a new timeout set to go off in 500ms
+                    // Make a new timeout set to go off in 300ms
                     timeout = setTimeout(async(userList) => {
                         const userInput = input.value;
                         let results = userList.filter((user) => {
                             return user.fullname.toLowerCase().includes(userInput.toLowerCase());
                         });
                         await this.renderSearch(results);
-                        this.root.querySelector('[data-action="search-user-box"]').addEventListener('click', async(e) => {
+                        this.root.querySelector(Selectors.actions.searchUserBox).addEventListener('click', async(e) => {
                             e.preventDefault();
                             const user = e.target.closest(Selectors.actions.selectUser);
                             const foundUser = userList.findIndex(item => parseInt(item.id) === parseInt(user.dataset.userid));
@@ -172,7 +175,8 @@ class UserPicker {
      */
     async renderSearch(results) {
         const {html, js} = await Templates.renderForPromise(`${templatePath}/user_picker/user_search`, results);
-        Templates.replaceNode(Selectors.actions.searchUserBox, html, js);
+        const searchUserRegion = this.root.querySelector(Selectors.actions.searchUserBox);
+        Templates.replaceNode(searchUserRegion, html, js);
     }
     /**
      * Update the current user index.

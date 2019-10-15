@@ -80,6 +80,10 @@ class UserPicker {
         // Call the showUser function to show the first user immediately.
         await this.showUser(this.currentUser);
 
+        // Show a list of users under the user search box.
+        await this.renderSearch(this.userList);
+
+        this.searchResultListener(document.querySelector('[data-region="unified-grader"]'));
         // Ensure that the event listeners are all bound.
         this.registerEventListeners();
     }
@@ -120,9 +124,12 @@ class UserPicker {
     registerEventListeners() {
         this.root.addEventListener('click', async e => {
             const button = e.target.closest(Selectors.actions.changeUser);
+            const input = e.target.closest(Selectors.actions.searchUserInput);
+
+            const graderRegion = document.querySelector('[data-region="unified-grader"]');
             if (button) {
                 const result = await this.preChangeUserCallback(this.currentUser);
-                const spinner = addIconToContainerWithPromise(document.querySelector('[data-region="unified-grader"]'));
+                const spinner = addIconToContainerWithPromise(graderRegion);
 
                 if (!result.failed) {
                     this.updateIndex(parseInt(button.dataset.direction));
@@ -131,17 +138,77 @@ class UserPicker {
 
                 spinner.resolve();
             }
+            if (input) {
+
+                // Make the key up a seperate function.
+                this.onKeyUp(input, graderRegion);
+            }
+        });
+    }
+
+    onKeyUp(input, graderRegion) {
+        // Init a timeout variable to be used below
+        let timeout = null;
+        // Listen for keystroke events
+        input.onkeyup = () => {
+            // Clear the timeout if it has already been set.
+            clearTimeout(timeout);
+            // Make a new timeout set to go off in 300ms
+            timeout = setTimeout(async(userList) => {
+                const userInput = input.value;
+                let results = userList.filter((user) => {
+                    return user.fullname.toLowerCase().includes(userInput.toLowerCase());
+                });
+                await this.renderSearch(results);
+                this.searchResultListener(graderRegion);
+            }, 300, this.userList);
+        };
+    }
+
+    searchResultListener(graderRegion) {
+        this.root.querySelector(Selectors.actions.searchUserBox).addEventListener('click', async(e) => {
+            e.preventDefault();
+            const user = e.target.closest(Selectors.actions.selectUser);
+            const foundUser = this.userList.findIndex(item => parseInt(item.id) === parseInt(user.dataset.userid));
+            const result = await this.preChangeUserCallback(this.currentUser);
+            const spinner = addIconToContainerWithPromise(graderRegion);
+
+            if (!result.failed) {
+                this.updateIndex(0, parseInt(foundUser));
+                await this.showUser(this.currentUser);
+            }
+            spinner.resolve();
         });
     }
 
     /**
+     * Render the user search results.
+     */
+    async renderSearch(results) {
+        const trimmedUsers = results.slice(0, 10);
+        const overflowUsers = results.slice(10);
+        const builtResults = {
+          'expandedUsers': trimmedUsers,
+          'hasCollapsed': overflowUsers.length > 0,
+          'collapsedUsers': overflowUsers,
+        };
+        const {html, js} = await Templates.renderForPromise(`${templatePath}/user_picker/user_search`, builtResults);
+        const searchUserRegion = this.root.querySelector(Selectors.actions.searchUserBox);
+        Templates.replaceNode(searchUserRegion, html, js);
+    }
+    /**
      * Update the current user index.
      *
      * @param {Number} direction
+     * @param {Number} specificIndex
      * @returns {Number}}
      */
-    updateIndex(direction) {
-        this.currentUserIndex += direction;
+    updateIndex(direction, specificIndex = null) {
+        if (specificIndex) {
+            this.currentUserIndex = specificIndex;
+        } else {
+            this.currentUserIndex += direction;
+        }
 
         // Loop around the edges.
         if (this.currentUserIndex < 0) {

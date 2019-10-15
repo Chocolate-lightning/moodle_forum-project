@@ -83,6 +83,7 @@ class UserPicker {
         // Show a list of users under the user search box.
         await this.renderSearch(this.userList);
 
+        this.searchResultListener(document.querySelector('[data-region="unified-grader"]'));
         // Ensure that the event listeners are all bound.
         this.registerEventListeners();
     }
@@ -138,35 +139,45 @@ class UserPicker {
                 spinner.resolve();
             }
             if (input) {
-                // Init a timeout variable to be used below
-                let timeout = null;
-                // Listen for keystroke events
-                input.onkeyup = () => {
-                    // Clear the timeout if it has already been set.
-                    clearTimeout(timeout);
-                    // Make a new timeout set to go off in 300ms
-                    timeout = setTimeout(async(userList) => {
-                        const userInput = input.value;
-                        let results = userList.filter((user) => {
-                            return user.fullname.toLowerCase().includes(userInput.toLowerCase());
-                        });
-                        await this.renderSearch(results);
-                        this.root.querySelector(Selectors.actions.searchUserBox).addEventListener('click', async(e) => {
-                            e.preventDefault();
-                            const user = e.target.closest(Selectors.actions.selectUser);
-                            const foundUser = userList.findIndex(item => parseInt(item.id) === parseInt(user.dataset.userid));
-                            const result = await this.preChangeUserCallback(this.currentUser);
-                            const spinner = addIconToContainerWithPromise(graderRegion);
 
-                            if (!result.failed) {
-                                this.updateIndex(0, parseInt(foundUser));
-                                await this.showUser(this.currentUser);
-                            }
-                            spinner.resolve();
-                        });
-                    }, 300, this.userList);
-                };
+                // Make the key up a seperate function.
+                this.onKeyUp(input, graderRegion);
             }
+        });
+    }
+
+    onKeyUp(input, graderRegion) {
+        // Init a timeout variable to be used below
+        let timeout = null;
+        // Listen for keystroke events
+        input.onkeyup = () => {
+            // Clear the timeout if it has already been set.
+            clearTimeout(timeout);
+            // Make a new timeout set to go off in 300ms
+            timeout = setTimeout(async(userList) => {
+                const userInput = input.value;
+                let results = userList.filter((user) => {
+                    return user.fullname.toLowerCase().includes(userInput.toLowerCase());
+                });
+                await this.renderSearch(results);
+                this.searchResultListener(graderRegion);
+            }, 300, this.userList);
+        };
+    }
+
+    searchResultListener(graderRegion) {
+        this.root.querySelector(Selectors.actions.searchUserBox).addEventListener('click', async(e) => {
+            e.preventDefault();
+            const user = e.target.closest(Selectors.actions.selectUser);
+            const foundUser = this.userList.findIndex(item => parseInt(item.id) === parseInt(user.dataset.userid));
+            const result = await this.preChangeUserCallback(this.currentUser);
+            const spinner = addIconToContainerWithPromise(graderRegion);
+
+            if (!result.failed) {
+                this.updateIndex(0, parseInt(foundUser));
+                await this.showUser(this.currentUser);
+            }
+            spinner.resolve();
         });
     }
 

@@ -81,7 +81,7 @@ class UserPicker {
         await this.showUser(this.currentUser);
 
         // Show a list of users under the user search box.
-        await this.renderSearch(this.userList.slice(0, 10));
+        await this.renderSearch(this.userList);
 
         // Ensure that the event listeners are all bound.
         this.registerEventListeners();
@@ -154,15 +154,17 @@ class UserPicker {
                         this.root.querySelector(Selectors.actions.searchUserBox).addEventListener('click', async(e) => {
                             e.preventDefault();
                             const user = e.target.closest(Selectors.actions.selectUser);
-                            const foundUser = userList.findIndex(item => parseInt(item.id) === parseInt(user.dataset.userid));
-                            const result = await this.preChangeUserCallback(this.currentUser);
-                            const spinner = addIconToContainerWithPromise(graderRegion);
+                            if (user !== null) {
+                                const foundUser = userList.findIndex(item => parseInt(item.id) === parseInt(user.dataset.userid));
+                                const result = await this.preChangeUserCallback(this.currentUser);
+                                const spinner = addIconToContainerWithPromise(graderRegion);
 
-                            if (!result.failed) {
-                                this.updateIndex(0, parseInt(foundUser));
-                                await this.showUser(this.currentUser);
+                                if (!result.failed) {
+                                    this.updateIndex(0, parseInt(foundUser));
+                                    await this.showUser(this.currentUser);
+                                }
+                                spinner.resolve();
                             }
-                            spinner.resolve();
                         });
                     }, 300, this.userList);
                 };
@@ -174,7 +176,14 @@ class UserPicker {
      * Render the user search results.
      */
     async renderSearch(results) {
-        const {html, js} = await Templates.renderForPromise(`${templatePath}/user_picker/user_search`, results);
+        const trimmedUsers = results.slice(0, 10);
+        const overflowUsers = results.slice(10);
+        const builtResults = {
+          'expandedUsers': trimmedUsers,
+          'hasCollapsed': overflowUsers.length > 0,
+          'collapsedUsers': overflowUsers,
+        };
+        const {html, js} = await Templates.renderForPromise(`${templatePath}/user_picker/user_search`, builtResults);
         const searchUserRegion = this.root.querySelector(Selectors.actions.searchUserBox);
         Templates.replaceNode(searchUserRegion, html, js);
     }

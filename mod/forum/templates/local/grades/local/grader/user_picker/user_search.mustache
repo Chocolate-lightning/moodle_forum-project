@@ -31,15 +31,39 @@
     }
 }}
 <div data-action="search-user-box">
-    {{#.}}
+    {{#expandedUsers}}
         <div class="mt-2">
             <img class="rounded-circle userpicture" src="{{profileimagesm}}"
                  alt="{{#str}}pictureof, moodle, {{fullname}}{{/str}}"
                  title="{{#str}}pictureof, moodle, {{fullname}}{{/str}}" >
             <a href="#" class="font-weight-bold" data-action="select-user" data-userid="{{id}}">{{fullname}}</a>
         </div>
-    {{/.}}
-    {{^.}}
+    {{/expandedUsers}}
+    {{^expandedUsers}}
         <h5>No user(s) found for given criteria</h5>
-    {{/.}}
+    {{/expandedUsers}}
+    {{#hasCollapsed}}
+        <button
+                class="btn btn-icon text-muted icon-no-margin icon-size-3"
+                type="button"
+                id="grader-users-menu-{{uniqid}}"
+                aria-label="{{#str}} showmoreusers, mod_forum {{/str}}"
+                data-toggle="collapse"
+                data-target="#collapsed-users-{{uniqid}}"
+                aria-expanded="false"
+                aria-controls="collapsed-users-{{uniqid}}"
+        >
+            {{#pix}} i/moremenu {{/pix}}
+        </button>
+        <div id="collapsed-users-{{uniqid}}" class="collapse" aria-labelledby="grader-users-menu-{{uniqid}}">
+            {{#collapsedUsers}}
+                <div class="mt-2">
+                    <img class="rounded-circle userpicture" src="{{profileimagesm}}"
+                         alt="{{#str}}pictureof, moodle, {{fullname}}{{/str}}"
+                         title="{{#str}}pictureof, moodle, {{fullname}}{{/str}}" >
+                    <a href="#" class="font-weight-bold" data-action="select-user" data-userid="{{id}}">{{fullname}}</a>
+                </div>
+            {{/collapsedUsers}}
+        </div>
+    {{/hasCollapsed}}
 </div>

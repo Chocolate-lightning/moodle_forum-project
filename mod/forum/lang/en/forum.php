@@ -729,6 +729,7 @@ $string['actionsforgraderinterface'] = 'Actions for grader interface';
 $string['togglefullscreen'] = 'Toggle fullscreen';
 $string['close'] = 'Close';
 $string['closegrader'] = 'Close grade interface';
+$string['showmoreusers'] = 'Show more users';
 
 // Deprecated since Moodle 3.8.
 $string['inpagereplysubject'] = 'Re: {$a}';

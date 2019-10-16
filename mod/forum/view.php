@@ -119,7 +119,7 @@ if ($capabilitymanager->can_grade($USER)) {
             'gradingcomponent' => $forumgradeitem->get_grading_component_name(),
             'gradingcomponentsubtype' => $forumgradeitem->get_grading_component_subtype(),
         ];
-        $buttons[] = $OUTPUT->render_from_template('mod_forum/grades/view_grade_button', $gradeobj);
+        $PAGE->add_header_action($OUTPUT->render_from_template('mod_forum/grades/view_grade_button', $gradeobj));
     }
 }
 

@@ -408,6 +408,34 @@ abstract class component_gradeitem {
     abstract public function get_all_grades(): array;
 
     /**
+     * Get the grade item instance id.
+     *
+     * This is typically the cmid in the case of an activity, and relates to the iteminstance field in the grade_items
+     * table.
+     *
+     * @return int
+     */
+    abstract public function get_grade_instance_id(): int;
+
+    /**
+     * Get grades for all users for the specified gradeitem.
+     *
+     * @return stdClass The grades
+     */
+    public function get_grade_item(): \grade_item {
+        global $CFG;
+        require("{$CFG->libdir}/gradelib.php");
+
+        [$itemtype, $itemmodule] = \core_component::normalize_component($this->component);
+        return \grade_item::fetch([
+            'itemtype' => $itemtype,
+            'itemmodule' => $itemmodule,
+            'itemnumber' => $this->itemnumber,
+            'iteminstance' => $this->get_grade_instance_id(),
+        ]);
+    }
+
+    /**
      * Create or update the grade.
      *
      * @param stdClass $grade

@@ -95,7 +95,7 @@ $PAGE->set_include_region_main_settings_in_header_actions(true);
 if ($capabilitymanager->can_grade($USER)) {
     $forumgradeitem = forum_gradeitem::load_from_forum_entity($forum);
     if ($forumgradeitem->is_grading_enabled()) {
-        $groupid = groups_get_activity_group($cm, true) ?: null;
+        $groupid = groups_get_activity_group($cm, true) ?: 0;
         $gradeobj = (object) [
             'contextid' => $forum->get_context()->id,
             'cmid' => $cmid,

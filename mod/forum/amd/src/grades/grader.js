@@ -32,7 +32,7 @@ const templateNames = {
     contentRegion: 'mod_forum/grades/grader/discussion/posts',
 };
 
-const getWholeForumFunctions = (cmid) => {
+const getWholeForumFunctions = (cmid, groupID) => {
     const getPostContextFunction = () => {
         return (userid) => {
             return Repository.getDiscussionByUserID(userid, cmid);
@@ -55,7 +55,7 @@ const getWholeForumFunctions = (cmid) => {
 
     const getUsersForCmidFunction = () => {
         return () => {
-            return CourseRepository.getUsersFromCourseModuleID(cmid)
+            return CourseRepository.getUsersFromCourseModuleID(cmid, groupID)
                 .then((context) => {
                     return context.users;
                 })
@@ -100,7 +100,7 @@ const discussionPostMapper = discussion => {
  */
 const launchWholeForumGrading = async rootNode => {
     const data = rootNode.dataset;
-    const wholeForumFunctions = getWholeForumFunctions(data.cmid);
+    const wholeForumFunctions = getWholeForumFunctions(data.cmid, data.group);
     const gradingPanelFunctions = await Grader.getGradingPanelFunctions(
         'mod_forum',
         data.contextid,
@@ -115,7 +115,6 @@ const launchWholeForumGrading = async rootNode => {
         gradingPanelFunctions.getter,
         gradingPanelFunctions.setter,
         {
-            groupid: data.groupid,
             initialUserId: data.initialuserid,
             moduleName: data.name
         }

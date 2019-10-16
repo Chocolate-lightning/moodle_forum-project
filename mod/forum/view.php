@@ -121,6 +121,21 @@ if ($capabilitymanager->can_grade($USER)) {
         ];
         $buttons[] = $OUTPUT->render_from_template('mod_forum/grades/grade_button', $gradeobj);
     }
+} else {
+    $forumgradeitem = forum_gradeitem::load_from_forum_entity($forum);
+    if ($forumgradeitem->is_grading_enabled()) {
+        $groupid = groups_get_activity_group($cm, true) ?: 0;
+        $gradeobj = (object) [
+            'contextid' => $forum->get_context()->id,
+            'cmid' => $cmid,
+            'name' => $forum->get_name(),
+            'groupid' => $groupid,
+            'userid' => $USER->id,
+            'gradingcomponent' => $forumgradeitem->get_grading_component_name(),
+            'gradingcomponentsubtype' => $forumgradeitem->get_grading_component_subtype(),
+        ];
+        $buttons[] = $OUTPUT->render_from_template('mod_forum/grades/view_grade_button', $gradeobj);
+    }
 }
 $buttons[] = forum_search_form($course, $search);
 $PAGE->set_button(implode('', $buttons));

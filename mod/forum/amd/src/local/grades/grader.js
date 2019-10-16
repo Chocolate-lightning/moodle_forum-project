@@ -29,6 +29,8 @@ import getGradingPanelFunctions from './local/grader/gradingpanel';
 import {add as addToast} from 'core/toast';
 import {get_string as getString} from 'core/str';
 import {failedUpdate} from 'core_grades/grades/grader/gradingpanel/normalise';
+import * as Modal from 'core/modal_factory';
+import * as ModalEvents from 'core/modal_events';
 
 const templateNames = {
     grader: {
@@ -187,6 +189,43 @@ export const launch = async(getListOfUsers, getContentForUser, getGradeForUser, 
 
     // Display the newly created user picker.
     displayUserPicker(graderContainer, userPicker.rootNode);
+};
+
+/**
+ * Show the grade for a specific user.
+ *
+ * @param {Function} getGradeForUser A function get the grade details for a specific user
+ * @param {Number} userid The ID of a specific user
+ */
+export const view = async(getGradeForUser, userid) => {
+
+    const [
+        userGrade,
+    ] = await Promise.all([
+        getGradeForUser(userid),
+    ]);
+    window.console.log(userGrade);
+    const [
+        modal,
+    ] = await Promise.all([
+        Modal.create({
+            title: 'Grades for Forum XX',
+            large: true,
+            type: Modal.types.CANCEL
+        }),
+    ]);
+
+    // Handle hidden event.
+    modal.getRoot().on(ModalEvents.hidden, function() {
+        // Destroy when hidden.
+        modal.destroy();
+    });
+
+    modal.show();
+
+    // Note: We do not use await here because it messes with the Modal transitions.
+    const templatePromise = Templates.render(userGrade.templatename, userGrade.grade);
+    modal.setBody(templatePromise);
 };
 
 export {getGradingPanelFunctions};

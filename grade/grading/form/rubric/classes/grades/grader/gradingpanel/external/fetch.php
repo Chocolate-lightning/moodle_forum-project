@@ -90,8 +90,6 @@ class fetch extends external_api {
      * @since Moodle 3.8
      */
     public static function execute(string $component, int $contextid, string $itemname, int $gradeduserid): array {
-        global $USER;
-
         [
             'component' => $component,
             'contextid' => $contextid,
@@ -129,7 +127,7 @@ class fetch extends external_api {
     }
 
     /**
-     * Get the data to be fetched.
+     * Get the data to be fetched and create the structure ready for Mustache.
      *
      * @param gradeitem $gradeitem
      * @param stdClass $gradeduser
@@ -138,6 +136,7 @@ class fetch extends external_api {
     public static function get_fetch_data(gradeitem $gradeitem, stdClass $gradeduser): array {
         global $USER;
 
+        // Set up all the controllers etc that we'll be needing.
         $grade = $gradeitem->get_grade_for_user($gradeduser, $USER);
         $instance = $gradeitem->get_advanced_grading_instance($USER, $grade);
         $controller = $instance->get_controller();
@@ -156,7 +155,9 @@ class fetch extends external_api {
 
         $criterion = [];
         if ($definition->rubric_criteria) {
+            // Iterate over the defined criterion in the rubric and map out what we need to render each item.
             $criterion = array_map(function($criterion) use ($definitionid, $fillings, $context) {
+                // The general structure we'll be returning, we still need to get the remark (if any) and the levels associated.
                 $result = [
                     'id' => $criterion['id'],
                     'description' => self::get_formatted_text(
@@ -168,6 +169,7 @@ class fetch extends external_api {
                     ),
                 ];
 
+                // Do we have an existing grade filling? if so lets get the remark associated to this criteria.
                 $filling = [];
                 if (array_key_exists($criterion['id'], $fillings['criteria'])) {
                     $filling = $fillings['criteria'][$criterion['id']];
@@ -179,7 +181,9 @@ class fetch extends external_api {
                     );
                 }
 
+                // Lets build the levels within a criteria and figure out what needs to go where.
                 $result['levels'] = array_map(function($level) use ($criterion, $filling, $context, $definitionid) {
+                    // The bulk of what'll be returned can be defined easily we'll add to this further down.
                     $result = [
                         'id' => $level['id'],
                         'criterionid' => $criterion['id'],
@@ -194,6 +198,7 @@ class fetch extends external_api {
                         'checked' => null,
                     ];
 
+                    // Consult the grade filling to see if a level has been selected and if it is the current level.
                     if (array_key_exists('levelid', $filling) && $filling['levelid'] == $level['id']) {
                         $result['checked'] = true;
                     }

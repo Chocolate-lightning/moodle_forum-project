@@ -253,7 +253,7 @@ class filters implements renderable, templatable {
 
         // Set date button and generate dates popover mform.
         $output->filterdatesname = $this->datesbuttontext;
-        $datesform = new forumreport_summary\dates_filter_form(null, $this->datesdata);
+        $datesform = new forumreport_summary\form\dates_filter_form(null, $this->datesdata);
         $output->filterdatesform = $datesform->render();
 
          // Set dates filter data within filters form.

@@ -433,6 +433,7 @@ class summary_table extends table_sql {
         $this->no_sorting('select');
         $this->set_attribute('id', 'forumreport_summary_table');
         $this->sql = new \stdClass();
+        $this->sql->params = [];
     }
 
     /**

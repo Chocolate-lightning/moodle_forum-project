@@ -195,7 +195,7 @@ export const init = (root) => {
         });
 
         // Submit the filter values and re-generate report.
-       submitWithFilter('#filter-dates-popover');
+        submitWithFilter('#filter-dates-popover');
     });
 
     jqRoot.on("click", "#id_filterdatefrompopover_calendar", function() {

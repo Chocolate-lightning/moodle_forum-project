@@ -22,6 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * Manage the frequently used comments in the Marking Guide form.
+ *
+ * @param {String} rootId
+ */
 export const init = (rootId) => {
     const rootNode = document.querySelector(`#${rootId}`);
 
@@ -40,6 +45,7 @@ export const init = (rootId) => {
             return;
         }
 
+        // Either append the comment to an existing comment or set it as the comment.
         if (remark.value.trim()) {
             remark.value += `\n${clicked.innerHTML}`;
         } else {

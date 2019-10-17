@@ -32,13 +32,33 @@ const templateNames = {
     contentRegion: 'mod_forum/grades/grader/discussion/posts',
 };
 
+/**
+ * A function of functions, This is done so that we can call this once with a cmid
+ * With the functions within all needing the same immutable variable we wrap them in a curry
+ * This is done so we can avoid verbosely passing around the same const everywhere.
+ *
+ * @param {Number} cmid
+ * @return {Object} {getUsers(), getContentForUserId()}
+ */
 const getWholeForumFunctions = (cmid) => {
+    /**
+     * Get a users discussions in a Forum by userid & cmid
+     * This is used by getContentForUserIdFunction()
+     *
+     * @return {Function}
+     */
     const getPostContextFunction = () => {
         return (userid) => {
             return Repository.getDiscussionByUserID(userid, cmid);
         };
     };
 
+    /**
+     * This is what the Unified grader calls to fetch the gradable content for a given user.
+     * Once a userid is passed to this function it'll carry on it's execution.
+     *
+     * @return {Function}
+     */
     const getContentForUserIdFunction = () => {
         const postContextFunction = getPostContextFunction(cmid);
         return userid => {
@@ -53,6 +73,12 @@ const getWholeForumFunctions = (cmid) => {
         };
     };
 
+    /**
+     * Curried function with CMID set, this is then used in unified grader as a fetch users call.
+     * The function curried fetches all users in a course for a given CMID.
+     *
+     *  @return {Function}
+     */
     const getUsersForCmidFunction = () => {
         return () => {
             return CourseRepository.getUsersFromCourseModuleID(cmid)
@@ -63,6 +89,7 @@ const getWholeForumFunctions = (cmid) => {
         };
     };
 
+    // Return the two key functions the grader interface requires, all else can be abstracted from it.
     return {
         getContentForUserId: getContentForUserIdFunction(),
         getUsers: getUsersForCmidFunction(),
@@ -73,6 +100,12 @@ const findGradableNode = (node) => {
     return node.closest(Selectors.gradableItem);
 };
 
+/**
+ * For a discussion we need to manipulate it's posts to hide certain UI elements.
+ *
+ * @param {Object} discussion
+ * @return {Array} name, id, posts
+ */
 const discussionPostMapper = discussion => {
     // Map postid => post.
     const parentMap = new Map();
@@ -100,6 +133,10 @@ const discussionPostMapper = discussion => {
  */
 const launchWholeForumGrading = async rootNode => {
     const data = rootNode.dataset;
+    /**
+     * Partially execute this function so we have the CMID in all of the curried functions within.
+     * This makes our lives easier as we don't have to keep passing an immutable variable all over the shop.
+     */
     const wholeForumFunctions = getWholeForumFunctions(data.cmid);
     const gradingPanelFunctions = await Grader.getGradingPanelFunctions(
         'mod_forum',

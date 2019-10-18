@@ -118,7 +118,7 @@ class UserPicker {
      * Register the event listeners for the user picker.
      */
     registerEventListeners() {
-        this.root.addEventListener('click', async e => {
+        this.root.addEventListener('click', async(e) => {
             const button = e.target.closest(Selectors.actions.changeUser);
             if (button) {
                 const result = await this.preChangeUserCallback(this.currentUser);

@@ -61,7 +61,7 @@ const getWholeForumFunctions = (cmid) => {
      */
     const getContentForUserIdFunction = () => {
         const postContextFunction = getPostContextFunction(cmid);
-        return userid => {
+        return (userid) => {
             return postContextFunction(userid)
             .then(context => {
                 // Rebuild the returned data for the template.
@@ -106,11 +106,11 @@ const findGradableNode = (node) => {
  * @param {Object} discussion
  * @return {Array} name, id, posts
  */
-const discussionPostMapper = discussion => {
+const discussionPostMapper = (discussion) => {
     // Map postid => post.
     const parentMap = new Map();
     discussion.posts.parentposts.forEach(post => parentMap.set(post.id, post));
-    const userPosts = discussion.posts.userposts.map(post => {
+    const userPosts = discussion.posts.userposts.map((post) => {
         post.subject = null;
         post.readonly = true;
         post.starter = !post.parentid;
@@ -131,7 +131,7 @@ const discussionPostMapper = discussion => {
  *
  * @param {HTMLElement} rootNode the root HTML element describing what is to be graded
  */
-const launchWholeForumGrading = async rootNode => {
+const launchWholeForumGrading = async (rootNode) => {
     const data = rootNode.dataset;
     /**
      * Partially execute this function so we have the CMID in all of the curried functions within.
@@ -163,7 +163,7 @@ const launchWholeForumGrading = async rootNode => {
  * Register listeners to launch the grading panel.
  */
 export const registerLaunchListeners = () => {
-    document.addEventListener('click', async e => {
+    document.addEventListener('click', async(e) => {
         if (e.target.matches(Selectors.launch)) {
             const rootNode = findGradableNode(e.target);
 

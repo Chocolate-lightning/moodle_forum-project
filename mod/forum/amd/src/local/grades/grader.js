@@ -130,7 +130,7 @@ const registerEventListeners = (graderLayout, userPicker, saveGradeFunction) => 
  * @return {Function}
  */
 const getSaveUserGradeFunction = (root, setGradeForUser) => {
-    return async user => {
+    return async(user) => {
         try {
             root.querySelector(Selectors.regions.gradingPanelErrors).innerHTML = '';
             const result = await setGradeForUser(user.id, root.querySelector(Selectors.regions.gradingPanel));

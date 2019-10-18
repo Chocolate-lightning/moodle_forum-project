@@ -24,6 +24,8 @@
 
 /**
  * Get the grade panel setter and getter for the current component.
+ * This function dynamically pulls the relevant gradingpanel JS file defined in the grading method.
+ * We do this because we do not know until execution time what the grading type is and we do not want to import unused files.
  *
  * @param {String} component The component being graded
  * @param {Number} context The contextid of the thing being graded

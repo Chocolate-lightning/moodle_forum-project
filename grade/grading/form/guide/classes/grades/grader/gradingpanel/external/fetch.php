@@ -118,7 +118,7 @@ class fetch extends external_api {
         // Fetch the gradeitem instance.
         $gradeitem = gradeitem::instance($component, $context, $itemname);
 
-        if ('guide' !== $gradeitem->get_advanced_grading_method()) {
+        if (MARKING_GUIDE !== $gradeitem->get_advanced_grading_method()) {
             throw new moodle_exception(
                 "The {$itemname} item in {$component}/{$contextid} is not configured for advanced grading with a marking guide"
             );

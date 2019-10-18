@@ -542,6 +542,7 @@ abstract class gradingform_controller {
      * @param int $raterid
      * @param int $itemid
      * @return gradingform_instance
+     * @throws dml_exception
      */
     public function fetch_instance(int $raterid, int $itemid, ?int $instanceid): gradingform_instance {
         global $DB;

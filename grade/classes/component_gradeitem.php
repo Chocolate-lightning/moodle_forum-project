@@ -58,6 +58,14 @@ abstract class component_gradeitem {
     /** @var int The grade itemnumber */
     protected $itemnumber;
 
+    /**
+     * component_gradeitem constructor.
+     *
+     * @param string $component
+     * @param context $context
+     * @param string $itemname
+     * @throws \coding_exception
+     */
     final protected function __construct(string $component, context $context, string $itemname) {
         $this->component = $component;
         $this->context = $context;
@@ -364,6 +372,7 @@ abstract class component_gradeitem {
      *
      * @param int $gradeid
      * @return stdClass
+     * @throws \dml_exception
      */
     public function get_grade(int $gradeid): stdClass {
         global $DB;

@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/grade/grading/form/lib.php');
 
+const MARKING_GUIDE = 'guide';
 /**
  * This controller encapsulates the guide grading logic
  *

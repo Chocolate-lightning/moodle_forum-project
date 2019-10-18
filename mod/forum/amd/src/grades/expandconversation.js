@@ -41,7 +41,7 @@ const findGradableNode = node => node.closest(ForumSelectors.expandConversation)
  *
  * @param {HTMLElement} rootNode The button that has been clicked
  */
-const showPostInContext = async rootNode => {
+const showPostInContext = async(rootNode) => {
     const postId = rootNode.dataset.postid;
     const discussionId = rootNode.dataset.discussionid;
     const discussionName = rootNode.dataset.name;
@@ -85,8 +85,8 @@ const showPostInContext = async rootNode => {
  *
  * @param {HTMLElement} rootNode The root to listen to.
  */
-export const registerEventListeners = rootNode => {
-    rootNode.addEventListener('click', e => {
+export const registerEventListeners = (rootNode) => {
+    rootNode.addEventListener('click', (e) => {
         const rootNode = findGradableNode(e.target);
 
         if (rootNode) {

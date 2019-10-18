@@ -153,57 +153,69 @@ class filters implements renderable, templatable {
      * Prepares from date, to date and button text.
      * Empty data will default to a disabled filter with today's date.
      *
-     * @param array $datefrom From date selected for filtering, and whether the filter is enabled.
-     * @param array $dateto To date selected for filtering, and whether the filter is enabled.
+     * @param array $datefromdata From date selected for filtering, and whether the filter is enabled.
+     * @param array $datetodata To date selected for filtering, and whether the filter is enabled.
      * @return void.
      */
-    private function prepare_dates_data(array $datefrom, array $dateto): void {
+    private function prepare_dates_data(array $datefromdata, array $datetodata): void {
         $timezone = \core_date::get_user_timezone_object();
-        $datetoday = new \DateTime("now", $timezone);
+        $calendartype = \core_calendar\type_factory::get_calendar_instance();
+        $timestamptoday = time();
+        $datetoday  = $calendartype->timestamp_to_date_array($timestamptoday, $timezone);
 
         // Prepare date/enabled data.
-        if (empty($datefrom['enabled'])) {
+        if (empty($datefromdata['enabled'])) {
             $fromdate = $datetoday;
+            $fromtimestamp = $timestamptoday;
             $fromenabled = false;
         } else {
-            $fromdate = new \DateTime("{$datefrom['year']}-{$datefrom['month']}-{$datefrom['day']} 00:00:00", $timezone);
+            $fromdate = $calendartype->timestamp_to_date_array($datefromdata['timestamp'], $timezone);
+            $fromtimestamp = $datefromdata['timestamp'];
             $fromenabled = true;
         }
 
-        if (empty($dateto['enabled'])) {
+        if (empty($datetodata['enabled'])) {
             $todate = $datetoday;
+            $totimestamp = $timestamptoday;
             $toenabled = false;
         } else {
-            $todate = new \DateTime("{$dateto['year']}-{$dateto['month']}-{$dateto['day']} 23:59:59", $timezone);
+            $todate = $calendartype->timestamp_to_date_array($datetodata['timestamp'], $timezone);
+            $totimestamp = $datetodata['timestamp'];
             $toenabled = true;
         }
 
         $this->datesdata = [
             'from' => [
-                'day'     => $fromdate->format('d'),
-                'month'   => $fromdate->format('m'),
-                'year'    => $fromdate->format('Y'),
-                'enabled' => $fromenabled,
+                'day'       => $fromdate['mday'],
+                'month'     => $fromdate['mon'],
+                'year'      => $fromdate['year'],
+                'timestamp' => $fromtimestamp,
+                'enabled'   => $fromenabled,
             ],
             'to' => [
-                'day'     => $todate->format('d'),
-                'month'   => $todate->format('m'),
-                'year'    => $todate->format('Y'),
-                'enabled' => $toenabled,
+                'day'       => $todate['mday'],
+                'month'     => $todate['mon'],
+                'year'      => $todate['year'],
+                'timestamp' => $totimestamp,
+                'enabled'   => $toenabled,
             ],
         ];
 
         // Prepare button string data.
+        $displayformat = '%e %b %Y';
+        $fromdatestring = $calendartype->timestamp_to_date_string($fromtimestamp, $displayformat, $timezone, true, true);
+        $todatestring = $calendartype->timestamp_to_date_string($totimestamp, $displayformat, $timezone, true, true);
+
         if ($fromenabled && $toenabled) {
             $datestrings = [
-                'datefrom' => $fromdate->format('d M y'),
-                'dateto'   => $todate->format('d M y'),
+                'datefrom' => $fromdatestring,
+                'dateto'   => $todatestring,
             ];
             $this->datesbuttontext = get_string('filter:datesfromto', 'forumreport_summary', $datestrings);
         } else if ($fromenabled) {
-            $this->datesbuttontext = get_string('filter:datesfrom', 'forumreport_summary', $fromdate->format('d M Y'));
+            $this->datesbuttontext = get_string('filter:datesfrom', 'forumreport_summary', $fromdatestring);
         } else if ($toenabled) {
-            $this->datesbuttontext = get_string('filter:datesto', 'forumreport_summary', $todate->format('d M Y'));
+            $this->datesbuttontext = get_string('filter:datesto', 'forumreport_summary', $todatestring);
         } else {
             $this->datesbuttontext = get_string('filter:datesname', 'forumreport_summary');
         }

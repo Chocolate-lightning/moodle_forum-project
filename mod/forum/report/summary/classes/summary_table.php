@@ -370,41 +370,32 @@ class summary_table extends table_sql {
 
             case self::FILTER_DATES:
                 if (!isset($values['from']['enabled']) || !isset($values['to']['enabled']) ||
-                        ($values['from']['enabled'] && !empty(array_diff(['day', 'month', 'year'], array_keys($values['from'])))) ||
-                        ($values['to']['enabled'] && !empty(array_diff(['day', 'month', 'year'], array_keys($values['to']))))) {
+                        ($values['from']['enabled'] && !isset($values['from']['timestamp'])) ||
+                        ($values['to']['enabled'] && !isset($values['to']['timestamp']))) {
                     $paramcounterror = true;
                 } else {
                     $this->sql->filterbase['dates'] = '';
                     $this->sql->filterbase['dateslog'] = '';
                     $this->sql->filterbase['dateslogparams'] = [];
-                    $timezone = \core_date::get_user_timezone_object();
 
                     // From date.
                     if ($values['from']['enabled']) {
                         // If the filter was enabled, include the date restriction.
-                        $fromdatestr = "{$values['from']['year']}-{$values['from']['month']}-{$values['from']['day']} 00:00:00";
-                        $fromdate = new \DateTime($fromdatestr, $timezone);
-                        $fromdatetimestamp = $fromdate->format('U');
-
                         // Needs to form part of the base join to posts, so will be injected by define_base_sql().
                         $this->sql->filterbase['dates'] .= " AND p.created >= :fromdate";
-                        $this->sql->params['fromdate'] = $fromdatetimestamp;
+                        $this->sql->params['fromdate'] = $values['from']['timestamp'];
                         $this->sql->filterbase['dateslog'] .= ' AND timecreated >= :fromdate';
-                        $this->sql->filterbase['dateslogparams']['fromdate'] = $fromdatetimestamp;
+                        $this->sql->filterbase['dateslogparams']['fromdate'] = $values['from']['timestamp'];
                     }
 
                     // To date.
                     if ($values['to']['enabled']) {
                         // If the filter was enabled, include the date restriction.
-                        $todatestr = "{$values['to']['year']}-{$values['to']['month']}-{$values['to']['day']} 23:59:59";
-                        $todate = new \DateTime($todatestr, $timezone);
-                        $todatetimestamp = $todate->format('U');
-
                         // Needs to form part of the base join to posts, so will be injected by define_base_sql().
                         $this->sql->filterbase['dates'] .= " AND p.created <= :todate";
-                        $this->sql->params['todate'] = $todatetimestamp;
+                        $this->sql->params['todate'] = $values['to']['timestamp'];
                         $this->sql->filterbase['dateslog'] .= ' AND timecreated <= :todate';
-                        $this->sql->filterbase['dateslogparams']['todate'] = $todatetimestamp;
+                        $this->sql->filterbase['dateslogparams']['todate'] = $values['to']['timestamp'];
                     }
                 }
 

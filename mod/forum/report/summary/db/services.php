@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -28,7 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 
 $functions = [
     'forumreport_summary_get_timestamps' => [
-        'classname'     => 'forumreport_summary\external',
+        'classname'     => 'forumreport_summary_external',
         'methodname'    => 'get_timestamps',
         'classpath'     => 'mod/forum/report/summary/externallib.php',
         'description'   => 'Fetch unix timestamps for given dates',

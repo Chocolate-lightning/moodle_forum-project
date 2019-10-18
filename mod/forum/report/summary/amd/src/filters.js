@@ -27,6 +27,7 @@ import Popper from 'core/popper';
 import CustomEvents from 'core/custom_interaction_events';
 import Selectors from 'forumreport_summary/selectors';
 import Y from 'core/yui';
+import Ajax from 'core/ajax';
 
 export const init = (root) => {
     let jqRoot = $(root);
@@ -176,26 +177,53 @@ export const init = (root) => {
     jqRoot.on(CustomEvents.events.activate, Selectors.filters.date.save, function() {
         // Populate the hidden form inputs to submit the data.
         let filtersform = document.forms.filtersform,
-            datespopover = root.querySelector(Selectors.filters.date.popover);
+            datespopover = root.querySelector(Selectors.filters.date.popover),
+            datefromobj = {
+                'day': datespopover.querySelector('[name="filterdatefrompopover[day]"]').value,
+                'month': datespopover.querySelector('[name="filterdatefrompopover[month]"]').value,
+                'year': datespopover.querySelector('[name="filterdatefrompopover[year]"]').value,
+                'enabled': datespopover.querySelector('[name="filterdatefrompopover[enabled]"]').checked ? 1 : 0
+            },
+            datetoobj = {
+                'day': datespopover.querySelector('[name="filterdatetopopover[day]"]').value,
+                'month': datespopover.querySelector('[name="filterdatetopopover[month]"]').value,
+                'year': datespopover.querySelector('[name="filterdatetopopover[year]"]').value,
+                'enabled': datespopover.querySelector('[name="filterdatetopopover[enabled]"]').checked ? 1 : 0
+            },
+            args = {
+                datefrom: datefromobj,
+                dateto: datetoobj
+            },
+            request = {
+                methodname: 'forumreport_summary_get_timestamps',
+                args: args
+            };
 
-        filtersform.elements['datefrom[day]'].value = datespopover.querySelector('[name="filterdatefrompopover[day]"]').value;
-        filtersform.elements['datefrom[month]'].value = datespopover.querySelector('[name="filterdatefrompopover[month]"]').value;
-        filtersform.elements['datefrom[year]'].value = datespopover.querySelector('[name="filterdatefrompopover[year]"]').value;
-        filtersform.elements['datefrom[enabled]'].value =
-                datespopover.querySelector('[name="filterdatefrompopover[enabled]"]').checked ? 1 : 0;
-        filtersform.elements['dateto[day]'].value = datespopover.querySelector('[name="filterdatetopopover[day]"]').value;
-        filtersform.elements['dateto[month]'].value = datespopover.querySelector('[name="filterdatetopopover[month]"]').value;
-        filtersform.elements['dateto[year]'].value = datespopover.querySelector('[name="filterdatetopopover[year]"]').value;
-        filtersform.elements['dateto[enabled]'].value =
-                datespopover.querySelector('[name="filterdatetopopover[enabled]"]').checked ? 1 : 0;
+        Ajax.call([request])[0].done(function(result) {
+            if (result.warnings.length > 0) {
+                // Display the error.
+                let warningdiv = document.getElementById('dates-filter-warning');
+                warningdiv.textContent = result.warnings[0].message;
+                warningdiv.classList.remove('hidden');
+                warningdiv.classList.add('d-block');
+            } else {
+                // Update the elements in the filter form.
+                filtersform.elements['datefrom[timestamp]'].value = result.timestampfrom;
+                filtersform.elements['datefrom[enabled]'].value =
+                        datespopover.querySelector('[name="filterdatefrompopover[enabled]"]').checked ? 1 : 0;
+                filtersform.elements['dateto[timestamp]'].value = result.timestampto;
+                filtersform.elements['dateto[enabled]'].value =
+                        datespopover.querySelector('[name="filterdatetopopover[enabled]"]').checked ? 1 : 0;
 
-        // Disable the mform checker to prevent unsubmitted form warning to the user when closing the popover.
-        Y.use('moodle-core-formchangechecker', function() {
-            M.core_formchangechecker.reset_form_dirty_state();
+                // Disable the mform checker to prevent unsubmitted form warning to the user when closing the popover.
+                Y.use('moodle-core-formchangechecker', function() {
+                    M.core_formchangechecker.reset_form_dirty_state();
+                });
+
+                // Submit the filter values and re-generate report.
+                submitWithFilter('#filter-dates-popover');
+            }
         });
-
-        // Submit the filter values and re-generate report.
-        submitWithFilter('#filter-dates-popover');
     });
 
     jqRoot.on("click", "#id_filterdatefrompopover_calendar", function() {

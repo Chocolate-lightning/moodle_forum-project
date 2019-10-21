@@ -115,6 +115,7 @@ const discussionPostMapper = (discussion) => {
         post.readonly = true;
         post.starter = !post.parentid;
         post.parent = parentMap.get(post.parentid);
+        post.html.rating = null;
 
         return post;
     });

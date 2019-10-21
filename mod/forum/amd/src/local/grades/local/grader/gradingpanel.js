@@ -43,7 +43,7 @@ export default async(component, context, gradingComponent, gradingSubtype, itemN
     const GradingMethod = await import(gradingMethodHandler);
 
     return {
-        getter: userId => GradingMethod.fetchCurrentGrade(component, context, itemName, userId),
+        getter: (userId) => GradingMethod.fetchCurrentGrade(component, context, itemName, userId),
         setter: (userId, formData) => GradingMethod.storeCurrentGrade(component, context, itemName, userId, formData),
     };
 };

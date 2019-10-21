@@ -186,7 +186,11 @@ class UserPicker {
  * @param {Number} [currentUserID] The userid of the current user
  * @returns {UserPicker}
  */
-export default async(users, showUserCallback, preChangeUserCallback, {
+export default async(
+    users,
+    showUserCallback,
+    preChangeUserCallback,
+    {
         initialUserId = null,
     } = {}
 ) => {

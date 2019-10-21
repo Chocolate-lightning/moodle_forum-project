@@ -103,3 +103,8 @@
         {{/criteria}}
     </div>
 </form>
+{{#js}}
+    require(['gradingform_rubric/grades/grader/gradingpanel/deselectradio'], function(Radio) {
+        Radio.init('gradingform_rubric-{{uniqid}}');
+    });
+{{/js}}

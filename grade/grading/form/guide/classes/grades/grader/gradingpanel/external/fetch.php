@@ -138,7 +138,7 @@ class fetch extends external_api {
     /**
      * Get the data to be fetched.
      *
-     * @param component_gradeitem $gradeitem
+     * @param gradeitem $gradeitem
      * @param stdClass $gradeduser
      * @return array
      */

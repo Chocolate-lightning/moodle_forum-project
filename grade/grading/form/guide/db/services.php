@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die;
+
 $functions = [
     'gradingform_guide_grader_gradingpanel_fetch' => [
         'classname' => 'gradingform_guide\\grades\\grader\\gradingpanel\\external\\fetch',

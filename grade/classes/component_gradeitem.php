@@ -394,7 +394,6 @@ abstract class component_gradeitem {
     /**
      * Get grades for all users for the specified gradeitem.
      *
-     * @param int $itemnumber The specific grade item to fetch for the user
      * @return stdClass[] The grades
      */
     abstract public function get_all_grades(): array;

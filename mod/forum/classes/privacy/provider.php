@@ -131,7 +131,7 @@ class provider implements
             'timemodified' => 'privacy:metadata:forum_queue:timemodified'
         ], 'privacy:metadata:forum_queue');
 
-        //The 'forum_grades' table stores grade data.
+        // The 'forum_grades' table stores grade data.
         $items->add_database_table('forum_grades', [
             'userid' => 'privacy:metadata:forum_grades:userid',
             'forum' => 'privacy:metadata:forum_grades:forum',
@@ -263,7 +263,16 @@ class provider implements
         $params += $ratingsql->params;
         $contextlist->add_from_sql($sql, $params);
 
-        // TODO MDL-66358 forum_grades
+        // Forum grades.
+        $sql = "SELECT c.id
+                  FROM {context} c
+                  JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
+                  JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+                  JOIN {forum} f ON f.id = cm.instance
+                  JOIN {forum_grades} fg ON fg.forum = f.id
+                 WHERE fg.userid = :userid
+        ";
+        $contextlist->add_from_sql($sql, $params);
 
         return $contextlist;
     }

@@ -521,6 +521,7 @@ abstract class gradingform_controller {
      * @param int $raterid
      * @param int $itemid
      * @return gradingform_instance
+     * @throws dml_exception
      */
     public function get_or_create_instance($instanceid, $raterid, $itemid) {
         if (!is_numeric($instanceid)) {

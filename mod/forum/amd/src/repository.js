@@ -138,6 +138,8 @@ define(['core/ajax'], function(Ajax) {
      * Get the posts for the discussion ID provided.
      *
      * @param {number} discussionId
+     * @param {String} sortby
+     * @param {String} sortdirection
      * @return {*|Promise}
      */
     var getDiscussionPosts = function(discussionId, sortby = 'created', sortdirection = 'ASC') {

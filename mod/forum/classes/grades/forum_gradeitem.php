@@ -187,7 +187,6 @@ class forum_gradeitem extends component_gradeitem {
     /**
      * Get grades for all users for the specified gradeitem.
      *
-     * @param int $itemnumber The specific grade item to fetch for the user
      * @return stdClass[] The grades
      * @throws \dml_exception
      */

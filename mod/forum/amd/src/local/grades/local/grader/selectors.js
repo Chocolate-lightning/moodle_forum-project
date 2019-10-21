@@ -24,8 +24,8 @@
 
 /**
  * A small helper function to build queryable data selectors.
- * @param name
- * @param value
+ * @param {String} name
+ * @param {String} value
  * @return {string}
  */
 const getDataSelector = (name, value) => {

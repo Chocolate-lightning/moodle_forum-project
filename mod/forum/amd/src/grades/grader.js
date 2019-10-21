@@ -131,7 +131,7 @@ const discussionPostMapper = (discussion) => {
  *
  * @param {HTMLElement} rootNode the root HTML element describing what is to be graded
  */
-const launchWholeForumGrading = async (rootNode) => {
+const launchWholeForumGrading = async(rootNode) => {
     const data = rootNode.dataset;
     /**
      * Partially execute this function so we have the CMID in all of the curried functions within.

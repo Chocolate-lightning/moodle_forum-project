@@ -61,6 +61,7 @@ const showPostInContext = async(rootNode) => {
     const userPosts = allPosts.posts.map((post) => {
         post.subject = null;
         post.readonly = true;
+        post.html.rating = null;
 
         return post;
     });

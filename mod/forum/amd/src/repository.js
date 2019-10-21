@@ -140,11 +140,13 @@ define(['core/ajax'], function(Ajax) {
      * @param {number} discussionId
      * @return {*|Promise}
      */
-    var getDiscussionPosts = function(discussionId) {
+    var getDiscussionPosts = function(discussionId, sortby = 'created', sortdirection = 'ASC') {
         var request = {
             methodname: 'mod_forum_get_discussion_posts',
             args: {
                 discussionid: discussionId,
+                sortby: sortby,
+                sortdirection: sortdirection,
             },
         };
         return Ajax.call([request])[0];

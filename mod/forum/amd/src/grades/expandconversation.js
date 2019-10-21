@@ -58,6 +58,13 @@ const showPostInContext = async(rootNode) => {
         }),
     ]);
 
+    const userPosts = allPosts.posts.map((post) => {
+        post.subject = null;
+        post.readonly = true;
+
+        return post;
+    });
+
     // Handle hidden event.
     modal.getRoot().on(ModalEvents.hidden, function() {
         // Destroy when hidden.
@@ -67,7 +74,7 @@ const showPostInContext = async(rootNode) => {
     modal.show();
 
     // Note: We do not use await here because it messes with the Modal transitions.
-    const templatePromise = Templates.render('mod_forum/grades/grader/discussion/post_modal', allPosts);
+    const templatePromise = Templates.render('mod_forum/grades/grader/discussion/post_modal', userPosts);
     modal.setBody(templatePromise);
     // eslint-disable-next-line promise/catch-or-return
     templatePromise.then(() => {

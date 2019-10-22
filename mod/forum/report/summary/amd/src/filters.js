@@ -28,6 +28,7 @@ import CustomEvents from 'core/custom_interaction_events';
 import Selectors from 'forumreport_summary/selectors';
 import Y from 'core/yui';
 import Ajax from 'core/ajax';
+import KeyCodes from 'core/key_codes';
 
 export const init = (root) => {
     let jqRoot = $(root);
@@ -73,6 +74,11 @@ export const init = (root) => {
 
     // Submit report via filter
     var submitWithFilter = (containerelement) => {
+        // Disable the dates filter mform checker to prevent any changes triggering a warning to the user.
+        Y.use('moodle-core-formchangechecker', function() {
+            M.core_formchangechecker.reset_form_dirty_state();
+        });
+
         // Close the container (eg popover).
         $(containerelement).addClass('hidden');
 
@@ -88,14 +94,14 @@ export const init = (root) => {
         new Popper(referenceElement, popperContent, {placement: 'bottom'});
     };
 
-    // Call when opening filter to ensure only one can be activated.
-    var canOpenFilter = (event) => {
-        if (document.querySelector('[data-openfilter="true"]')) {
-            return false;
-        }
+    // Close the relevant filter.
+    var closeOpenFilters = (openFilterButton, openFilter) => {
+        openFilter.classList.add('hidden');
+        openFilter.setAttribute('data-openfilter', 'false');
 
-        event.target.setAttribute('data-openfilter', "true");
-        return true;
+        openFilterButton.classList.add('btn-primary');
+        openFilterButton.classList.remove('btn-outline-primary');
+        openFilterButton.setAttribute('aria-expanded', false);
     };
 
     // Groups filter specific handlers.
@@ -118,19 +124,16 @@ export const init = (root) => {
     });
 
     // Event handler for showing groups filter popover.
-    jqRoot.on(CustomEvents.events.activate, Selectors.filters.group.trigger, function(event) {
-        if (!canOpenFilter(event)) {
-            return false;
-        }
-
+    jqRoot.on(CustomEvents.events.activate, Selectors.filters.group.trigger, function() {
         // Create popover.
-        var referenceElement = root.querySelector(Selectors.filters.group.trigger),
+        let referenceElement = root.querySelector(Selectors.filters.group.trigger),
             popperContent = root.querySelector(Selectors.filters.group.popover);
 
         new Popper(referenceElement, popperContent, {placement: 'bottom'});
 
         // Show popover.
         popperContent.classList.remove('hidden');
+        popperContent.setAttribute('data-openfilter', 'true');
 
         // Change to outlined button.
         referenceElement.classList.add('btn-outline-primary');
@@ -138,21 +141,48 @@ export const init = (root) => {
 
         // Let screen readers know that it's now expanded.
         referenceElement.setAttribute('aria-expanded', true);
-        return true;
+
+        // Add listeners to handle closing filter.
+        const closeListener = e => {
+            if (e.target.id !== referenceElement.id && popperContent !== e.target.closest('[data-openfilter="true"]')) {
+                closeOpenFilters(referenceElement, popperContent);
+                document.removeEventListener('click', closeListener);
+                document.removeEventListener('keyup', escCloseListener);
+            }
+        };
+
+        document.addEventListener('click', closeListener);
+
+        const escCloseListener = e => {
+            if (e.keyCode === KeyCodes.escape) {
+                closeOpenFilters(referenceElement, popperContent);
+                document.removeEventListener('keyup', escCloseListener);
+                document.removeEventListener('click', closeListener);
+            }
+        };
+
+        document.addEventListener('keyup', escCloseListener);
     });
 
     // Event handler to click save groups filter.
     jqRoot.on(CustomEvents.events.activate, Selectors.filters.group.save, function() {
+        // Copy the saved values into the form before submitting.
+        let popcheckboxes = root.querySelectorAll(Selectors.filters.group.checkbox);
+
+        popcheckboxes.forEach(function(popcheckbox) {
+            let filtersform = document.forms.filtersform,
+                saveid = popcheckbox.getAttribute('data-saveid');
+
+            filtersform.querySelector(`#${saveid}`).checked = popcheckbox.checked;
+        });
+
         submitWithFilter('#filter-groups-popover');
     });
 
     // Dates filter specific handlers.
 
    // Event handler for showing dates filter popover.
-    jqRoot.on(CustomEvents.events.activate, Selectors.filters.date.trigger, function(event) {
-        if (!canOpenFilter(event)) {
-            return false;
-        }
+    jqRoot.on(CustomEvents.events.activate, Selectors.filters.date.trigger, function() {
 
         // Create popover.
         let referenceElement = root.querySelector(Selectors.filters.date.trigger),
@@ -162,6 +192,7 @@ export const init = (root) => {
 
         // Show popover and move focus.
         popperContent.classList.remove('hidden');
+        popperContent.setAttribute('data-openfilter', 'true');
         popperContent.querySelector('[name="filterdatefrompopover[enabled]"]').focus();
 
         // Change to outlined button.
@@ -170,7 +201,27 @@ export const init = (root) => {
 
         // Let screen readers know that it's now expanded.
         referenceElement.setAttribute('aria-expanded', true);
-        return true;
+
+        // Add listener to handle closing filter.
+        const closeListener = e => {
+            if (e.target.id !== referenceElement.id && popperContent !== e.target.closest('[data-openfilter="true"]')) {
+                closeOpenFilters(referenceElement, popperContent);
+                document.removeEventListener('click', closeListener);
+                document.removeEventListener('keyup', escCloseListener);
+            }
+        };
+
+        document.addEventListener('click', closeListener);
+
+        const escCloseListener = e => {
+            if (e.keyCode === KeyCodes.escape) {
+                closeOpenFilters(referenceElement, popperContent);
+                document.removeEventListener('keyup', escCloseListener);
+                document.removeEventListener('click', closeListener);
+            }
+        };
+
+        document.addEventListener('keyup', escCloseListener);
     });
 
     // Event handler to save dates filter.
@@ -199,9 +250,25 @@ export const init = (root) => {
                 args: args
             };
 
-        // Disable the mform checker to prevent unsubmitted form warning to the user when closing the popover.
-        Y.use('moodle-core-formchangechecker', function() {
-            M.core_formchangechecker.reset_form_dirty_state();
+        Ajax.call([request])[0].done(function(result) {
+            if (result.warnings.length > 0) {
+                // Display the error.
+                let warningDiv = document.getElementById('dates-filter-warning');
+                warningDiv.textContent = result.warnings[0].message;
+                warningDiv.classList.remove('hidden');
+                warningDiv.classList.add('d-block');
+            } else {
+                // Update the elements in the filter form.
+                filtersForm.elements['datefrom[timestamp]'].value = result.timestampfrom;
+                filtersForm.elements['datefrom[enabled]'].value =
+                        datesPopover.querySelector('[name="filterdatefrompopover[enabled]"]').checked ? 1 : 0;
+                filtersForm.elements['dateto[timestamp]'].value = result.timestampto;
+                filtersForm.elements['dateto[enabled]'].value =
+                        datesPopover.querySelector('[name="filterdatetopopover[enabled]"]').checked ? 1 : 0;
+
+                // Submit the filter values and re-generate report.
+                submitWithFilter('#filter-dates-popover');
+            }
         });
 
         if (!dateFromObj.enabled && !dateToObj.enabled) {

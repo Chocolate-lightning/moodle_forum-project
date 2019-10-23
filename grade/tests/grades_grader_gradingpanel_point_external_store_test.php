@@ -27,6 +27,8 @@ declare(strict_types = 1);
 
 namespace core_grades\grades\grader\gradingpanel\point\external;
 
+defined('MOODLE_INTERNAL') || die();
+
 use advanced_testcase;
 use coding_exception;
 use core_grades\component_gradeitem;

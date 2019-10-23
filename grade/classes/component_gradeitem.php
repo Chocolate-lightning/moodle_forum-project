@@ -26,6 +26,8 @@ declare(strict_types = 1);
 
 namespace core_grades;
 
+defined('MOODLE_INTERNAL') || die();
+
 use context;
 use gradingform_controller;
 use gradingform_instance;

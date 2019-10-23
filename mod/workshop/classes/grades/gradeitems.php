@@ -26,6 +26,8 @@ declare(strict_types = 1);
 
 namespace mod_workshop\grades;
 
+defined('MOODLE_INTERNAL') || die();
+
 use \core_grades\local\gradeitem\itemnumber_mapping;
 
 /**

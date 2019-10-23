@@ -27,6 +27,8 @@ require_once($CFG->libdir.'/completionlib.php');
 require_once($CFG->libdir.'/gradelib.php');
 require_once($CFG->libdir.'/plagiarismlib.php');
 
+defined('MOODLE_INTERNAL') || die();
+
 use core_grades\component_gradeitems;
 
 /**

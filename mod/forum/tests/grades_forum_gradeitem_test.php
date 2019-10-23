@@ -24,6 +24,8 @@
 
 namespace tests\mod_forum\grades;
 
+defined('MOODLE_INTERNAL') || die();
+
 use core_grades\component_gradeitem;
 use mod_forum\grades\forum_gradeitem as gradeitem;
 use mod_forum\local\entities\forum as forum_entity;

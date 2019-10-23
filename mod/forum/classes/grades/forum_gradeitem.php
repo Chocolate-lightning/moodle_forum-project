@@ -26,6 +26,8 @@ declare(strict_types = 1);
 
 namespace mod_forum\grades;
 
+defined('MOODLE_INTERNAL') || die();
+
 use coding_exception;
 use context;
 use core_grades\component_gradeitem;

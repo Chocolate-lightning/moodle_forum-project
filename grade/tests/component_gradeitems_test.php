@@ -27,6 +27,8 @@ declare(strict_types = 1);
 
 namespace tests\core_grades {
 
+    defined('MOODLE_INTERNAL') || die();
+
     use advanced_testcase;
     use core_grades\component_gradeitems;
     use coding_exception;

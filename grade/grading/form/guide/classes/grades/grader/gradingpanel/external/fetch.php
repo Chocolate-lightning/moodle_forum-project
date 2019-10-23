@@ -26,6 +26,8 @@ declare(strict_types = 1);
 
 namespace gradingform_guide\grades\grader\gradingpanel\external;
 
+defined('MOODLE_INTERNAL') || die();
+
 use coding_exception;
 use context;
 use core_user;

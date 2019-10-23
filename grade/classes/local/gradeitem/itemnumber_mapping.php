@@ -26,6 +26,8 @@ declare(strict_types = 1);
 
 namespace core_grades\local\gradeitem;
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Grade item, itemnumber mapping.
  *

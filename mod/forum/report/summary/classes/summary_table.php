@@ -314,7 +314,7 @@ class summary_table extends table_sql {
      * @throws coding_exception
      */
     public function add_filter(int $filtertype, array $values = []): void {
-        global $DB, $USER;
+        global $DB;
 
         $paramcounterror = false;
 

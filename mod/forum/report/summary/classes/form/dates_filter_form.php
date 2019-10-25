@@ -40,18 +40,6 @@ class dates_filter_form extends \moodleform {
      *
      */
     public function definition() {
-        $existingdata = [];
-
-        if ($this->_customdata['from']['enabled']) {
-            $existingdata['filterdatefrompopover'] = $this->_customdata['from'];
-        }
-
-        if ($this->_customdata['to']['enabled']) {
-            $existingdata['filterdatetopopover'] = $this->_customdata['to'];
-        }
-
-        $this->set_data($existingdata);
-
         // From date field.
         $this->_form->addElement('date_selector', 'filterdatefrompopover', get_string('from'), ['optional' => true]);
 

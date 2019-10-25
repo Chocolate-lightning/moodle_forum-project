@@ -176,54 +176,62 @@ export const init = (root) => {
     // Event handler to save dates filter.
     jqRoot.on(CustomEvents.events.activate, Selectors.filters.date.save, function() {
         // Populate the hidden form inputs to submit the data.
-        let filtersform = document.forms.filtersform,
-            datespopover = root.querySelector(Selectors.filters.date.popover),
-            datefromobj = {
-                'day': datespopover.querySelector('[name="filterdatefrompopover[day]"]').value,
-                'month': datespopover.querySelector('[name="filterdatefrompopover[month]"]').value,
-                'year': datespopover.querySelector('[name="filterdatefrompopover[year]"]').value,
-                'enabled': datespopover.querySelector('[name="filterdatefrompopover[enabled]"]').checked ? 1 : 0
-            },
-            datetoobj = {
-                'day': datespopover.querySelector('[name="filterdatetopopover[day]"]').value,
-                'month': datespopover.querySelector('[name="filterdatetopopover[month]"]').value,
-                'year': datespopover.querySelector('[name="filterdatetopopover[year]"]').value,
-                'enabled': datespopover.querySelector('[name="filterdatetopopover[enabled]"]').checked ? 1 : 0
-            },
-            args = {
-                datefrom: datefromobj,
-                dateto: datetoobj
-            },
-            request = {
+        let filtersForm = document.forms.filtersform;
+        const datesPopover = root.querySelector(Selectors.filters.date.popover);
+        const dateFromObj = {
+                'day': datesPopover.querySelector('[name="filterdatefrompopover[day]"]').value,
+                'month': datesPopover.querySelector('[name="filterdatefrompopover[month]"]').value,
+                'year': datesPopover.querySelector('[name="filterdatefrompopover[year]"]').value,
+                'enabled': datesPopover.querySelector('[name="filterdatefrompopover[enabled]"]').checked ? 1 : 0
+            };
+        const dateToObj = {
+                'day': datesPopover.querySelector('[name="filterdatetopopover[day]"]').value,
+                'month': datesPopover.querySelector('[name="filterdatetopopover[month]"]').value,
+                'year': datesPopover.querySelector('[name="filterdatetopopover[year]"]').value,
+                'enabled': datesPopover.querySelector('[name="filterdatetopopover[enabled]"]').checked ? 1 : 0
+            };
+        const args = {
+                datefrom: dateFromObj,
+                dateto: dateToObj
+            };
+        const request = {
                 methodname: 'forumreport_summary_get_timestamps',
                 args: args
             };
 
-        Ajax.call([request])[0].done(function(result) {
-            if (result.warnings.length > 0) {
-                // Display the error.
-                let warningdiv = document.getElementById('dates-filter-warning');
-                warningdiv.textContent = result.warnings[0].message;
-                warningdiv.classList.remove('hidden');
-                warningdiv.classList.add('d-block');
-            } else {
-                // Update the elements in the filter form.
-                filtersform.elements['datefrom[timestamp]'].value = result.timestampfrom;
-                filtersform.elements['datefrom[enabled]'].value =
-                        datespopover.querySelector('[name="filterdatefrompopover[enabled]"]').checked ? 1 : 0;
-                filtersform.elements['dateto[timestamp]'].value = result.timestampto;
-                filtersform.elements['dateto[enabled]'].value =
-                        datespopover.querySelector('[name="filterdatetopopover[enabled]"]').checked ? 1 : 0;
-
-                // Disable the mform checker to prevent unsubmitted form warning to the user when closing the popover.
-                Y.use('moodle-core-formchangechecker', function() {
-                    M.core_formchangechecker.reset_form_dirty_state();
-                });
-
-                // Submit the filter values and re-generate report.
-                submitWithFilter('#filter-dates-popover');
-            }
+        // Disable the mform checker to prevent unsubmitted form warning to the user when closing the popover.
+        Y.use('moodle-core-formchangechecker', function() {
+            M.core_formchangechecker.reset_form_dirty_state();
         });
+
+        if (!dateFromObj.enabled && !dateToObj.enabled) {
+            // Update the elements in the filter form.
+            filtersForm.elements['datefrom[timestamp]'].value = 0;
+            filtersForm.elements['datefrom[enabled]'].value = dateFromObj.enabled;
+            filtersForm.elements['dateto[timestamp]'].value = 0;
+            filtersForm.elements['dateto[enabled]'].value = dateToObj.enabled;
+
+            // Submit the filter values and re-generate report.
+            submitWithFilter('#filter-dates-popover');
+        } else {
+            Ajax.call([request])[0].done(function(result) {
+                if (result.warnings.length > 0) {
+                    // Display the error.
+                    let warningdiv = document.getElementById('dates-filter-warning');
+                    warningdiv.textContent = result.warnings[0].message;
+                    warningdiv.classList.remove('hidden');
+                    warningdiv.classList.add('d-block');
+                } else {
+                    filtersForm.elements['datefrom[timestamp]'].value = result.timestampfrom;
+                    filtersForm.elements['datefrom[enabled]'].value = dateFromObj.enabled;
+                    filtersForm.elements['dateto[timestamp]'].value = result.timestampto;
+                    filtersForm.elements['dateto[enabled]'].value = dateToObj.enabled;
+
+                    // Submit the filter values and re-generate report.
+                    submitWithFilter('#filter-dates-popover');
+                }
+            });
+        }
     });
 
     jqRoot.on("click", "#id_filterdatefrompopover_calendar", function() {

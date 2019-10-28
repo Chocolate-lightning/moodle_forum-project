@@ -17,7 +17,7 @@
 /**
  * Unit tests for core_grades\component_gradeitems;
  *
- * @package   core_grades
+ * @package   gradingform_rubric
  * @category  test
  * @copyright 2019 Mathew May <mathew.solutions>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -37,7 +37,7 @@ use moodle_exception;
 /**
  * Unit tests for core_grades\component_gradeitems;
  *
- * @package   core_grades
+ * @package   gradingform_rubric
  * @category  test
  * @copyright 2019 Mathew May <mathew.solutions>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -92,7 +92,6 @@ class store_test extends advanced_testcase {
         $gradeitem = component_gradeitem::instance('mod_forum', $forum->get_context(), 'forum');
 
         $this->expectException(moodle_exception::class);
-        //$this->expectExceptionMessage("not configured for advanced grading with a rubric");
         store::execute('mod_forum', (int) $forum->get_context()->id, 'forum', (int) $student->id, 'formdata');
     }
 

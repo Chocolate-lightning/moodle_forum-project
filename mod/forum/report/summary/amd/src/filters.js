@@ -113,6 +113,17 @@ export const init = (root) => {
         };
     }
 
+    // Override download link so the file is generated with filters.
+    const downloadForm = document.getElementById('summaryreport').querySelector('form.dataformatselector');
+    if (downloadForm) {
+        downloadForm.onsubmit = (event) => {
+            const downloadType = downloadForm.querySelector('#downloadtype_download').value;
+            const getParams = `download=${downloadType}`;
+
+            generateWithFilters(event, getParams);
+        };
+    }
+
     // Submit report via filter
     const submitWithFilter = (containerelement) => {
         // Close the container (eg popover).

@@ -21,6 +21,9 @@
 
     Context variables required for this template:
 
+    Data attributes required for JS:
+    * data-value
+
     Example context (json):
     {
         "value": 1,
@@ -31,7 +34,12 @@
 <form>
   <div class="form-group">
     <label for="core_grades-grade-{{uniqid}}">{{#str}}grade, moodle{{/str}}</label>
-    <select class="form-control" name="grade" id="core_grades-grade-{{uniqid}}" aria-describedby="core_grades-help-{{uniqid}}">
+    <select class="form-control"
+            name="grade"
+            id="core_grades-grade-{{uniqid}}"
+            data-value="{{#value}}{{value}}{{/value}}{{^value}}-1{{/value}}"
+            aria-describedby="core_grades-help-{{uniqid}}"
+    >
         <option value="-1">{{#str}} nograde, moodle{{/str}}</option>
     {{#options}}
         <option value="{{value}}" {{#selected}}selected{{/selected}}>{{title}}</option>

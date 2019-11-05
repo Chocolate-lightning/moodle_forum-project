@@ -88,6 +88,7 @@ $string['scorepostfix'] = '{$a}points';
 $string['showdescriptionstudent'] = 'Display rubric description to those being graded';
 $string['showdescriptionteacher'] = 'Display rubric description during evaluation';
 $string['showremarksstudent'] = 'Show remarks to those being graded';
+$string['additionalfeedback'] = 'Additional feedback';
 $string['showscorestudent'] = 'Display points for each level to those being graded';
 $string['showscoreteacher'] = 'Display points for each level during evaluation';
 $string['sortlevelsasc'] = 'Sort order for levels:';

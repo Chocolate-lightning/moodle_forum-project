@@ -96,8 +96,13 @@
                     </div>
                 {{/levels}}
                 <div class="form-group">
-                    <label for="advancedgrading-criteria-{{id}}-remark">Additional feedback</label>
-                    <textarea class="form-control" name="advancedgrading[criteria][{{id}}][remark]" id="advancedgrading-criteria-{{id}}-remark" cols="10" rows="5">{{{remark}}}</textarea>
+                    <label for="advancedgrading-criteria-{{id}}-remark">{{#str}}additionalfeedback, gradingform_rubric{{/str}}</label>
+                    <textarea class="form-control"
+                              name="advancedgrading[criteria][{{id}}][remark]"
+                              id="advancedgrading-criteria-{{id}}-remark"
+                              cols="10"
+                              rows="5"
+                    >{{{remark}}}</textarea>
                 </div>
             </div>
         {{/criteria}}

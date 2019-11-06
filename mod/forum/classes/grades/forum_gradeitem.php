@@ -185,6 +185,30 @@ class forum_gradeitem extends component_gradeitem {
     }
 
     /**
+     * Get the grade for the specified user.
+     *
+     * @param stdClass $gradeduser The user being graded
+     * @return bool The grade exists
+     * @throws \dml_exception
+     */
+    public function get_grade_status_for_user(stdClass $gradeduser): ?bool {
+        global $DB;
+
+        $params = [
+            'forum' => $this->forum->get_id(),
+            'itemnumber' => $this->itemnumber,
+            'userid' => $gradeduser->id,
+        ];
+
+        $grade = $DB->get_record($this->get_table_name(), $params);
+
+        if (empty($grade) || $grade->grade === null) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Get grades for all users for the specified gradeitem.
      *
      * @return stdClass[] The grades

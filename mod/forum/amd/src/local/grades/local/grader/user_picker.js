@@ -112,9 +112,12 @@ class UserPicker {
      * @param {Object} user
      */
     async showUser(user) {
-        const [{html, js}] = await Promise.all([this.renderUserChange(user), this.showUserCallback(user)]);
+        const [{html, js}, hasGrade] = await Promise.all([this.renderUserChange(user), this.showUserCallback(user)]);
         const userRegion = this.root.querySelector(Selectors.regions.userRegion);
         Templates.replaceNodeContents(userRegion, html, js);
+
+        // TODO: plumb in and tidy up with MDL-66893.
+        Templates.appendNodeContents(userRegion, `<h5>learner has grade: ${hasGrade}</h5>`, '');
     }
 
     /**

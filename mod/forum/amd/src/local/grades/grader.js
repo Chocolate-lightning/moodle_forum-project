@@ -82,13 +82,15 @@ const getUpdateUserContentFunction = (root, getContentForUser, getGradeForUser) 
             getGradeForUser(user.id),
         ]);
         Templates.replaceNodeContents(root.querySelector(Selectors.regions.moduleReplace), html, js);
-
         const [
             gradingPanelHtml,
             gradingPanelJS
         ] = await Templates.render(userGrade.templatename, userGrade.grade).then(fetchContentFromRender);
         Templates.replaceNodeContents(root.querySelector(Selectors.regions.gradingPanel), gradingPanelHtml, gradingPanelJS);
+
         spinner.resolve();
+
+        return userGrade.hasgrade;
     };
 };
 

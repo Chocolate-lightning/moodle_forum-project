@@ -27,6 +27,7 @@ import getUserPicker from './local/grader/user_picker';
 import {createLayout as createFullScreenWindow} from 'mod_forum/local/layout/fullscreen';
 import getGradingPanelFunctions from './local/grader/gradingpanel';
 import {add as addToast} from 'core/toast';
+import {addNotification} from 'core/notification';
 import {get_string as getString} from 'core/str';
 import {failedUpdate} from 'core_grades/grades/grader/gradingpanel/normalise';
 import {addIconToContainerWithPromise} from 'core/loadingicon';
@@ -191,7 +192,7 @@ const searchForUsers = (userList, searchTerm) => {
  * @param {HTMLElement} searchResultsContainer The container element for search results
  * @param {Array} users The list of users to display
  */
-const renderSearchResults = async (searchResultsContainer, users) => {
+const renderSearchResults = async(searchResultsContainer, users) => {
     const {html, js} = await Templates.renderForPromise(templateNames.grader.searchResults, {users});
     Templates.replaceNodeContents(searchResultsContainer, html, js);
 };
@@ -329,7 +330,7 @@ const displayGradingError = async(root, user, err) => {
  * @param {Function} getContentForUser A function to get the content for a specific user
  * @param {Function} getGradeForUser A function get the grade details for a specific user
  * @param {Function} setGradeForUser A function to set the grade for a specific user
- * @param
+ * @param {Object} Anonymous This object gives us essential information about the caller beyond its curried functions
  */
 export const launch = async(getListOfUsers, getContentForUser, getGradeForUser, setGradeForUser, {
     initialUserId = null, moduleName, courseName, courseUrl, sendStudentNotifications
@@ -337,10 +338,21 @@ export const launch = async(getListOfUsers, getContentForUser, getGradeForUser, 
 
     // We need all of these functions to be executed in series, if one step runs before another the interface
     // will not work.
+
+    // We need this promise to resolve separately so that we can avoid loading the whole interface if there are no users.
+    const userList = await getListOfUsers();
+    if (!userList.length) {
+        addNotification({
+            message: await getString('nouserstograde', 'core_grades'),
+            type: "error",
+        });
+        return;
+    }
+
+    // Now that we have confirmed there are at least some users let's boot up the grader interface.
     const [
         graderLayout,
         {html, js},
-        userList,
     ] = await Promise.all([
         createFullScreenWindow({fullscreen: false, showLoader: false}),
 
@@ -351,8 +363,8 @@ export const launch = async(getListOfUsers, getContentForUser, getGradeForUser, 
             drawer: {show: true},
             defaultsendnotifications: sendStudentNotifications,
         }),
-        getListOfUsers(),
     ]);
+
     const graderContainer = graderLayout.getContainer();
 
     const saveGradeFunction = getSaveUserGradeFunction(graderContainer, setGradeForUser);
@@ -395,6 +407,7 @@ export const launch = async(getListOfUsers, getContentForUser, getGradeForUser, 
  *
  * @param {Function} getGradeForUser A function get the grade details for a specific user
  * @param {Number} userid The ID of a specific user
+ * @param {String} moduleName the name of the module
  */
 export const view = async(getGradeForUser, userid, moduleName) => {
 
